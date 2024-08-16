@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/showdown@1.9.0/dist/showdown.min.js"></script>
+    <title>...</title>
+    <style>
+        .llm-container-message {
+            padding-top: 50px;
+            height: 500px;
+            color: #fff;
+            background-color: #009688;
+        }
+
+        .message-container {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.05);
+            font-size: 12px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="jumbotron text-center">
+        <h4>LLM RAG Chatbot - Desenvolvimento</h4>
+    </header>
+    <main class="container-fluid">
+        <section class="row">
+            <div class="panel panel-default">
+                <div class="panel-heading">LLM RAG Chatbot - Desenvolvimento</div>
+                <div class="panel-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <form action="/action_page.php" onsubmit="return enviar(event)">
+                                    <div class="form-group">
+                                        <label for="contexto">Contexto:</label>
+                                        <textarea class="form-control" id="contexto" rows="15">
+Introdução
+O Banco Sicoob tem como visão “Ser reconhecido como a principal instituição financeira propulsora do desenvolvimento econômico e social dos associados das cooperativas do Sicoob”. A oferta dos produtos e serviços de câmbio e comércio exterior foi idealizada com vistas a agregar competitividade e visibilidade ao portfólio da instituição ante ao mercado. 
+Como parte da solução, o Banco Sicoob disponibilizará a troca de moeda estrangeira para fins de turismo. As transferências de recursos até US$ 3.000,00 (três mil dólares dos Estados Unidos) integram parte dessa solução e serão disponibilizadas através de parceria firmada com a empresa Western Union.
+A Circular nº 3.691/2013 do Banco Central do Brasil regulamenta, entre outros assuntos, as operações de remessa expressa de recursos, limitadas à US$ 3.000,00 ou o equivalente em outras moedas, eximindo-as de burocracias inerentes às outras modalidades de operações de câmbio.
+
+Propósito
+Descrever as regras negociais detalhadamente para possibilitar a operacionalização das transferências de recursos até US$ 3.000,00.
+
+Áreas envolvidas
+Para a implantação das funcionalidades descritas nesta especificação definiu-se a necessidade de participação das áreas:
+- GEDEP/SUEST - responsável pela elaboração da especificação negocial e pela coordenação do projeto câmbio e comércio exterior.
+- GEBAN/SUOPE - responsável pela priorização dos desenvolvimentos em pauta e pela condução das operações.
+- Sicoob Confederação - responsável pelo desenvolvimento da infraestrutura, funcionalidades e integrações, homologação e disponibilização nos canais de autoatendimento e SISBR.
+
+Regras de negócio
+As operações de Remessa Expressa de Recursos, alvo desta especificação, podem ser realizadas exclusivamente por pessoas físicas que possuam endereço no Brasil e Cadastro de Pessoas Físicas (CPF). O Banco Sicoob optou por disponibilizá-las através de parceria com a Western Union, líder global no segmento.
+Os desenvolvimentos serão realizados no SISBR e incluirão:
+- Desenvolver módulo específico para gestão das operações de câmbio, contemplando os menus câmbio e comércio exterior, remessa expressa de recursos, moeda em espécie e cartão pré-pago;
+- Desenvolver menu para contratação das operações de remessa até US$ 3.000,00 no canal de autoatendimento Mobile Banking;
+- Realizar integração com a Western Union para consumo e transmissão de informações necessárias para efetivação das operações;
+- Realizar integração com o sistema de Conta Corrente para sensibilização das contas correntes dos cooperados, refletindo na conta convênio da respectiva cooperativa singular.
+                                        </textarea>
+                                    </div>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="questao">
+                                        <div class="input-group-btn">
+                                            <button class="btn" type="submit">
+                                                <i class="glyphicon glyphicon-send"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-sm-6" id="llm-container">
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+    <footer class="row"></footer>
+    <script>
+        function enviar(e) {
+            e.preventDefault();
+            const pergunta = document.getElementById("questao").value;
+            const contexto = document.getElementById("contexto").value;
+
+            const ollama_endpoint = "http://localhost:8000/api/v1/conversation";
+
+            const headers = {
+                "Content-Type": "application/json",
+            };
+
+            const data = {
+                "type": "object",
+                "properties": {
+                    "question": {
+                        "type": "string",
+                        "description": pergunta
+                    },
+                    "service": {
+                        "type": "string",
+                        "description": contexto
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "Llama3"
+                    }
+                }
+            };
+            const response = fetch(ollama_endpoint, {
+                method: "POST",
+                body: JSON.stringify(data),
+                headers
+            }).then(response => response.json())
+                .then(retorno => {
+                    if (typeof retorno !== 'undefined') {
+                        var converter = new showdown.Converter();
+                        html = converter.makeHtml(retorno.data);
+
+                        const att = document.createAttribute("class");
+                        att.value = "message-container";
+
+                        contMensagem = window.document.createElement('div');
+                        contMensagem.setAttributeNode(att);
+                        contMensagem.innerHTML = html;
+
+                        window.document.getElementById('llm-container').appendChild(contMensagem);
+                    }
+                }).catch((error) => {
+                    console.error(error);
+                });
+            return false;
+        }
+    </script>
+</body>
+
+</html>
