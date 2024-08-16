@@ -5,11 +5,7 @@ from langchain_ollama import ChatOllama
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.documents import Document
-from langchain_community.vectorstores import DocArrayInMemorySearch
-from langchain_core.prompts import ChatPromptTemplate
-import os
 import argparse
-import json
 from rag_service import RAGService
 
 # Model
@@ -37,16 +33,16 @@ parser        = StrOutputParser()
 chain         = llm | parser
 db            = None
 
-async def ollama_chat(question: str, documentos_relevantes: List[Document], rag_service: RAGService, historico_chat: List):
-    historico_chat.append({"role": "user", "content": question})
+async def ollama_chat(pergunta_usuario: str, documentos_relevantes: List[Document], rag_service: RAGService, historico_chat: List):
+    historico_chat.append({"role": "user", "content": pergunta_usuario})
     contexto_relevante = []
     for doc in documentos_relevantes:
         contexto_relevante.append(doc[0].page_content)
     contexto_relevante = '\n'.join(contexto_relevante)
     
-    user_input_with_context = question
+    user_input_with_context = pergunta_usuario
     if contexto_relevante:
-        user_input_with_context = question + "\n\nCONTEXTO:\n" + contexto_relevante
+        user_input_with_context = pergunta_usuario + "\n\nCONTEXTO:\n" + contexto_relevante
     historico_chat[-1]["content"] = user_input_with_context
     
     # query = await rag_service.reescrever_query(question)
@@ -59,16 +55,16 @@ async def ollama_chat(question: str, documentos_relevantes: List[Document], rag_
     ai_msg = rag_service.invoke(messages)
     return ai_msg
 
-async def stream_ollama_chat(question: str, documentos_relevantes: List[Document], rag_service: RAGService, historico_chat: List) -> None:
-    historico_chat.append({"role": "user", "content": question})
+async def stream_ollama_chat(pergunta_usuario: str, documentos_relevantes: List[Document], rag_service: RAGService, historico_chat: List) -> None:
+    historico_chat.append({"role": "user", "content": pergunta_usuario})
     contexto_relevante = []
     for doc in documentos_relevantes:
         contexto_relevante.append(doc[0].page_content)
     contexto_relevante = '\n'.join(contexto_relevante)
     
-    user_input_with_context = question
+    user_input_with_context = pergunta_usuario
     if contexto_relevante:
-        user_input_with_context = question + "\n\nContext:\n" + contexto_relevante
+        user_input_with_context = pergunta_usuario + "\n\nContext:\n" + contexto_relevante
     historico_chat[-1]["content"] = user_input_with_context
 
     messages = [
@@ -82,7 +78,6 @@ async def main():
     system_prompt = "You are a brazilian helpful assistant that is an expert at extracting information from a given text. Use only the context provided to craft a clear and detailed answer to the given question. Use language detection to ensure you respond in the same language as the user's question. If you don't know the answer, state that you don't know and do not provide unrelated information."
     rag_service = RAGService(embeddings, text_splitter, chain, system_prompt, './files/pdfs/')
     
-    # command-line arguments
     print(NEON_GREEN + "Parsing command-line arguments..." + RESET_COLOR)
     parser = argparse.ArgumentParser(description="Ollama Chat")
     parser.add_argument("--model", default=MODEL, help="Ollama model to use (default: llama3.1:8b-instruct-q2_K)")
@@ -100,8 +95,6 @@ async def main():
         documentos_relevantes = await rag_service.obter_contexto_relevante(query, 2)
         if documentos_relevantes:
             await stream_ollama_chat(query, documentos_relevantes, rag_service, historico_chat)
-            # response          = await ollama_chat(query, documentos_relevantes, rag_service, historico_chat)
-            # print(NEON_GREEN + "Resposta: \n\n" + response + RESET_COLOR)
         else:
             break
 
