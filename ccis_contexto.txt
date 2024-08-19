@@ -1,0 +1,46 @@
+## Comunicado: CCI - 1.029/2024 - CCS Brasília/DF, 31 de julho de 2024.
+
+WYs | COOB Carta-Circular
+de Instrução/Funcionalidade 5
+
+CCI - 1.029/2024 - CCS Brasília/DF, 31 de julho de 2024.
+
+
+Às entidades do Sicoob.
+
+
+Evolução da funcionalidade Pagamento de Operações de Crédito no módulo Empréstimo
+
+da Plataforma de Crédito do Sisbr 2.0, em 31/7/2024, referente à disponibilização de novo
+
+histórico de liquidação.
+
+
+Senhores(as).
+
+
+1. Informamos a evolução da funcionalidade Pagamento de Operações de Crédito no
+módulo Empréstimo da Plataforma de Crédito do Sisbr 2.0, em 31/7/2024, conforme
+anexo desta CCI.
+
+
+2. O histórico poderá ser utilizado pela cooperativa quando algum boleto for rejeitado
+e caso seja necessário liquidar o contrato de forma manual.
+
+
+2.1 O histórico poderá ser utilizado caso o valor do boleto seja maior que o valor
+calculado pelo sistema. Nesse caso, será possível utilizar o campo Outros Acréscimos
+para acrescentar a diferença entre o valor da liquidação e o valor recebido do boleto
+rejeitado.
+
+
+2.2 Quando ocorrer o acréscimo de valores no campo Outros Acréscimos, a liquidação
+será submetida à funcionalidade de dupla aprovação (Sisbr 2.0 — Plataforma de
+Crédito — Empréstimo — Pagamento de operações de crédito — Aprovação de
+Pagamento), para que, somente após essa aprovação, a liquidação seja efetivada.
+
+
+Evolutiva negocial
+
+ST1:72949 HRESTRITA+
+

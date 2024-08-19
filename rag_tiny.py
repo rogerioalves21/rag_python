@@ -23,11 +23,11 @@ rag_service   = None
 text_splitter = CharacterTextSplitter(chunk_size=400, chunk_overlap=0)
 embeddings    = OllamaEmbeddings(model=EMBD)
 llm           = ChatOllama(
-    model=MODEL,
-    temperature=0.0,
-    max_length=250,
-    top_k=10,
-    keep_alive='1h'
+    model       = MODEL,
+    temperature = 0.0,
+    max_length  = 1000,
+    top_k       = 10,
+    keep_alive  = '1h'
 )
 parser        = StrOutputParser()
 chain         = llm | parser
@@ -44,9 +44,6 @@ async def ollama_chat(pergunta_usuario: str, documentos_relevantes: List[Documen
     if contexto_relevante:
         user_input_with_context = pergunta_usuario + "\n\nCONTEXTO:\n" + contexto_relevante
     historico_chat[-1]["content"] = user_input_with_context
-    
-    # query = await rag_service.reescrever_query(question)
-    # print(query)
 
     messages = [
         {"role": "system", "content": rag_service.get_system_prompt()},
@@ -62,23 +59,28 @@ async def stream_ollama_chat(pergunta_usuario: str, documentos_relevantes: List[
         contexto_relevante.append(doc[0].page_content)
     contexto_relevante = '\n'.join(contexto_relevante)
     
+    # refaz o questionamento do usuário
+    query = await rag_service.reescrever_query(pergunta_usuario, contexto_relevante)
+    print(f"query reescrita: {query}")
+    
+    pergunta_usuario += '. Responda utilizando apenas as informações do contexto e usando o idioma português.'
+    
     user_input_with_context = pergunta_usuario
     if contexto_relevante:
         user_input_with_context = pergunta_usuario + "\n\nContext:\n" + contexto_relevante
     historico_chat[-1]["content"] = user_input_with_context
 
-    messages = [
-        {"role": "system", "content": rag_service.get_system_prompt()},
-        *historico_chat
-    ]
-    for text in rag_service.get_chain().stream(messages):
-        print(NEON_GREEN + text + RESET_COLOR, end="", flush=True)
+    #messages = [
+    #    {"role": "system", "content": rag_service.get_system_prompt()},
+    #    *historico_chat
+    #]
+    #for text in rag_service.get_chain().stream(messages):
+    #    print(NEON_GREEN + text + RESET_COLOR, end="", flush=True)
 
 async def main():
-    system_prompt = "You are a brazilian helpful assistant that is an expert at extracting information from a given text. Use only the context provided to craft a clear and detailed answer to the given question. Use language detection to ensure you respond in the same language as the user's question. If you don't know the answer, state that you don't know and do not provide unrelated information."
+    system_prompt = "You are a brazilian helpful assistant that is an expert at extracting information from a given context. Use language detection to ensure that you respond in the same language as the user's question."
     rag_service = RAGService(embeddings, text_splitter, chain, system_prompt, './files/pdfs/')
-    
-    print(NEON_GREEN + "Parsing command-line arguments..." + RESET_COLOR)
+
     parser = argparse.ArgumentParser(description="Ollama Chat")
     parser.add_argument("--model", default=MODEL, help="Ollama model to use (default: llama3.1:8b-instruct-q2_K)")
     
@@ -91,7 +93,7 @@ async def main():
         if query.lower() == 'q':
             break
         historico_chat.clear()
-        print(query)
+        
         documentos_relevantes = await rag_service.obter_contexto_relevante(query, 2)
         if documentos_relevantes:
             await stream_ollama_chat(query, documentos_relevantes, rag_service, historico_chat)

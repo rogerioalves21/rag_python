@@ -5,7 +5,7 @@ from pytesseract import Output
 import cv2
 import ollama
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\\Users\\rogerio.rodrigues\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
 
 def get_rgb_from_img(img_path):
     image_bgr = cv2.imread(img_path)

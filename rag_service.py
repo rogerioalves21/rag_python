@@ -1,19 +1,20 @@
 from typing import List, Union, Dict, Any, AsyncIterator
 from tqdm import tqdm
 import os
-from langchain_ollama import OllamaEmbeddings
-from langchain_ollama import ChatOllama
+from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.documents import Document
 from langchain_community.vectorstores import DocArrayInMemorySearch
+from langchain_chroma import Chroma
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.messages import (
-    BaseMessageChunk
-)
+from langchain.retrievers.self_query.base import SelfQueryRetriever
+from langchain.chains.query_constructor.base import AttributeInfo
 from image_utils import ImageProcessing
+from langchain_core.messages import BaseMessage
 import unicodedata
 import re
+from langchain_core.prompts import ChatPromptTemplate
 
 def unicode_to_ascii(s: str) -> str:
     return ''.join(
@@ -36,21 +37,58 @@ class RAGService():
         embedding_function: OllamaEmbeddings,
         text_splitter: CharacterTextSplitter,
         chain: Union[ChatOllama | StrOutputParser | ChatPromptTemplate],
-        system_prompt: str,
-        folder: str
+        chain_qr: Union[ChatOllama | StrOutputParser | ChatPromptTemplate] = None,
+        system_prompt: str = None,
+        folder: str = None,
+        in_memonry : bool = False
     ):
         self.__data_base          = None
+        self.__chroma_db          = None
         self.__embedding_function = embedding_function
         self.__chain              = chain
+        self.__chain_qr           = chain_qr
         self.__system_prompt      = system_prompt
         self.__text_splitter      = text_splitter
         self.__folder             = folder
         self.__img_prc            = ImageProcessing()
+        self.__in_memory          = in_memonry
         
         self.__obter_conteudo_arquivo()
-    
-    def invoke(self, messages: List) -> str:
+        if self.__in_memory:
+            self.__retriever = None
+        else:
+            metadata_field_info = [
+                AttributeInfo(
+                    name="documento",
+                    description="O nome do documento que foi extraída a informação. Pode ser um arquivo PDF ou PNG",
+                    type="string",
+                ),
+                AttributeInfo(
+                    name="chunk_index",
+                    description="Qual índice do chunk que a informação está",
+                    type="integer",
+                ),
+                AttributeInfo(
+                    name="CCI",
+                    description="O Número do comunicado",
+                    type="integer",
+                )
+            ]
+            self.__retriever = SelfQueryRetriever.from_llm(
+                llm=self.__chain,
+                vectorstore=self.__chroma_db,
+                text_splitter=self.__text_splitter,
+                document_contents="Comunicados sobre problemas, novos produtos ou alteração de produto do Sicoob - SISBR",
+                metadata_field_info=metadata_field_info,
+                verbose=True,
+                enable_limit=True
+            )
+        
+    def invoke(self, messages: List[BaseMessage]) -> str:
         return self.__chain.invoke(messages)
+    
+    def get_retriever(self) -> SelfQueryRetriever:
+        return self.__retriever
     
     def get_chain(self) -> Union[ChatOllama | StrOutputParser | ChatPromptTemplate]:
         return self.__chain
@@ -85,37 +123,36 @@ class RAGService():
             # cria um metada simples apenas com o nome do documento
             metadatas = list()
             for i in range(len(document_chunks)):
-                metadatas.append({ "documento": image_path, "chunk": i })
+                metadatas.append({ "documento": image_path, "chunk": i, "CCI": i  })
            
             if self.__data_base is None:
-                self.__data_base = DocArrayInMemorySearch.from_texts(document_chunks, self.__embedding_function, metadatas=metadatas)
+                if self.__in_memory:
+                    self.__data_base = DocArrayInMemorySearch.from_texts(collection_name="comunicados-sicoob", texts=document_chunks, embedding=self.__embedding_function, metadatas=metadatas)
+                else:
+                    self.__chroma_db = Chroma.from_texts(collection_name="comunicados-sicoob", texts=document_chunks, embedding=self.__embedding_function, metadatas=metadatas)
             else:
-                self.__data_base.add_texts(document_chunks, metadatas=metadatas)
+                if self.__in_memory:
+                    self.__data_base.add_texts(document_chunks, metadatas=metadatas)
+                else:
+                    self.__chroma_db.add_texts(document_chunks, metadatas=metadatas)
     
     def __converter_texto_para_chunks(self, texto_arquivo: str) -> List[str]:
         return self.__text_splitter.split_text(texto_arquivo)
     
     async def obter_contexto_relevante(self, question: str, top_k: int = 2) -> List[Document]:
-        relevant_context = self.__data_base.similarity_search_with_score(question, top_k)
+        if self.__in_memory:
+            relevant_context = await self.__data_base.asimilarity_search_with_score(question, top_k)
+        else:
+            relevant_context = self.__retriever.invoke(question, k=top_k)
         return relevant_context
 
-    async def reescrever_query(self, question: str) -> str:
-        system_rewrite = """Você é um assistente útil que gera várias consultas de pesquisa com base em uma única consulta de entrada.
-
-Execute a expansão da consulta. Se houver várias maneiras comuns de formular uma pergunta do usuário
-ou sinônimos comuns para palavras-chave na pergunta, certifique-se de retornar várias versões
-da consulta com as diferentes frases.
-
-Se houver siglas ou palavras com as quais você não está familiarizado, não tente reformulá-las.
-
-Retorne 3 versões diferentes da pergunta."""
-
-        prompt = ChatPromptTemplate.from_messages(
-            [
-                ("system", system_rewrite),
-                ("human", "{question}"),
-            ]
-        )
-        model = prompt | self.__chain
-        response = model.invoke({"question": question})
-        response
+    def reescrever_query(self, question: str, contexto_relevante: str) -> str:
+        output = None
+        messages = [
+            ("system", f"Você é um ótimo assistente chamdo chamado Qwen-2, especialista em reformular perguntas e sua tarefa é reformular as perguntas de usuários fornecidas na rola user. Se você, o assistente não souber o que responder então não escreva nada."),# usando as informações contidas no contexto fornecido na outra role user. Se você, o assistente não souber responder então repita a pergunta orginal apenas, sem acrescentar nada."),
+            ("user", f"Pergunta: {question}"),
+            ("assistant", f""),
+            # ("user", f"Contexto: {contexto_relevante}"),
+        ]
+        output = self.__chain_qr.invoke(messages)
+        return output

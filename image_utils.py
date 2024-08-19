@@ -4,7 +4,7 @@ import fitz
 from typing import List, Union
 import pytesseract
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\\Users\\rogerio.rodrigues\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
 
 class ImageProcessing:
 
@@ -18,19 +18,20 @@ class ImageProcessing:
 
     def get_text_from_image(self, img_path: str) -> Union[str, None]:
         img_rgb            = self.get_rgb_from_img(img_path)
-        config_pytesseract = '--tessdata-dir assets/tessdata'
+        config_pytesseract = r'--tessdata-dir assets/tessdata -l por --oem 1 --psm 6'
         text               = pytesseract.image_to_string(image=img_rgb, lang='por', config=config_pytesseract)
         return text
 
     def pdf_to_image(self, img_path: str, img_folder: str) -> List:
         pdf = fitz.open(img_path)
-        imagens_criadas = []
+        imagens_criadas    = []
         for page in pdf:
-            pixmap         = page.get_pixmap(dpi=100)
+            pixmap         = page.get_pixmap(dpi=500)
             new_img_folder = img_folder.replace('.png', '_' + str(page.number) + '.png')
             
             pixmap.pil_save(new_img_folder, optimize=True)
-            imagens_criadas.append(new_img_folder)
+            # new_img_folder = self.invert_color(new_img_folder)
+            imagens_criadas.append((new_img_folder, page.number))
         return imagens_criadas
 
     def to_gray(self, img_path):
@@ -110,22 +111,22 @@ class ImageProcessing:
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-    def invert_color(self, img_path):
+    def invert_color(self, img_path: str) -> str:
         img = cv2.imread(img_path)
-        cv2.imshow('Original Image', img)
-        cv2.waitKey(0)
+        # cv2.imshow('Original Image', img)
+        # cv2.waitKey(0)
 
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        print(gray)
-        cv2.waitKey(0)
+        # print(gray)
+        # cv2.waitKey(0)
 
         invert = 255 - gray
-        print(invert)
 
-        cv2.imshow('Imagem invertida', invert)
-        cv2.waitKey(0)
-        
-        cv2.imwrite(img_path.replace('.png', 'INVERT.png'), invert)
+        # cv2.imshow('Imagem invertida', invert)
+        # cv2.waitKey(0)
+        new_img_path = img_path.replace('.png', 'INVERT.png')
+        cv2.imwrite(new_img_path, invert)
+        return new_img_path
 
 if __name__ == '__main__':
     imgProcessing = ImageProcessing()
