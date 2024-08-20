@@ -16,12 +16,12 @@ from app.api.services.comunicados_service import ComunicadosService
 from fastapi.responses import StreamingResponse
 from langchain.callbacks import AsyncIteratorCallbackHandler
 from langchain.schema import HumanMessage
+from clean_symbols import CleanSymbolsProcessor
 import re
 
-MODEL_Q2      = 'qwen2:0.5b-instruct-fp16'
+MODEL         = 'qwen'
+MODEL_Q2      = 'qwen2:1.5b-instruct-q8_0'
 EMBD          = 'nomic-embed-text'
-
-callback = AsyncIteratorCallbackHandler()
 
 rag_service   = None
 text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=3)
@@ -29,11 +29,8 @@ embeddings    = OllamaEmbeddings(model=EMBD)
 llm           = ChatOllama(
     model=MODEL_Q2,
     keep_alive='1h',
-    temperature=0.3,
-    # top_k=50,
-    verbose=True,
+    temperature=0.4,
     num_predict=2000,
-    callbacks=[callback]
 )
 llm_query     = ChatOllama(
     model=MODEL_Q2,
@@ -50,72 +47,78 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 system_prompt = "Você é um assistente dedicado a responder perguntas de usuários utilizando apenas o conteúdo do CONTEXTO fornecido. Se você não souber a resposta, escreva que a pergunta deve ser reformulada ou que o contexto é insuficiente. Não faça comentários. Escreva seu raciocínio passo a passo para ter certeza de que gerou a resposta correta!"
-rag_service   = ComunicadosService(embeddings, text_splitter, chain, chain_q2, system_prompt, './files/pdfs/', True)
+rag_service   = None # ComunicadosService(embeddings, text_splitter, chain, chain_q2, system_prompt, './files/pdfs/', True)
 
-async def send_message(question: str, relevant_docs: List) -> AsyncIterable[str]:
-    callback = AsyncIteratorCallbackHandler()
-    llm_streaming           = ChatOllama(
+def extrair_numero_cci(context: str) -> str:
+    _splitado = context.split('\n')
+    _regexer  = re.compile(fr'(?<=(CCI\s[—|-]\s)).*(?=.$)')
+    return ''.join(list(filter(_regexer.findall, _splitado)))
+
+def limpar_texto(t: str) -> str:
+    t = t.replace(' \n', '\n').replace('— \n', '— ').replace('—\n', '— ').replace('- \n', '- ').replace('-\n', '- ').replace(') \n', ') ').replace(')\n', ') ').replace('o \n', 'o ').replace('o\n', 'o ').replace('s \n', 's ').replace('s\n', 's ').replace('e \n', 's ').replace('e\n', 'e ').replace('a \n', 'a ').replace('a\n', 'a ').replace('r \n', 'r ').replace('r\n', 'r ').replace('á \n', 'á ').replace('á\n', 'á ').replace('HRESTRITA', '')
+    _cleaner = CleanSymbolsProcessor()
+    return _cleaner.process_line(t)# .replace('\n', ' '))
+
+def tratar_contexto(relevant_docs: List) -> str:
+    __contexto_relevante = ''
+    __keys = relevant_docs.keys()
+    for chave in __keys:
+        __texto               = ''.join((relevant_docs[chave])).replace('HRESTRITAH', '').replace("#RESTRITA#", '').replace('\r\n', '\n\n').replace('#', '').replace('.\n', '.\n\n').replace('.\r\n', '.\n\n').replace(',\n', '.\n\n').replace(',\r\n', '.\n\n')
+        __contexto_relevante += f"## Comunicado: {extrair_numero_cci(__texto)}\n\n"     
+        __contexto_relevante += limpar_texto(__texto.strip())
+        __contexto_relevante += "\n\n\n"
+    return __contexto_relevante
+
+async def send_message(question: str, relevant_docs: str) -> AsyncIterable[str]:
+    __callback = AsyncIteratorCallbackHandler()
+    __llm_streaming           = ChatOllama(
         model=MODEL_Q2,
         keep_alive='1h',
-        temperature=0.7,
-        # top_k=50,
+        temperature=0.4,
         num_predict=2000,
-        verbose=True,
-        callbacks=[callback]
+        callbacks=[__callback]
     )
-    contexto_relevante = ''
-    keys = relevant_docs.keys()
-    for chave in keys:
-        # contexto_relevante += f'#### Fonte: {chave}\n\n'
-        texto         = ''.join((relevant_docs[chave])).replace("#RESTRITA#", '').replace('\r\n', '\n\n').replace('#', '').replace('.\n', '.\n\n').replace('.\r\n', '.\n\n').replace(',\n', '\n\n').replace(',\r\n', '\n\n')
-        contexto_relevante += texto.strip()
-        contexto_relevante += "\n\n"
-    with open('ccis_contexto.txt', 'w+', encoding='utf-8') as file:
-        file.write(contexto_relevante)
-    chat_template     = ChatPromptTemplate.from_messages(
+    __chat_template = ChatPromptTemplate.from_messages(
         [
             ("system", rag_service.get_system_prompt()),
             ("user", "{question}"),
-            ("user",  "### CONTEXTO: {contexto_relevante}"),
+            ("user", "## CONTEXTO ##\n{contexto_relevante}")
         ]
     )
-    messages = chat_template.format_messages(question=question, contexto_relevante=contexto_relevante)
-    
+    __messages = __chat_template.format_messages(question=question, contexto_relevante=relevant_docs)
     async def wrap_done(fn: Awaitable, event: asyncio.Event):
         """Wrap an awaitable with a event to signal when it's done or an exception is raised."""
         try:
             await fn
         except Exception as e:
-            # TODO: handle exception
             print(f"Caught exception: {e}")
+            raise e
         finally:
-            # Signal the aiter to stop.
             event.set()
 
-    # Begin a task that runs in the background.
-    task = asyncio.create_task(wrap_done(
-        llm_streaming.agenerate(messages=[messages]),
-        callback.done),
+    __task = asyncio.create_task(wrap_done(
+        __llm_streaming.agenerate(messages=[__messages]),
+        __callback.done),
     )
 
     try:
-        async for token in callback.aiter():
+        async for token in __callback.aiter():
             yield token
     except Exception as e:
         print(f"Caught exception: {e}")
+        raise e
     finally:
-        callback.done.set()
-
-    await task
+        __callback.done.set()
+    await __task
 
 @router.post("/conversation-tiny")
 def conversation(payload: Union[ConversationPayload | None] = None) -> Any:
-    relevant_docs = rag_service.obter_contexto_relevante(payload.properties.question.description.strip(), 10)
-    sources = dict()
-    for doc in relevant_docs:
-        sources[doc.metadata['source']] = list()
-    for doc in relevant_docs:
-        sources[doc.metadata['source']].append(doc.page_content)
-    print(sources)
-    response = send_message(payload.properties.question.description.strip(), sources)
-    return StreamingResponse(response, media_type="text/event-stream")
+    __relevant_docs = None #rag_service.obter_contexto_relevante(payload.properties.question.description.strip(), 2)
+    __sources = dict()
+    for doc in __relevant_docs:
+        __sources[doc.metadata['source']] = list()
+    for doc in __relevant_docs:
+        __sources[doc.metadata['source']].append(doc.page_content)
+    __contexto_relevante = tratar_contexto(__sources)
+    __response           = send_message(payload.properties.question.description.strip(), __contexto_relevante)
+    return StreamingResponse(__response, media_type="text/event-stream")

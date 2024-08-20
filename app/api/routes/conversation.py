@@ -13,8 +13,8 @@ import logging
 from app.api.services.comunicados_service import ComunicadosService
 import re
 
-MODEL         = 'tinyllama'
-MODEL_Q2      = 'qwen2:0.5b-instruct-fp16'
+MODEL         = 'qwen'
+MODEL_Q2      = 'qwen2:1.5b-instruct-q8_0'
 EMBD          = 'nomic-embed-text'
 
 rag_service   = None
@@ -23,10 +23,10 @@ embeddings    = OllamaEmbeddings(model=EMBD)
 llm           = ChatOllama(
     model=MODEL_Q2,
     keep_alive='1h',
-    temperature=0,
-    verbose=True,
-    top_k=10,
-    num_predict=250,
+    temperature=0.4,
+    # verbose=True,
+    # top_k=10,
+    num_predict=2000,
 )
 llm_query     = ChatOllama(
     model=MODEL_Q2,
@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 system_prompt = "Você é um assistente especialista em responder perguntas utilizando apenas o conteúdo do CONTEXTO fornecido, não utilize seu conhecimento prévio. Se você não souber a resposta, escreva que a pergunta deve ser reformulada ou que o contexto é insuficiente. Não faça comentários nem notas."
-rag_service   = ComunicadosService(embeddings, text_splitter, chain, chain_q2, system_prompt, './files/pdfs/', True)
+rag_service   = None# ComunicadosService(embeddings, text_splitter, chain, chain_q2, system_prompt, './files/pdfs/', True)
 
 history_placeholder = MessagesPlaceholder("chat_history", optional=True)
 history_prompt = (
@@ -59,7 +59,7 @@ lista_historico = []
 def extrair_numero_cci(context: str) -> str:
     print(context)
     splitado = context.split('\n')
-    regexer  = re.compile(fr'(?<=(CCI\s-\s)).*(?=.$)')
+    regexer  = re.compile(fr'(?<=(CCI\s[—|-]\s)).*(?=.$)')
     return ''.join(list(filter(regexer.findall, splitado)))
 
 def chat(question: str, relevant_docs: List) -> AIMessage:
@@ -87,7 +87,7 @@ def chat(question: str, relevant_docs: List) -> AIMessage:
 
 @router.post("/conversation", response_model=ConversationResponse)
 async def conversation(payload: Union[ConversationPayload | None] = None) -> Any:
-    relevant_docs = rag_service.obter_contexto_relevante(payload.properties.question.description.strip(), 10)
+    relevant_docs = None# rag_service.obter_contexto_relevante(payload.properties.question.description.strip(), 10)
     sources = dict()
     for doc in relevant_docs:
         sources[doc.metadata['source']] = list()
@@ -96,7 +96,7 @@ async def conversation(payload: Union[ConversationPayload | None] = None) -> Any
             sources[doc.metadata['source']].append(doc.page_content)
     response, contexto_relevante = chat(payload.properties.question.description.strip(), sources)
     
-    lista_historico.apeend(history_placeholder.format_messages(
+    lista_historico.append(history_placeholder.format_messages(
         history=[
             ("system", history_prompt),
             ("human", f"## CONTEXTO ##\n{contexto_relevante}"),

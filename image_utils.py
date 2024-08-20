@@ -26,7 +26,7 @@ class ImageProcessing:
         pdf = fitz.open(img_path)
         imagens_criadas    = []
         for page in pdf:
-            pixmap         = page.get_pixmap(dpi=500)
+            pixmap         = page.get_pixmap(dpi=300)
             new_img_folder = img_folder.replace('.png', '_' + str(page.number) + '.png')
             
             pixmap.pil_save(new_img_folder, optimize=True)
@@ -71,45 +71,53 @@ class ImageProcessing:
         val, otsu = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
         print('Limiar calculado (cada img possuirá um limiar diferente: ', val)
-        cv2.imshow('THRESH_OTSU', otsu)
+        # cv2.imshow('THRESH_OTSU', otsu)
 
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+        
+        new_img_path = img_path.replace('.png', 'OTSU.png')
+        cv2.imwrite(new_img_path, otsu)
 
     def adaptive_threshold(selfs, img_path):
         # Limiarização usando a média de pixels na região
         img = cv2.imread(img_path)
-        cv2.imshow('Original Image', img)
+        # cv2.imshow('Original Image', img)
 
-        cv2.waitKey(0)
+        # cv2.waitKey(0)
 
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         val, otsu = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
         print('Limiar calculado (cada img possuirá um limiar diferente: ', val)
-        cv2.imshow('THRESH_OTSU', otsu)
+        # cv2.imshow('THRESH_OTSU', otsu)
 
-        cv2.waitKey(0)
+        # cv2.waitKey(0)
 
         adapt_media = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 9)
-        cv2.imshow('ADAPT_MEDIA', adapt_media)
+        # cv2.imshow('ADAPT_MEDIA', adapt_media)
 
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+        
+        new_img_path = img_path.replace('.png', 'THRESH2.png')
+        cv2.imwrite(new_img_path, adapt_media)
 
     def adaptive_gaussian_threshold(self, img_path):
         #Menos ruídos - Testar com imagens com sombras
         img = cv2.imread(img_path)
-        cv2.imshow('Original Image', img)
-        cv2.waitKey(0)
+        # cv2.imshow('Original Image', img)
+        # cv2.waitKey(0)
 
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         adapt_gaussian = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 9)
-        cv2.imshow('ADAPT_MEDIA_GAUS', adapt_gaussian)
+        # cv2.imshow('ADAPT_MEDIA_GAUS', adapt_gaussian)
 
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+        new_img_path = img_path.replace('.png', 'GAUS.png')
+        cv2.imwrite(new_img_path, adapt_gaussian)
 
     def invert_color(self, img_path: str) -> str:
         img = cv2.imread(img_path)
@@ -130,5 +138,9 @@ class ImageProcessing:
 
 if __name__ == '__main__':
     imgProcessing = ImageProcessing()
+    imgProcessing.pdf_to_image('./files/pdfs/CCI1.088_2024.pdf', './files/to_img/cci1.0882024.png')
+    imgProcessing.otsu_threshold('./files/to_img/cci1.0882024_0.png')
+    # imgProcessing.adaptive_gaussian_threshold('./files/to_img/CCI1.081_2024_0.png')
+    print(imgProcessing.get_text_from_image('./files/to_img/cci1.0882024_0OTSU.png'))
     
     

@@ -11,7 +11,7 @@ from rag_service import RAGService
 
 # Model
 MODEL         = 'llama3.1:8b-instruct-q2_K'
-MODEL_Q2      = 'qwen2:1.5b-instruct-fp16'
+MODEL_Q2      = 'qwen2:0.5b-instruct-fp16'
 EMBD          = 'nomic-embed-text:latest'
 
 # ANSI escape codes for colors

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.routes import get_signed_url, user_control_service, check_documents, conversation, conversation2
+from app.api.routes import get_signed_url, user_control_service, check_documents, conversation, conversation2, parent
 
 api_router = APIRouter()
 
@@ -9,3 +9,4 @@ api_router.include_router(user_control_service.router, tags=["user-control-servi
 api_router.include_router(check_documents.router, tags=["check-documents"])
 api_router.include_router(conversation.router, tags=["conversation"])
 api_router.include_router(conversation2.router, tags=["conversation-tiny"])
+api_router.include_router(parent.router, tags=["conversation-parent"])

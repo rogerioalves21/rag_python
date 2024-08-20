@@ -11,6 +11,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/showdown@1.9.0/dist/showdown.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <title>...</title>
     <style>
         .llm-container-message {
@@ -24,7 +25,7 @@
             margin-bottom: 10px;
             padding: 10px;
             background-color: rgba(0, 0, 0, 0.05);
-            font-size: 12px;
+            font-size: 13px;
             border-radius: 8px;
         }
     </style>
@@ -53,7 +54,7 @@
                                     </div>
                                 </form>
                             </div>
-                            <div class="col-sm-6" id="llm-container">
+                            <div class="col-sm-6 message-container" id="llm-container">
 
                             </div>
                         </div>
@@ -66,8 +67,10 @@
     </main>
     <footer class="row"></footer>
     <script>
+        document.getElementById("llm-container").innerHTML = marked.parse('# Marked in browser\n\nRendered by **marked**.');
         async function sendMessage(e) {
             e.preventDefault();
+
             const pergunta = document.getElementById("questao").value;
             const contexto = ""// document.getElementById("contexto").value;
             const payload = {
@@ -87,7 +90,7 @@
                     }
                 }
             };
-            var response = await fetch('http://localhost:8000/api/v1/conversation-tiny', {
+            var response = await fetch('http://localhost:8000/api/v1/conversation-parent', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -95,17 +98,34 @@
                 body: JSON.stringify(payload)
             });
 
-            var reader = response.body.getReader();
+            var reader  = response.body.getReader();
             var decoder = new TextDecoder('utf-8');
 
+            document.getElementById("llm-container").innerHTML = '';
+
+            var tokens = []
+
             reader.read().then(function processResult(result) {
+                var converter = new showdown.Converter();
+
                 if (result.done) return;
                 let token = decoder.decode(result.value);
-                if (token.endsWith('!') || token.endsWith('?')) {
+
+                if (token.endsWith('!\n') || token.endsWith('?\n') || token.endsWith(':\n')) {
+                    tokens.push(token + '<br/>');
+                } else {
+                    tokens.push(token);
+                }
+
+                let html_content = converter.makeHtml(tokens.join(""));
+                document.getElementById("llm-container").innerHTML = marked.parse(html_content);
+
+                /* if (token.endsWith('!') || token.endsWith('?')) {
                     document.getElementById("llm-container").innerHTML += token + "<br>";
                 } else {
                     document.getElementById("llm-container").innerHTML += token;
-                }
+                } */
+                
                 return reader.read().then(processResult);
             });
 

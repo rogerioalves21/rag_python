@@ -1,46 +1,71 @@
-## Comunicado: CCI - 1.029/2024 - CCS Brasília/DF, 31 de julho de 2024.
+## Comunicado: CCI - 1.081/2024 - CCS Brasília/DF, 8 de agosto de 2024.
 
-WYs | COOB Carta-Circular
-de Instrução/Funcionalidade 5
+SICOOB Carta-Circular de Instrução/Funcionalidade -
 
-CCI - 1.029/2024 - CCS Brasília/DF, 31 de julho de 2024.
+CCI - 1.081/2024 - CCS Brasília/DF, 8 de agosto de 2024.
 
 
 Às entidades do Sicoob.
 
 
-Evolução da funcionalidade Pagamento de Operações de Crédito no módulo Empréstimo
-
-da Plataforma de Crédito do Sisbr 2.0, em 31/7/2024, referente à disponibilização de novo
-
-histórico de liquidação.
+CCI complementar, referente às evoluções na funcionalidade Reavaliação Garantias do 
+módulo Condução de Crédito da Plataforma de Crédito do Sisbr 2.0, em 9/8/2024.
 
 
 Senhores(as).
 
 
-1. Informamos a evolução da funcionalidade Pagamento de Operações de Crédito no
-módulo Empréstimo da Plataforma de Crédito do Sisbr 2.0, em 31/7/2024, conforme
-anexo desta CCI.
+1. Em complemento às CClIs - 007/2023, 129/2023, 522/2023, 1.015/2023 e 1.598/2023 - CCS, de 3/1/2023, 27/1/2023, 24/4/2023, 17/08/2023 e 14/12/2023 respectivamente.
+
+informamos a evolução da funcionalidade Reavaliação Garantias, disponível na Plataforma de Crédito do Sisbr 2.0, em 9/8/2024, conforme anexo desta CCI.
 
 
-2. O histórico poderá ser utilizado pela cooperativa quando algum boleto for rejeitado
-e caso seja necessário liquidar o contrato de forma manual.
+2. Na data em que a reavaliação está agendada, o sistema verificará, de forma automática, na Plataforma de Atendimento (Cadastro de Pessoas do Sicoob - Capes), se a data de avaliação do bem é inferior a 12 (doze) meses da data do agendamento. Caso a última avaliação tenha sido realizada dentro desse novo intervalo de 12 (doze) meses, o sistema procederá com a atualização da data da última avaliação e do valor da garantia, conforme avaliação mais recente informada no Capes.
 
 
-2.1 O histórico poderá ser utilizado caso o valor do boleto seja maior que o valor
-calculado pelo sistema. Nesse caso, será possível utilizar o campo Outros Acréscimos
-para acrescentar a diferença entre o valor da liquidação e o valor recebido do boleto
-rejeitado.
+Atenciosamente.
+
+Edson Rodrigues Lisboa Júnior Paulo Antônio Neto Ribeiro Sistemas de Informação | Operações e Produtos de Crédito Superintendente Superintendente Evolutiva negocial
+STI: 77127 É
 
 
-2.2 Quando ocorrer o acréscimo de valores no campo Outros Acréscimos, a liquidação
-será submetida à funcionalidade de dupla aprovação (Sisbr 2.0 — Plataforma de
-Crédito — Empréstimo — Pagamento de operações de crédito — Aprovação de
-Pagamento), para que, somente após essa aprovação, a liquidação seja efetivada.
+## Comunicado: CCI — 1.010/2024 - CCS Brasília/DF, 31 de julho de 2024.
+
+SICOOB Carta-Circular de Instrução -
+
+CCI - 1.010/2024 - CCS Brasília/DF, 31 de julho de 2024.
 
 
-Evolutiva negocial
+Às entidades do Sicoob.
 
-ST1:72949 HRESTRITA+
+
+Evolução da funcionalidade Multicálculo Automóvel no Sistema Integrado para Gestão e 
+Aquisição de Seguros do Sicoob (SicoobSigas) do Sisbr 3.0, referente às mudanças na 
+integração das seguradoras Porto e Azul.
+
+
+Senhores(as).
+
+
+1. Com as mudanças na integração das seguradoras Porto e Azul, informamos a evolução da funcionalidade Multicálculo Automóvel no SicoobSigas do Sisbr 3.0.
+
+realizada em 24/7/2024, contemplando as seguintes alterações nas companhias:
+
+a) apartirde24/7/2024, os cálculos realizados não serão salvos. Após essa data.
+
+será necessário criar uma simulação para calcular ou contratar seguros;
+
+b) nas renovações de seguros com vigência a partir de 23/8/2024, será apresentado um pacote fechado de condição exclusiva de cada seguradora.
+
+Não será válido o recálculo ou ajustes de coberturas;
+
+c)  paraoscasosem que há uma recusa no produto tradicional, disponibilizamos uma oferta alternativa, denominada Cotação para Todos, com condições adequadas para cada cooperado. Nessa oferta, serão apresentadas as coberturas de Incêndio, Roubo e Furto, Compreensiva Fipe de até 80% (oitenta por cento) ou RCF. Não será válido recálculo ou ajustes de coberturas;
+
+d) o Desconto Cota Prêmio está disponível na opção Condições Especiais.
+
+conforme o saldo acumulado da corretora. O desconto não é aplicável para o pacote de renovação;
+
+e)  quando exigida a vistoria prévia pela seguradora, será apresentada na tela de contratação a seguinte mensagem, com o link para baixar o aplicativo de 
+
+
 
