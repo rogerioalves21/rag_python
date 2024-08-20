@@ -171,6 +171,11 @@ class CleanSymbolsProcessor():
         self.inicio = None
 
     def process_line(self, line: str) -> Optional[str]:
+        line = line.replace('#RESTRITA#', '#RESTRITA#')
+        line = line.replace('Omecanismo', 'O mecanismo')
+        line = line.replace('Afimde', 'A fim de')
+        line = line.replace('. —', '. ')
+        line = line.replace('HERESTRITAL', '')
         line = line.replace('HRESTRITAH', '')
         line = line.replace('aE)', '')
         line = line.replace('HRESTRITAA', '')

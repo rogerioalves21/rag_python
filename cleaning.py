@@ -1,24 +1,23 @@
 import re
 import nltk
 from nltk.tokenize import word_tokenize
-from nltk.corpus import stopword
-s
+from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
 # Sample text with emojis, hashtags, and other characters
-text = “I love coding! 😊 #PythonProgramming is fun! 🐍✨ Let’s clean some text 🧹”
+text = "I love coding! 😊 #PythonProgramming is fun! 🐍✨ Let’s clean some text 🧹"
 
 # Tokenization
 tokens = word_tokenize(text)
 
 # Remove Noise
-cleaned_tokens = [re.sub(r’[^\w\s]’, ‘’, token) for token in tokens]
+cleaned_tokens = [re.sub(r'[^\w\s]’, ‘', token) for token in tokens]
 
 # Normalization (convert to lowercase)
 cleaned_tokens = [token.lower() for token in cleaned_tokens]
 
 # Remove Stopwords
-stop_words = set(stopwords.words(‘english’))
+stop_words = set(stopwords.words("portuguese"))
 cleaned_tokens = [token for token in cleaned_tokens if token not in stop_words]
 
 # Lemmatization
@@ -35,9 +34,9 @@ print(cleaned_tokens)
 import re
 
 # Sample text with spelling errors
-text_with_errors = “””But ’s not  oherence  about more language  oherence . 
+text_with_errors = """But ’s not  oherence  about more language  oherence . 
 Other important aspect is ensuring accurte retrievel by  oherence  product name spellings. 
-Additionally, refning descriptions  oherenc the  oherence of the contnt.”””
+Additionally, refning descriptions  oherenc the  oherence of the contnt."""
 
 # Function to correct spelling errors
 def correct_spelling_errors(text):
@@ -71,42 +70,30 @@ print(cleaned_text)
 # Additionally, refining descriptions enhances the coherence of the content.
 
 
-Import spacy
+import spacy
 import json
 
 # Load English language model
-nlp = spacy.load(“en_core_web_sm”)
+nlp = spacy.load("en_core_web_sm")
 
 # Sample text with meta data candidates
-text = “””In a blog post titled ‘The Top 10 Tech Trends of 2024,’ 
+text = """In a blog post titled ‘The Top 10 Tech Trends of 2024,’ 
 John Doe discusses the rise of artificial intelligence and machine learning 
 in various industries. The article mentions companies like Google and Microsoft 
 as pioneers in AI research. Additionally, it highlights emerging technologies 
-such as natural language processing and computer vision.”””
+such as natural language processing and computer vision."""
 
 # Process the text with spaCy
 doc = nlp(text)
 
 # Extract named entities and their labels
-meta_data = [{“text”: ent.text, “label”: ent.label_} for ent in doc.ents]
+meta_data = [{"text": ent.text, "label": ent.label_} for ent in doc.ents]
 
 # Convert meta data to JSON format
 meta_data_json = json.dumps(meta_data)
 
 print(meta_data_json)
 
-# output
-“””
-[
-    {“text”: “2024”, “label”: “DATE”},
-    {“text”: “John Doe”, “label”: “PERSON”},
-    {“text”: “Google”, “label”: “ORG”},
-    {“text”: “Microsoft”, “label”: “ORG”},
-    {“text”: “AI”, “label”: “ORG”},
-    {“text”: “natural language processing”, “label”: “ORG”},
-    {“text”: “computer vision”, “label”: “ORG”}
-]
-“””
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
@@ -177,7 +164,7 @@ cleaned_tokens = [re.sub(r'[^\w\s]', '', token) for token in tokens]
 cleaned_tokens = [token.lower() for token in cleaned_tokens]
 
 # Remove Stopwords
-stop_words = set(stopwords.words('english'))
+stop_words = set(stopwords.words('portuguese'))
 cleaned_tokens = [token for token in cleaned_tokens if token not in stop_words]
 
 # Lemmatization
@@ -187,15 +174,13 @@ cleaned_tokens = [lemmatizer.lemmatize(token) for token in cleaned_tokens]
 print(cleaned_tokens)
 
 
-MESSAGE_SYSTEM_CONTENT = "You are a customer service agent that helps 
+MESSAGE_SYSTEM_CONTENT = """You are a customer service agent that helps 
 a customer with answering questions. Please answer the question based on the
 provided context below. 
 Make sure not to make any changes to the context if possible,
 when prepare answers so as to provide accurate responses. If the answer 
 cannot be found in context, just politely say that you do not know, 
-do not try to make up an answer."
-
-
+do not try to make up an answer."""
 
 def response_test(question:str, context:str, model:str = "gpt-4"):
     response = client.chat.completions.create(
@@ -209,12 +194,10 @@ def response_test(question:str, context:str, model:str = "gpt-4"):
             {"role": "assistant", "content": context},
         ],
     )
-    
     return response.choices[0].message.content
 
 
-question1 = "What are some specific techniques in Adversarial Training (AT) 
-that can help mitigate biases in Generative AI models?"
+question1 = "What are some specific techniques in Adversarial Training (AT) that can help mitigate biases in Generative AI models?"
 
 
 response = response_test(question1, synthetic_text)
