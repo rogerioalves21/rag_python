@@ -20,18 +20,19 @@ from clean_symbols import CleanSymbolsProcessor
 from langchain_text_splitters.spacy import SpacyTextSplitter
 import re
 from rich import print
+from app.utils import ComunicadoTextSplitter
 
 MODEL_Q2      = 'gemma2:2b-instruct-q4_K_M'
 EMBD          = 'mxbai-embed-large'
 
 callback      = AsyncIteratorCallbackHandler()
-text_splitter = CharacterTextSplitter(chunk_size=900, chunk_overlap=0)
+text_splitter = ComunicadoTextSplitter(chunk_size=500, chunk_overlap=0, length_function=len)
 embeddings    = OllamaEmbeddings(model=EMBD)
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-system_prompt = "Use os documentos fornecidos delimitados por aspas triplas para responder às perguntas. Se a resposta não puder ser encontrada nos documentos, escreva “Não consegui encontrar uma resposta”. Procure responder de forma clara e detalhada."
+system_prompt = "Use os documentos fornecidos delimitados por aspas triplas para responder às perguntas. Se a resposta não puder ser encontrada nos documentos, escreva “Não consegui encontrar uma resposta”. Por fim, escreva de forma clara e concisa em Português."
 chat_prompt   = ChatPromptTemplate.from_messages(
         [
             ("system", system_prompt),

@@ -1,16 +1,39 @@
 import cv2
 from cv2.typing import MatLike
 import fitz
-from typing import List, Union
 import pytesseract
+import numpy as np
+from pytesseract import Output
+from PIL import Image
+from langchain_core.documents import Document
+from langchain_core.document_loaders.base import BaseBlobParser
+from langchain_core.document_loaders.blob_loaders import Blob
+from langchain_community.document_loaders.pdf import BasePDFLoader
+from typing import Iterator, List, Union
+from rich import print
+from clean_symbols import CleanSymbolsProcessor, show_paragraphs
 
-# pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
-pytesseract.pytesseract.tesseract_cmd = r"C:\\Users\\rogerio.rodrigues\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
+# pytesseract.pytesseract.tesseract_cmd = r"C:\\Users\\rogerio.rodrigues\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe"
 
 class ImageProcessing:
 
     def __init__(self):
         print('Image Processing')
+
+    def find_words_remove(self, img_data):
+        __words_remove = []
+        __whitelist = ['ç','STI:','STI','CCI','-','—',"N",'IC','SICOOB']
+        __threshold2 = 10
+        
+        for i in range(0, len(img_data['text'])):
+            __palavra = img_data['text'][i]
+            __confidence = int(float(img_data['conf'][i]))
+            
+            if __confidence < __threshold2 and not __palavra.isspace() and len(__palavra) and __palavra not in __whitelist:
+                __words_remove.append(__palavra)
+        print(__words_remove)
+        return __words_remove
 
     def get_rgb_from_img(self, img_path: str) -> MatLike:
         image_bgr = cv2.imread(img_path)
@@ -19,20 +42,21 @@ class ImageProcessing:
 
     def get_text_from_image(self, img_path: str) -> Union[str, None]:
         img_rgb            = self.get_rgb_from_img(img_path)
-        config_pytesseract = r'--tessdata-dir assets/tessdata -l por --oem 3 --psm 6'
+        config_pytesseract = r'-l por --oem 3 --psm 6'#r'--tessdata-dir assets/tessdata -l por --oem 1 --psm 6 -c preserve_interword_spaces=2 output-preserve-enabled'
         text               = pytesseract.image_to_string(image=img_rgb, lang='por', config=config_pytesseract)
+        words_remove       = self.find_words_remove(self.get_image_data(img_rgb))
+        for w in words_remove:
+            text = text.replace(w, '')
+        print(text)
         return text
 
     def pdf_to_image(self, img_path: str, img_folder: str) -> List:
         pdf = fitz.open(img_path)
         imagens_criadas    = []
         for page in pdf:
-            pixmap         = page.get_pixmap(dpi=1200)
+            pixmap         = page.get_pixmap(dpi=300)
             new_img_folder = img_folder.replace('.png', '_' + str(page.number) + '.png')
-            
             pixmap.pil_save(new_img_folder, optimize=True)
-            new_img_folder = self.invert_color(new_img_folder)
-            new_img_folder = self.otsu_threshold(new_img_folder)
             imagens_criadas.append((new_img_folder, page.number))
         return imagens_criadas
 
@@ -106,6 +130,10 @@ class ImageProcessing:
         new_img_path = img_path.replace('.png', 'THRESH2.png')
         cv2.imwrite(new_img_path, adapt_media)
 
+    def get_image_data(self, img_rgb):
+        config_pytesseract = f'-l por --oem 3 --psm 6 '# -c preserve_interword_spaces=1 output-preserve-enabled=True'
+        return pytesseract.image_to_data(image=img_rgb, lang='por', config=config_pytesseract, output_type=Output.DICT)
+
     def adaptive_gaussian_threshold(self, img_path):
         #Menos ruídos - Testar com imagens com sombras
         img = cv2.imread(img_path)
@@ -139,11 +167,67 @@ class ImageProcessing:
         cv2.imwrite(new_img_path, invert)
         return new_img_path
 
+class PyTesseractParser(BaseBlobParser):
+    """Carga un PDF con pdf2image y extrae texto usando pytesseract."""
+    def __init__(self, pdf_path: str):
+        self._img_processing = ImageProcessing()
+        self._pdf_path       = pdf_path
+
+        self._all_letters = " abcdefghijlmonpqrstuvxyzABCDEFGHIJLMNOPQRSTUVXYZ.,;'-0123456789"
+    
+    def __unicode_to_ascii(self, s: str) -> str:
+        texto = ''
+        for c in s:
+            if c in self._all_letters:
+                texto += c 
+        return ''.join(texto)
+
+    def __normalize_string(self, s: str) -> str:
+        s = self.__unicode_to_ascii(s.lower().strip())
+        return s.strip()
+    
+    def __tratar_linhas_texto(self, document: str) -> str:
+        __text = document.replace('.\n','.\n\n').replace('!\n','!\n\n').replace('?\n','?\n\n').replace(':\n',':\n\n').replace(',\n',', ').replace(';\n',' ')
+        __text = __text.replace('\\s\\n', '')
+        __text = __text.replace('  ', ' ')
+        return __text
+
+    def __limpar_texto(self, txt: str) -> str:
+        __cleaner = CleanSymbolsProcessor()
+        __t = __cleaner.process_line(txt).strip()
+        return self.__tratar_linhas_texto(__t)
+
+    def lazy_parse(self, blob: Union[Blob, None] = None) -> Iterator[Document]:
+        # recupera somente o nome do arquivo
+        __split       = self._pdf_path.split("/")
+        __nome_imagem = self.__normalize_string(__split[-1]).replace(' ', '_')
+        # cria o nome base da imagem
+        __nome_imagem = __nome_imagem.replace('.pdf', '.png')
+        # converte em imagem cada página
+        __imagens     = self._img_processing.pdf_to_image(self._pdf_path, './files/to_img/' + __nome_imagem)
+        yield from [
+            Document(
+                page_content=self.__limpar_texto(self._img_processing.get_text_from_image(img_path=img_path)),
+                metadata={"source": img_path, "page": page_number+1},
+            )
+            for img_path, page_number in __imagens
+        ]
+
+class PyTesseractLoader(BasePDFLoader):
+    def __init__(self, file_path: str) -> None:
+        self.parser = PyTesseractParser(pdf_path=file_path)
+        super().__init__(file_path)
+
+    def load(self) -> List[Document]:
+        return list(self.lazy_load())
+
+    def lazy_load(self) -> Iterator[Document]:
+        yield from self.parser.parse(None)
+
 if __name__ == '__main__':
-    imgProcessing = ImageProcessing()
-    imgProcessing.pdf_to_image('./files/pdfs/CCI1.088_2024.pdf', './files/to_img/cci1.0882024.png')
-    imgProcessing.otsu_threshold('./files/to_img/cci1.0882024_0.png')
-    # imgProcessing.adaptive_gaussian_threshold('./files/to_img/CCI1.081_2024_0.png')
-    print(imgProcessing.get_text_from_image('./files/to_img/cci1.0882024_0OTSU.png'))
+    file_path = "./files/pdfs/CCI1029.pdf"
+    loader    = PyTesseractLoader(file_path)
+    documents = loader.load()
+    print(documents)
     
     

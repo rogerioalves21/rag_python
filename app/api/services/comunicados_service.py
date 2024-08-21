@@ -10,7 +10,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 # from langchain_chroma import Chroma
 from langchain_core.prompts import ChatPromptTemplate
-from image_utils import ImageProcessing
+from image_utils import ImageProcessing, PyTesseractLoader
 import re
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.document_loaders import PyPDFium2Loader
@@ -18,6 +18,7 @@ from langchain.retrievers import ParentDocumentRetriever
 from langchain.storage import InMemoryStore
 from clean_symbols import CleanSymbolsProcessor, show_paragraphs
 from rich import print
+from app.utils import tratar_linhas_texto, clean_query
 
 all_letters = " abcdefghijlmonpqrstuvxyzABCDEFGHIJLMNOPQRSTUVXYZ.,;'-0123456789"
 def unicode_to_ascii(s: str) -> str:
@@ -72,10 +73,10 @@ class ComunicadosService():
         )
         
         # Define retriever
-        #retriever = self.__data_base.as_retriever(
-        #    search_type='mmr',
-        #    search_kwargs={'k':2, 'fetch_k':4}
-        #)
+        __retriever = self.__data_base.as_retriever(
+            search_type='mmr',
+            search_kwargs={'k':2, 'fetch_k':4}
+        )
         
         self.__full_doc_retriever = ParentDocumentRetriever(
             vectorstore=self.__data_base, #self.__chroma_db,
@@ -86,41 +87,59 @@ class ComunicadosService():
         self.__chain.verbose = True
         
         # memória para conversação. TODO - criar isso para multi-usuário
-        #memory = ConversationBufferMemory(
-        #    memory_key='chat_history',
-        #    output_key='answer',
-        #    return_messages=True
-        #)
+        __memory = ConversationBufferMemory(
+            memory_key='chat_history',
+            output_key='answer',
+            return_messages=True
+        )
         
         # Setup LLM and QA chain
-        #qa_chain = ConversationalRetrievalChain.from_llm(
-        #    llm=self.llm,
-        #    retriever=retriever,
-        #    memory=memory,
-        #    return_source_documents=True,
-        #    verbose=False
-        #)
+        self.__qa_chain = ConversationalRetrievalChain.from_llm(
+            llm=self.__chain,
+            retriever=__retriever,
+            memory=__memory,
+            return_source_documents=True,
+            verbose=True
+        )
         
         # popula a store e vectstore
         self.__obter_conteudo_arquivo()
-        self.__documents.sort(key=lambda x: x.metadata["page"])
-        self.__full_doc_retriever.add_documents(self.__documents, ids=None)
-        
         print(list(self.__store.yield_keys()))
     
-    async def agenerate(self, query: str) -> Any:
+    async def agenerate_memory(self, query: str) -> Any:
         """ Chamada streaming para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
-        __docs = self.get_parent_documents(query)
-        print(f"Documentos encontrados: {len(__docs)}")
-        __docs.sort(key=lambda x: x.metadata['source'] and x.metadata["page"])
+        __sub_docs = self.get_sub_documents(clean_query(query), 20)
+        __sub_docs.reverse()
+        print(f"SUB-DOCS\n")
+        print(__sub_docs)
+        __docs = self.get_parent_documents(clean_query(query))
+        print(f"FUL-DOCS\n")
+        print(__docs)
+        __docs.sort(key=lambda x: x.metadata['source'])
         __relevantes = []
         for __doc in __docs:
             __relevantes.append('\n"""')
             __relevantes.append(__doc.page_content)
             __relevantes.append('"""\n')
         __messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes))
-        print(__messages)
-        print(len(__messages))
+        return await self.__qa_chain.agenerate(messages=[__messages])
+    
+    async def agenerate(self, query: str) -> Any:
+        """ Chamada streaming para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
+        __sub_docs = self.get_sub_documents(clean_query(query), 20)
+        __sub_docs.reverse()
+        print(f"SUB-DOCS\n")
+        print(__sub_docs)
+        __docs = self.get_parent_documents(clean_query(query))
+        print(f"FUL-DOCS\n")
+        print(__docs)
+        __docs.sort(key=lambda x: x.metadata['source'])
+        __relevantes = []
+        for __doc in __docs:
+            __relevantes.append('\n"""')
+            __relevantes.append(__doc.page_content)
+            __relevantes.append('"""\n')
+        __messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes))
         return await self.__chain.agenerate(messages=[__messages])
     
     def invoke(self, query: str) -> Union[str, None]:
@@ -133,8 +152,6 @@ class ComunicadosService():
             __relevantes.append(__doc.page_content)
             __relevantes.append('"""\n')
         __messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes))
-        print(__messages)
-        print(len(__messages))
         return self.__chain.invoke(__messages).content
   
     def get_chain(self) -> Union[ChatOllama | StrOutputParser | ChatPromptTemplate]:
@@ -151,11 +168,9 @@ class ComunicadosService():
     
     def __obter_conteudo_arquivo(self) -> str:
         """ Obtêm os arquivos da pasta, divide e lotes de textos e inclui no banco em memória \"docarray\" """
-        arquivos      = os.listdir(self.__folder)
-        img_pdf_pages = []
-        if arquivos:
-            img_pdf_pages = self.__pdf_to_imagens(arquivos)
-            self.__gerar_embed_data_base(img_pdf_pages)
+        _lista_arquivos = os.listdir(self.__folder)
+        if _lista_arquivos:
+            self.__save_documents_from_pdfs(_lista_arquivos)
     
     def __carregar_pdf(self, arquivos: List[str]):
          for arquivo in tqdm(arquivos):
@@ -176,36 +191,12 @@ class ComunicadosService():
                     raise Exception('sem base de dados configurada')
                     ## self.__chroma_db.add_documents(document_chunks)
     
-    def __pdf_to_imagens(self, arquivos: List[str]) -> List[Tuple[str, str, int]]:
-        """ Converte os pdfs em imagens e retorna a lista com as imagens geradas """
-        __img_pdf_pages   = []
+    def __save_documents_from_pdfs(self, arquivos: List[str]) -> None:
         for arquivo in tqdm(arquivos):
-            __file_path   = self.__folder + arquivo
-            __nome_imagem = normalize_string(arquivo).replace(' ', '_')
-            __nome_imagem = __nome_imagem.replace('.pdf', '.png')
-            __imagens     = self.__img_prc.pdf_to_image(__file_path, './files/to_img/' + __nome_imagem)
-            for __imagem, __pagina in __imagens:
-                __img_pdf_pages.append((arquivo.replace(' ', '_'), __imagem, __pagina))
-        return __img_pdf_pages
-    
-    def __gerar_embed_data_base(self, imagens: List[str]) -> None:
-        """ Lê os arquivos na lista, gera chunks para os mesmos e inclui na base de dados """
-        # TODO - colocar tudo num documento só
-        for __arquivo_original, __image_path, __pagina in tqdm(imagens):
-            if (__pagina > 0): continue
-            __conteudo        = self.__img_prc.get_text_from_image(__image_path)
-            __document_chunks = self.__limpar_texto(__conteudo)
-            print("\n# ----------------------------------------- #\n")
-            print(__document_chunks)
-            print("\n# ----------------------------------------- #\n")
-            self.__documents.append(
-                Document(
-                    page_content=__document_chunks,
-                    metadata={"source": __arquivo_original, "page": __pagina}
-                )
-            )
-        print(f"Quantidade de documento inseridos: {len(self.__documents)}")
-    
+            __file_path    = self.__folder + arquivo
+            __pytess_loader = PyTesseractLoader(__file_path)
+            self.__full_doc_retriever.add_documents(__pytess_loader.load())
+   
     def extrair_numero_cci(self, context: str) -> Union[str, None]:
         __splitado  = context.split('\n')
         __regexer   = re.compile(fr'(?<=(CCI\s[—|-]\s)).*(?=.$)')
@@ -238,12 +229,3 @@ class ComunicadosService():
                 else:
                     __document += __doc.page_content
         return __document
-
-    def __limpar_texto(self, txt: str) -> str:
-        __t      = txt.replace(' \n', '\n').replace('— \n', '— ').replace('—\n', '— ').replace('- \n', '- ').replace('-\n', '- ').replace(') \n', ') ').replace(')\n', ') ')#.replace('o \n', 'o ').replace('o\n', 'o ').replace('s \n', 's ').replace('s\n', 's ').replace('e \n', 's ').replace('e\n', 'e ').replace('a \n', 'a ').replace('a\n', 'a ').replace('r \n', 'r ').replace('r\n', 'r ').replace('á \n', 'á ').replace('á\n', 'á ').replace('HRESTRITAH', '')
-        __cleaner = CleanSymbolsProcessor()
-        __t = __cleaner.process_line(__t).replace('  ', ' ').strip()
-        formatado = show_paragraphs(__t)
-        ft = '\n\n'.join(formatado)
-        print(ft)
-        return ft.replace("'", "")

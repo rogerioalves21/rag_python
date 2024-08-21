@@ -169,7 +169,7 @@ PONTUACAO = "!\"#$&'*@\\[\\]^`{|}~"
 
 class Paragraphs:
     def __init__(self, __texto: str, separator='\n'):
-        self.seq = __texto.splitlines('\n')
+        self.seq = __texto.splitlines()
 
         self.line_num = 0    # current index into self.seq (line number)
         self.para_num = 0    # current index into self (paragraph number)
@@ -219,6 +219,7 @@ class CleanSymbolsProcessor():
 
     def process_line(self, line: str) -> Optional[str]:
         line = line.replace('"', '')
+        line = line.replace('Vs À COOB', 'SICOOB')
         line = line.replace('S T11', 'STI')
         line = line.replace('f\'ª-..', '')
         line = line.replace('8 \'-):âê\'', '')
