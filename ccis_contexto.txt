@@ -52,20 +52,10 @@ Senhores(as).
 realizada em 24/7/2024, contemplando as seguintes alterações nas companhias:
 
 a) apartirde24/7/2024, os cálculos realizados não serão salvos. Após essa data.
-
 será necessário criar uma simulação para calcular ou contratar seguros;
-
 b) nas renovações de seguros com vigência a partir de 23/8/2024, será apresentado um pacote fechado de condição exclusiva de cada seguradora.
-
 Não será válido o recálculo ou ajustes de coberturas;
-
 c)  paraoscasosem que há uma recusa no produto tradicional, disponibilizamos uma oferta alternativa, denominada Cotação para Todos, com condições adequadas para cada cooperado. Nessa oferta, serão apresentadas as coberturas de Incêndio, Roubo e Furto, Compreensiva Fipe de até 80% (oitenta por cento) ou RCF. Não será válido recálculo ou ajustes de coberturas;
-
 d) o Desconto Cota Prêmio está disponível na opção Condições Especiais.
-
 conforme o saldo acumulado da corretora. O desconto não é aplicável para o pacote de renovação;
-
 e)  quando exigida a vistoria prévia pela seguradora, será apresentada na tela de contratação a seguinte mensagem, com o link para baixar o aplicativo de 
-
-
-

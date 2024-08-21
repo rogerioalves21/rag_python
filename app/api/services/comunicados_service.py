@@ -6,24 +6,18 @@ from langchain_text_splitters import CharacterTextSplitter
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.documents import Document
 from langchain_community.vectorstores import DocArrayInMemorySearch
-from langchain_chroma import Chroma
+from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationalRetrievalChain
+# from langchain_chroma import Chroma
 from langchain_core.prompts import ChatPromptTemplate
-from langchain.retrievers.self_query.base import SelfQueryRetriever
-from langchain.chains.query_constructor.base import AttributeInfo
 from image_utils import ImageProcessing
-from langchain_core.messages import BaseMessage
-import unicodedata
 import re
-import string
-from langchain_core.outputs import (
-    LLMResult,
-)
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.document_loaders import PyPDFium2Loader
 from langchain.retrievers import ParentDocumentRetriever
 from langchain.storage import InMemoryStore
-from clean_symbols import CleanSymbolsProcessor
-from langchain.chains.retrieval_qa.base import RetrievalQA
+from clean_symbols import CleanSymbolsProcessor, show_paragraphs
+from rich import print
 
 all_letters = " abcdefghijlmonpqrstuvxyzABCDEFGHIJLMNOPQRSTUVXYZ.,;'-0123456789"
 def unicode_to_ascii(s: str) -> str:
@@ -35,8 +29,6 @@ def unicode_to_ascii(s: str) -> str:
 
 def normalize_string(s: str) -> str:
     s = unicode_to_ascii(s.lower().strip())
-    # s = re.sub(r"([.!?])", r" \1", s)
-    # s = re.sub(r"[^a-zA-Z!?]+", r" ", s)
     return s.strip()
 
 class ComunicadosService():
@@ -70,95 +62,81 @@ class ComunicadosService():
         self.__callbacks          = callbacks
         self.__chat_prompt        = chat_prompt
         
-        self.__chroma_db = Chroma(
-            collection_name="comunicados-sicoob",
-            embedding_function=self.__embedding_function,
+        #self.__chroma_db = Chroma(
+        #    collection_name="comunicados-sicoob",
+        #    embedding_function=self.__embedding_function,
+        #)
+        self.__data_base = DocArrayInMemorySearch.from_params(
+            embedding=self.__embedding_function,
+            metric="euclidian_dist"
         )
+        
+        # Define retriever
+        #retriever = self.__data_base.as_retriever(
+        #    search_type='mmr',
+        #    search_kwargs={'k':2, 'fetch_k':4}
+        #)
         
         self.__full_doc_retriever = ParentDocumentRetriever(
-            vectorstore=self.__chroma_db,
+            vectorstore=self.__data_base, #self.__chroma_db,
             docstore=self.__store,
             child_splitter=self.__text_splitter,
+            search_kwargs={"k": 10}
         )
-        
         self.__chain.verbose = True
-              
-        self.__retrieval_qa = RetrievalQA.from_chain_type(
-            llm=self.__chain,
-            # prompt=self.__chat_prompt,
-            retriever=self.__full_doc_retriever,
-            # callbacks=self.__callbacks,
-            # return_source_documents=True
-        )
         
-        self.__retrieval_qa.verbose = True
+        # memória para conversação. TODO - criar isso para multi-usuário
+        #memory = ConversationBufferMemory(
+        #    memory_key='chat_history',
+        #    output_key='answer',
+        #    return_messages=True
+        #)
+        
+        # Setup LLM and QA chain
+        #qa_chain = ConversationalRetrievalChain.from_llm(
+        #    llm=self.llm,
+        #    retriever=retriever,
+        #    memory=memory,
+        #    return_source_documents=True,
+        #    verbose=False
+        #)
         
         # popula a store e vectstore
         self.__obter_conteudo_arquivo()
         self.__documents.sort(key=lambda x: x.metadata["page"])
         self.__full_doc_retriever.add_documents(self.__documents, ids=None)
         
-        if self.__in_memory:
-            self.__retriever = None
-        else:
-            metadata_field_info = [
-                AttributeInfo(
-                    name="documento",
-                    description="O nome do documento que foi extraída a informação. Pode ser um arquivo PDF ou PNG",
-                    type="string",
-                ),
-                AttributeInfo(
-                    name="chunk_index",
-                    description="Qual índice do chunk que a informação está",
-                    type="integer",
-                ),
-                AttributeInfo(
-                    name="CCI",
-                    description="O Número do comunicado",
-                    type="integer",
-                )
-            ]
-            self.__retriever = SelfQueryRetriever.from_llm(
-                llm=self.__chain,
-                vectorstore=self.__chroma_db,
-                text_splitter=self.__text_splitter,
-                document_contents="Comunicados sobre problemas, novos produtos ou alteração de produto do Sicoob - SISBR",
-                metadata_field_info=metadata_field_info,
-                verbose=True,
-                enable_limit=True
-            )
-            
+        print(list(self.__store.yield_keys()))
+    
     async def agenerate(self, query: str) -> Any:
         """ Chamada streaming para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
-        __docs = self.get_contexto_relevante(query)
+        __docs = self.get_parent_documents(query)
+        print(f"Documentos encontrados: {len(__docs)}")
         __docs.sort(key=lambda x: x.metadata['source'] and x.metadata["page"])
-        print(__docs)
         __relevantes = []
         for __doc in __docs:
-            # __source = __doc.metadata['source']
-            __relevantes.append('\n\n')
-            __relevantes.append(__doc.page_content) #self.get_full_document_by_source(__source))
-        # print(__relevantes)
-        __messages = self.__chat_prompt.format_messages(question=query, context=__relevantes)
+            __relevantes.append('\n"""')
+            __relevantes.append(__doc.page_content)
+            __relevantes.append('"""\n')
+        __messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes))
+        print(__messages)
+        print(len(__messages))
         return await self.__chain.agenerate(messages=[__messages])
     
-    def invoke(self, query: str) -> str:
+    def invoke(self, query: str) -> Union[str, None]:
         """ Chamada para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
-        __docs = self.get_contexto_relevante(query)
+        __docs = self.get_parent_documents(query)
         __docs.sort(key=lambda x: x.metadata['source'] and x.metadata["page"])
-        print(__docs)
         __relevantes = []
         for __doc in __docs:
-            # __source = __doc.metadata['source']
-            __relevantes.append('\n\n')
-            __relevantes.append(__doc.page_content) #self.get_full_document_by_source(__source))
-        # print(__relevantes)
-        __messages = self.__chat_prompt.format_messages(question=query, context=__relevantes)
+            __relevantes.append('\n"""')
+            __relevantes.append(__doc.page_content)
+            __relevantes.append('"""\n')
+        __messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes))
+        print(__messages)
+        print(len(__messages))
         return self.__chain.invoke(__messages).content
-    
-    def get_retriever(self) -> SelfQueryRetriever:
-        return self.__retriever
-    
+  
     def get_chain(self) -> Union[ChatOllama | StrOutputParser | ChatPromptTemplate]:
         return self.__chain
     
@@ -190,12 +168,13 @@ class ComunicadosService():
                 if self.__in_memory:
                     self.__data_base = DocArrayInMemorySearch.from_documents(collection_name="comunicados-sicoob", documents=document_chunks, embedding=self.__embedding_function)
                 else:
-                    self.__chroma_db = Chroma.from_documents(collection_name="comunicados-sicoob", documents=document_chunks, embedding=self.__embedding_function)
+                    self.__chroma_db = None# Chroma.from_documents(collection_name="comunicados-sicoob", documents=document_chunks, embedding=self.__embedding_function)
             else:
                 if self.__in_memory:
                     self.__data_base.add_documents(document_chunks)
                 else:
-                    self.__chroma_db.add_documents(document_chunks)
+                    raise Exception('sem base de dados configurada')
+                    ## self.__chroma_db.add_documents(document_chunks)
     
     def __pdf_to_imagens(self, arquivos: List[str]) -> List[Tuple[str, str, int]]:
         """ Converte os pdfs em imagens e retorna a lista com as imagens geradas """
@@ -211,18 +190,21 @@ class ComunicadosService():
     
     def __gerar_embed_data_base(self, imagens: List[str]) -> None:
         """ Lê os arquivos na lista, gera chunks para os mesmos e inclui na base de dados """
+        # TODO - colocar tudo num documento só
         for __arquivo_original, __image_path, __pagina in tqdm(imagens):
-            if (__pagina > 0):
-                continue
+            if (__pagina > 0): continue
             __conteudo        = self.__img_prc.get_text_from_image(__image_path)
-            __document_chunks = __conteudo
-            
+            __document_chunks = self.__limpar_texto(__conteudo)
+            print("\n# ----------------------------------------- #\n")
+            print(__document_chunks)
+            print("\n# ----------------------------------------- #\n")
             self.__documents.append(
                 Document(
-                    page_content=self.__limpar_texto(__document_chunks),
+                    page_content=__document_chunks,
                     metadata={"source": __arquivo_original, "page": __pagina}
                 )
             )
+        print(f"Quantidade de documento inseridos: {len(self.__documents)}")
     
     def extrair_numero_cci(self, context: str) -> Union[str, None]:
         __splitado  = context.split('\n')
@@ -235,11 +217,11 @@ class ComunicadosService():
     def __converter_texto_para_chunks(self, texto_arquivo: str) -> List[str]:
         return self.__text_splitter.split_text(texto_arquivo)
     
-    def get_contexto_relevante(self, query: str) -> List[Document]:
+    def get_parent_documents(self, query: str) -> List[Document]:
         """ Recupera os textos completos da página do pdf e não o chunk dos subdocs """
-        return self.__full_doc_retriever.invoke(query, kwargs={"verbose": True})
+        return self.__full_doc_retriever.invoke(query, kwargs={"verbose": True, "top_k": 10, "k": 10})
     
-    def obter_contexto_relevante(self, question: str, top_k: int = 2) -> List[Document]:
+    def get_sub_documents(self, question: str, top_k: int = 10) -> List[Document]:
         if self.__in_memory:
             relevant_context = self.__data_base.similarity_search(query=question, k=top_k)
         else:
@@ -257,18 +239,11 @@ class ComunicadosService():
                     __document += __doc.page_content
         return __document
 
-    def reescrever_query(self, question: str, contexto_relevante: str) -> str:
-        output = None
-        messages = [
-            ("system", f"Você é um ótimo assistente chamdo chamado Qwen-2, especialista em reformular perguntas e sua tarefa é reformular as perguntas de usuários fornecidas na rola user. Se você, o assistente não souber o que responder então não escreva nada."),# usando as informações contidas no contexto fornecido na outra role user. Se você, o assistente não souber responder então repita a pergunta orginal apenas, sem acrescentar nada."),
-            ("user", f"Pergunta: {question}"),
-            ("assistant", f""),
-            # ("user", f"Contexto: {contexto_relevante}"),
-        ]
-        output = self.__chain_qr.invoke(messages)
-        return output
-
-    def __limpar_texto(self, t: str) -> str:
-        __t      = t.replace(' \n', '\n').replace('— \n', '— ').replace('—\n', '— ').replace('- \n', '- ').replace('-\n', '- ').replace(') \n', ') ').replace(')\n', ') ').replace('o \n', 'o ').replace('o\n', 'o ').replace('s \n', 's ').replace('s\n', 's ').replace('e \n', 's ').replace('e\n', 'e ').replace('a \n', 'a ').replace('a\n', 'a ').replace('r \n', 'r ').replace('r\n', 'r ').replace('á \n', 'á ').replace('á\n', 'á ').replace('HRESTRITAH', '')
-        _cleaner = CleanSymbolsProcessor()
-        return _cleaner.process_line(__t).replace('  ', ' ').strip().replace('\n', ' ').replace('  ', ' ').strip()
+    def __limpar_texto(self, txt: str) -> str:
+        __t      = txt.replace(' \n', '\n').replace('— \n', '— ').replace('—\n', '— ').replace('- \n', '- ').replace('-\n', '- ').replace(') \n', ') ').replace(')\n', ') ')#.replace('o \n', 'o ').replace('o\n', 'o ').replace('s \n', 's ').replace('s\n', 's ').replace('e \n', 's ').replace('e\n', 'e ').replace('a \n', 'a ').replace('a\n', 'a ').replace('r \n', 'r ').replace('r\n', 'r ').replace('á \n', 'á ').replace('á\n', 'á ').replace('HRESTRITAH', '')
+        __cleaner = CleanSymbolsProcessor()
+        __t = __cleaner.process_line(__t).replace('  ', ' ').strip()
+        formatado = show_paragraphs(__t)
+        ft = '\n\n'.join(formatado)
+        print(ft)
+        return ft.replace("'", "")

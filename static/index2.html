@@ -14,6 +14,29 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <title>...</title>
     <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Segoe UI" !important;
+        }
+
+        html {
+            background: #f2f2f2 !important;
+            /* Root font size for 320px width screens */
+            font-family: "Segoe UI" !important;
+            -webkit-font-smoothing: antialiased !important;
+            -moz-osx-font-smoothing: grayscale !important;
+        }
+
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #root {
+            height: 100%;
+        }
+
         .llm-container-message {
             padding-top: 50px;
             height: 500px;
@@ -25,16 +48,16 @@
             margin-bottom: 10px;
             padding: 10px;
             background-color: rgba(0, 0, 0, 0.05);
-            font-size: 13px;
+            /*font-size: 14px;*/
             border-radius: 8px;
         }
     </style>
 </head>
 
 <body>
-    <header class="jumbotron text-center">
+    <!-- header class="jumbotron text-center">
         <h4>LLM RAG Chatbot - Desenvolvimento</h4>
-    </header>
+    </header -->
     <main class="container-fluid">
         <section class="row">
             <div class="panel panel-default">
@@ -42,8 +65,13 @@
                 <div class="panel-body">
                     <div class="container-fluid">
                         <div class="row">
-                            <div class="col-sm-6">
-                                <form action="/action_page.php" onsubmit="return sendMessage(event)">                                
+                            <div class="col-sm-12 message-container" id="llm-container">
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <form action="/action_page.php" onsubmit="return sendMessage(event)">
                                     <div class="input-group">
                                         <textarea type="text" class="form-control" id="questao"></textarea>
                                         <div class="input-group-btn">
@@ -54,9 +82,7 @@
                                     </div>
                                 </form>
                             </div>
-                            <div class="col-sm-6 message-container" id="llm-container">
 
-                            </div>
                         </div>
                     </div>
 
@@ -98,7 +124,7 @@
                 body: JSON.stringify(payload)
             });
 
-            var reader  = response.body.getReader();
+            var reader = response.body.getReader();
             var decoder = new TextDecoder('utf-8');
 
             document.getElementById("llm-container").innerHTML = '';
@@ -125,7 +151,7 @@
                 } else {
                     document.getElementById("llm-container").innerHTML += token;
                 } */
-                
+
                 return reader.read().then(processResult);
             });
 

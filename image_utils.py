@@ -4,7 +4,8 @@ import fitz
 from typing import List, Union
 import pytesseract
 
-pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
+# pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
+pytesseract.pytesseract.tesseract_cmd = r"C:\\Users\\rogerio.rodrigues\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe"
 
 class ImageProcessing:
 
@@ -18,7 +19,7 @@ class ImageProcessing:
 
     def get_text_from_image(self, img_path: str) -> Union[str, None]:
         img_rgb            = self.get_rgb_from_img(img_path)
-        config_pytesseract = r'--tessdata-dir assets/tessdata -l por --oem 1 --psm 6'
+        config_pytesseract = r'--tessdata-dir assets/tessdata -l por --oem 3 --psm 6'
         text               = pytesseract.image_to_string(image=img_rgb, lang='por', config=config_pytesseract)
         return text
 
@@ -26,11 +27,12 @@ class ImageProcessing:
         pdf = fitz.open(img_path)
         imagens_criadas    = []
         for page in pdf:
-            pixmap         = page.get_pixmap(dpi=300)
+            pixmap         = page.get_pixmap(dpi=1200)
             new_img_folder = img_folder.replace('.png', '_' + str(page.number) + '.png')
             
             pixmap.pil_save(new_img_folder, optimize=True)
-            # new_img_folder = self.invert_color(new_img_folder)
+            new_img_folder = self.invert_color(new_img_folder)
+            new_img_folder = self.otsu_threshold(new_img_folder)
             imagens_criadas.append((new_img_folder, page.number))
         return imagens_criadas
 
@@ -76,8 +78,9 @@ class ImageProcessing:
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
         
-        new_img_path = img_path.replace('.png', 'OTSU.png')
+        new_img_path = img_path.replace('.png', '_OTSU.png')
         cv2.imwrite(new_img_path, otsu)
+        return new_img_path
 
     def adaptive_threshold(selfs, img_path):
         # Limiarização usando a média de pixels na região

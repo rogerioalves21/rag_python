@@ -40,6 +40,7 @@ SINGLE_QUOTES = (
     '´',
 )
 DASHES = (
+    'º',
     '&',
     '—',  # em dash
     '–',  # en dash
@@ -164,6 +165,52 @@ QUESTIONS = (
 RE_SPACE_DOT = re.compile(r'\s+\.\s*')
 RE_MANY_DASH = re.compile(r'[\s\-]{2,}')
 
+PONTUACAO = "!\"#$&'*@\\[\\]^`{|}~"
+
+class Paragraphs:
+    def __init__(self, __texto: str, separator='\n'):
+        self.seq = __texto.splitlines('\n')
+
+        self.line_num = 0    # current index into self.seq (line number)
+        self.para_num = 0    # current index into self (paragraph number)
+
+        # Ensure that separator string includes a line-end character at the end
+        if separator[-1:] != '\n': separator += '\n'
+        self.separator = separator
+
+    def __getitem__(self, index):
+        if index != self.para_num:
+            raise Exception("Only sequential access supported")
+        self.para_num += 1
+        # Start where we left off and skip 0+ separator lines
+        while 1:
+        # Propagate IndexError, if any, since we're finished if it occurs
+            line = self.seq[self.line_num]
+            self.line_num += 1
+            if line != self.separator: break
+        # Accumulate 1+ nonempty lines into result
+        result = [line]
+        while 1:
+        # Intercept IndexError, since we have one last paragraph to return
+            try:
+                # Let's check if there's at least one more line in self.seq
+                line = self.seq[self.line_num]
+            except IndexError:
+                # self.seq is finished, so we exit the loop
+                break
+            # Increment index into self.seq for next time
+            self.line_num += 1
+            if line == self.separator: break
+            result.append(line)
+        return ''.join(result)
+
+def show_paragraphs(text: str, numpars=1000):
+    output = []
+    pp = Paragraphs(text)
+    for p in pp:
+        output.append(repr(p).replace('\\n', ' '))
+        if pp.para_num>numpars: break
+    return output
 
 class CleanSymbolsProcessor():
     def __init__(self):
@@ -171,7 +218,23 @@ class CleanSymbolsProcessor():
         self.inicio = None
 
     def process_line(self, line: str) -> Optional[str]:
-        line = line.replace('#RESTRITA#', '#RESTRITA#')
+        line = line.replace('"', '')
+        line = line.replace('S T11', 'STI')
+        line = line.replace('f\'ª-..', '')
+        line = line.replace('8 \'-):âê\'', '')
+        line = line.replace('S l COOB', 'SICOOB')
+        line = line.replace('©', '')
+        line = line.replace('S \' COOB', 'SICOOB')
+        line = line.replace('WV', 'IV')
+        line = line.replace('WV', 'IV')
+        line = line.replace('S\'COOB', 'SICOOB')
+        line = line.replace('S5\\.\\.', '5\\.')
+        line = line.replace('AÀ', 'À')
+        line = line.replace('SiIsbr', 'Sisbr')
+        line = line.replace('4,.', '4.')
+        line = line.replace('vs I COOB', 'SICOOB')
+        line = line.replace('HRESTRITA+', '')
+        line = line.replace('#RESTRITA#', '')
         line = line.replace('Omecanismo', 'O mecanismo')
         line = line.replace('Afimde', 'A fim de')
         line = line.replace('. —', '. ')
@@ -180,8 +243,13 @@ class CleanSymbolsProcessor():
         line = line.replace('aE)', '')
         line = line.replace('HRESTRITAA', '')
         line = line.replace('HRESTRITAR', '')
+        line = line.replace('HRESTRITAL', '')
+        line = line.replace('S5..', '5.')
+        line = line.replace('Tf.', '7.')
+        line = line.replace(' COS ', ' CCS ')
         line = line.replace('CCs', 'CCS')
         line = line.replace('CcCS', 'CCS')
+        line = line.replace('CCOI', 'CCI')
         line = line.replace(' H\r', '')
         line = line.replace('à a', 'a')
         line = line.replace('paraos', 'para os')
@@ -197,10 +265,10 @@ class CleanSymbolsProcessor():
         line = line.replace('|, I', 'I, I')
         line = line.replace('I, II, IN', 'I, II, III')
         for dq_symbol in DOUBLE_QUOTES:
-            line = line.replace(dq_symbol, '"')
+            line = line.replace(dq_symbol, '')
 
         for sq_symbol in SINGLE_QUOTES:
-            line = line.replace(sq_symbol, "'")
+            line = line.replace(sq_symbol, "")
 
         for d_symbol in DASHES:
             line = line.replace(d_symbol, '-')
@@ -217,6 +285,10 @@ class CleanSymbolsProcessor():
 
         for q_symbol in QUESTIONS:
             line = line.replace(q_symbol, '?')
+
+        
+        # table = str.maketrans('', '', PONTUACAO)
+        # line  = ''.join([w.translate(table) for w in line])
 
         # duplicate dashes
         if '-' in line:

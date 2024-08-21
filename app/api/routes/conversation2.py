@@ -111,14 +111,7 @@ async def send_message(question: str, relevant_docs: str) -> AsyncIterable[str]:
         __callback.done.set()
     await __task
 
-@router.post("/conversation-tiny")
+@router.post("/conversation-tinty")
 def conversation(payload: Union[ConversationPayload | None] = None) -> Any:
-    __relevant_docs = None #rag_service.obter_contexto_relevante(payload.properties.question.description.strip(), 2)
-    __sources = dict()
-    for doc in __relevant_docs:
-        __sources[doc.metadata['source']] = list()
-    for doc in __relevant_docs:
-        __sources[doc.metadata['source']].append(doc.page_content)
-    __contexto_relevante = tratar_contexto(__sources)
-    __response           = send_message(payload.properties.question.description.strip(), __contexto_relevante)
+    __response = send_message(payload.properties.question.description.strip())
     return StreamingResponse(__response, media_type="text/event-stream")
