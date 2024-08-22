@@ -29,7 +29,6 @@ class ComunicadoTextSplitter(TextSplitter):
         """ Implementação do método abstrato da classe TextSplitter """
         __text = tratar_linhas_texto(text)
         chunks = []
-        print(f"CHUNK_SIZE: {self._chunk_size}")
         while len(__text) > 0:
             if len(__text) > self._chunk_size:
                 limit = __text.rfind(' ', 0, self._chunk_size)

@@ -13,8 +13,8 @@ from typing import Iterator, List, Union
 from rich import print
 from clean_symbols import CleanSymbolsProcessor, show_paragraphs
 
-pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
-# pytesseract.pytesseract.tesseract_cmd = r"C:\\Users\\rogerio.rodrigues\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe"
+# pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
+pytesseract.pytesseract.tesseract_cmd = r"C:\\Users\\rogerio.rodrigues\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe"
 
 class ImageProcessing:
 
@@ -41,13 +41,12 @@ class ImageProcessing:
         return img_rgb
 
     def get_text_from_image(self, img_path: str) -> Union[str, None]:
-        img_rgb            = self.get_rgb_from_img(img_path)
-        config_pytesseract = r'-l por --oem 3 --psm 6'#r'--tessdata-dir assets/tessdata -l por --oem 1 --psm 6 -c preserve_interword_spaces=2 output-preserve-enabled'
+        img_rgb            = cv2.imread(img_path) # self.get_rgb_from_img(img_path)
+        config_pytesseract = r'--tessdata-dir assets/tessdata -l por --oem 3 --psm 6'#r'--tessdata-dir assets/tessdata -l por --oem 1 --psm 6 -c preserve_interword_spaces=2 output-preserve-enabled'
         text               = pytesseract.image_to_string(image=img_rgb, lang='por', config=config_pytesseract)
         words_remove       = self.find_words_remove(self.get_image_data(img_rgb))
         for w in words_remove:
             text = text.replace(w, '')
-        print(text)
         return text
 
     def pdf_to_image(self, img_path: str, img_folder: str) -> List:
@@ -58,6 +57,7 @@ class ImageProcessing:
             new_img_folder = img_folder.replace('.png', '_' + str(page.number) + '.png')
             pixmap.pil_save(new_img_folder, optimize=True)
             imagens_criadas.append((new_img_folder, page.number))
+            break # lê somente a primeira página
         return imagens_criadas
 
     def to_gray(self, img_path):
@@ -97,72 +97,42 @@ class ImageProcessing:
         val, otsu = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
         print('Limiar calculado (cada img possuirá um limiar diferente: ', val)
-        # cv2.imshow('THRESH_OTSU', otsu)
-
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-        
         new_img_path = img_path.replace('.png', '_OTSU.png')
         cv2.imwrite(new_img_path, otsu)
         return new_img_path
 
     def adaptive_threshold(selfs, img_path):
-        # Limiarização usando a média de pixels na região
         img = cv2.imread(img_path)
-        # cv2.imshow('Original Image', img)
-
-        # cv2.waitKey(0)
 
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         val, otsu = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
         print('Limiar calculado (cada img possuirá um limiar diferente: ', val)
-        # cv2.imshow('THRESH_OTSU', otsu)
-
-        # cv2.waitKey(0)
-
         adapt_media = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 9)
-        # cv2.imshow('ADAPT_MEDIA', adapt_media)
-
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
         
         new_img_path = img_path.replace('.png', 'THRESH2.png')
         cv2.imwrite(new_img_path, adapt_media)
 
     def get_image_data(self, img_rgb):
-        config_pytesseract = f'-l por --oem 3 --psm 6 '# -c preserve_interword_spaces=1 output-preserve-enabled=True'
+        config_pytesseract = r'--tessdata-dir assets/tessdata -l por --oem 3 --psm 6'# -c preserve_interword_spaces=1 output-preserve-enabled=True'
         return pytesseract.image_to_data(image=img_rgb, lang='por', config=config_pytesseract, output_type=Output.DICT)
 
     def adaptive_gaussian_threshold(self, img_path):
-        #Menos ruídos - Testar com imagens com sombras
         img = cv2.imread(img_path)
-        # cv2.imshow('Original Image', img)
-        # cv2.waitKey(0)
-
+ 
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         adapt_gaussian = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 9)
-        # cv2.imshow('ADAPT_MEDIA_GAUS', adapt_gaussian)
-
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
+        
         new_img_path = img_path.replace('.png', 'GAUS.png')
         cv2.imwrite(new_img_path, adapt_gaussian)
 
     def invert_color(self, img_path: str) -> str:
         img = cv2.imread(img_path)
-        # cv2.imshow('Original Image', img)
-        # cv2.waitKey(0)
 
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        # print(gray)
-        # cv2.waitKey(0)
-
         invert = 255 - gray
 
-        # cv2.imshow('Imagem invertida', invert)
-        # cv2.waitKey(0)
         new_img_path = img_path.replace('.png', 'INVERT.png')
         cv2.imwrite(new_img_path, invert)
         return new_img_path

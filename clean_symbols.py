@@ -219,6 +219,8 @@ class CleanSymbolsProcessor():
 
     def process_line(self, line: str) -> Optional[str]:
         line = line.replace('"', '')
+        line = line.replace('S \' CO OB', 'SICOOB')
+        line = line.replace('vSICOOB', 'SICOOB')
         line = line.replace('Vs À COOB', 'SICOOB')
         line = line.replace('S T11', 'STI')
         line = line.replace('f\'ª-..', '')

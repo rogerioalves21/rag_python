@@ -7,9 +7,9 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.documents import Document
 from langchain_community.vectorstores import DocArrayInMemorySearch
 from langchain.memory import ConversationBufferMemory
-from langchain.chains import ConversationalRetrievalChain
+from langchain.chains.conversational_retrieval.base import ConversationalRetrievalChain
 # from langchain_chroma import Chroma
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate
 from image_utils import ImageProcessing, PyTesseractLoader
 import re
 from langchain_core.prompts import ChatPromptTemplate
@@ -72,12 +72,6 @@ class ComunicadosService():
             metric="euclidian_dist"
         )
         
-        # Define retriever
-        __retriever = self.__data_base.as_retriever(
-            search_type='mmr',
-            search_kwargs={'k':2, 'fetch_k':4}
-        )
-        
         self.__full_doc_retriever = ParentDocumentRetriever(
             vectorstore=self.__data_base, #self.__chroma_db,
             docstore=self.__store,
@@ -85,6 +79,11 @@ class ComunicadosService():
             search_kwargs={"k": 10}
         )
         self.__chain.verbose = True
+        
+        # __retriever = self.__full_doc_retriever.as_retriever(
+        #    search_type='mmr',
+        #    search_kwargs={'k': 10, 'fetch_k': 10}
+        #)
         
         # memória para conversação. TODO - criar isso para multi-usuário
         __memory = ConversationBufferMemory(
@@ -96,22 +95,23 @@ class ComunicadosService():
         # Setup LLM and QA chain
         self.__qa_chain = ConversationalRetrievalChain.from_llm(
             llm=self.__chain,
-            retriever=__retriever,
+            callbacks=self.__callbacks,
+            retriever=self.__full_doc_retriever,
             memory=__memory,
             return_source_documents=True,
             verbose=True
         )
-        
+
         # popula a store e vectstore
         self.__obter_conteudo_arquivo()
         print(list(self.__store.yield_keys()))
     
     async def agenerate_memory(self, query: str) -> Any:
         """ Chamada streaming para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
-        __sub_docs = self.get_sub_documents(clean_query(query), 20)
-        __sub_docs.reverse()
-        print(f"SUB-DOCS\n")
-        print(__sub_docs)
+        # __sub_docs = self.get_sub_documents(clean_query(query), 4)
+        # __sub_docs.reverse()
+        # print(f"SUB-DOCS\n")
+        # print(__sub_docs)
         __docs = self.get_parent_documents(clean_query(query))
         print(f"FUL-DOCS\n")
         print(__docs)
@@ -122,14 +122,14 @@ class ComunicadosService():
             __relevantes.append(__doc.page_content)
             __relevantes.append('"""\n')
         __messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes))
-        return await self.__qa_chain.agenerate(messages=[__messages])
+        self.__qa_chain.combine_docs_chain.llm_chain.prompt.messages = __messages
+        return await self.__qa_chain.ainvoke(
+                        {"question": query},
+                        {"callbacks": self.__callbacks}
+                    )
     
     async def agenerate(self, query: str) -> Any:
         """ Chamada streaming para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
-        __sub_docs = self.get_sub_documents(clean_query(query), 20)
-        __sub_docs.reverse()
-        print(f"SUB-DOCS\n")
-        print(__sub_docs)
         __docs = self.get_parent_documents(clean_query(query))
         print(f"FUL-DOCS\n")
         print(__docs)
@@ -144,15 +144,20 @@ class ComunicadosService():
     
     def invoke(self, query: str) -> Union[str, None]:
         """ Chamada para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
-        __docs = self.get_parent_documents(query)
-        __docs.sort(key=lambda x: x.metadata['source'] and x.metadata["page"])
+        __docs = self.get_sub_documents(clean_query(query))
+        print(f"SUB-DOCS\n")
+        print(__docs)
+        __docs.sort(key=lambda x: x.metadata['source'])
         __relevantes = []
         for __doc in __docs:
             __relevantes.append('\n"""')
             __relevantes.append(__doc.page_content)
             __relevantes.append('"""\n')
         __messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes))
-        return self.__chain.invoke(__messages).content
+        self.__qa_chain.combine_docs_chain.llm_chain.prompt.messages = __messages
+        retorno = self.__qa_chain.invoke(query)
+        print(retorno)
+        return retorno['answer']
   
     def get_chain(self) -> Union[ChatOllama | StrOutputParser | ChatPromptTemplate]:
         return self.__chain
@@ -210,7 +215,7 @@ class ComunicadosService():
     
     def get_parent_documents(self, query: str) -> List[Document]:
         """ Recupera os textos completos da página do pdf e não o chunk dos subdocs """
-        return self.__full_doc_retriever.invoke(query, kwargs={"verbose": True, "top_k": 10, "k": 10})
+        return self.__full_doc_retriever.invoke(query, kwargs={"verbose": True, "top_k": 4, "k": 4})
     
     def get_sub_documents(self, question: str, top_k: int = 10) -> List[Document]:
         if self.__in_memory:
