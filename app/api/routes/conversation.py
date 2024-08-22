@@ -33,7 +33,7 @@ llm_streaming = ChatOllama(
     num_predict=2000
 )
 
-rag_service = # ComunicadosService(embedding_function=embeddings, text_splitter=text_splitter, chain=llm_streaming, chain_qr=None, system_prompt=system_prompt, folder='./files/pdfs/', in_memory=True, chat_prompt=chat_prompt)
+rag_service = None# ComunicadosService(embedding_function=embeddings, text_splitter=text_splitter, chain=llm_streaming, chain_qr=None, system_prompt=system_prompt, folder='./files/pdfs/', in_memory=True, chat_prompt=chat_prompt)
 
 def send_message(question: str) -> str:
     return rag_service.invoke(query=question)
