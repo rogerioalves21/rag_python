@@ -18,7 +18,8 @@ from langchain.retrievers import ParentDocumentRetriever
 from langchain.storage import InMemoryStore
 from clean_symbols import CleanSymbolsProcessor, show_paragraphs
 from rich import print
-from app.utils import tratar_linhas_texto, clean_query
+from app.api.prepdoclib.textparser import TextParser
+from app.api.prepdoclib.comunicado_splitter import clean_query
 
 all_letters = " abcdefghijlmonpqrstuvxyzABCDEFGHIJLMNOPQRSTUVXYZ.,;'-0123456789"
 def unicode_to_ascii(s: str) -> str:
@@ -48,6 +49,7 @@ class ComunicadosService():
         callbacks: Union[List| None] = None,
         chat_prompt: Union[ChatPromptTemplate, None] = None
     ):
+        self.__text_parser        = TextParser()
         self.__data_base          = None
         self.__chroma_db          = None
         self.__embedding_function = embedding_function
@@ -147,16 +149,21 @@ class ComunicadosService():
         __docs = self.get_sub_documents(clean_query(query))
         print(f"SUB-DOCS\n")
         print(__docs)
+        
+        # obtêm o contexto
         __docs.sort(key=lambda x: x.metadata['source'])
         __relevantes = []
         for __doc in __docs:
             __relevantes.append('\n"""')
             __relevantes.append(__doc.page_content)
             __relevantes.append('"""\n')
+        
+        # cria as mensagens através do chat prompt com system context e query
         __messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes))
+        # passa para o retrivier conversacional as mensagens
         self.__qa_chain.combine_docs_chain.llm_chain.prompt.messages = __messages
-        retorno = self.__qa_chain.invoke(query)
-        print(retorno)
+        # invoca a cadeia de chamadas com histórico
+        retorno    = self.__qa_chain.invoke(query)
         return retorno['answer']
   
     def get_chain(self) -> Union[ChatOllama | StrOutputParser | ChatPromptTemplate]:

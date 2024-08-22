@@ -11,7 +11,7 @@ from app.api.services.comunicados_service import ComunicadosService
 from fastapi.responses import StreamingResponse
 from langchain.callbacks import AsyncIteratorCallbackHandler
 from rich import print
-from app.utils import ComunicadoTextSplitter
+from app.api.prepdoclib.comunicado_splitter import ComunicadoTextSplitter
 
 MODEL_Q2      = 'gemma2:2b-instruct-q4_K_M'
 EMBD          = 'mxbai-embed-large'
@@ -38,7 +38,7 @@ llm_streaming = ChatOllama(
     num_predict=2000,
     callbacks=[callback]
 )
-rag_service = None# ComunicadosService(embedding_function=embeddings, text_splitter=text_splitter, chain=llm_streaming, chain_qr=None, system_prompt=system_prompt, folder='./files/pdfs/', in_memory=True, callbacks=[callback], chat_prompt=chat_prompt)
+rag_service = ComunicadosService(embedding_function=embeddings, text_splitter=text_splitter, chain=llm_streaming, chain_qr=None, system_prompt=system_prompt, folder='./files/pdfs/', in_memory=True, callbacks=[callback], chat_prompt=chat_prompt)
 
 async def send_message(question: str) -> AsyncIterable[str]:
     async def wrap_done(fn: Awaitable, event: asyncio.Event):

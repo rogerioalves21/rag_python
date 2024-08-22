@@ -12,14 +12,14 @@ from langchain_community.document_loaders.pdf import BasePDFLoader
 from typing import Iterator, List, Union
 from rich import print
 from clean_symbols import CleanSymbolsProcessor, show_paragraphs
+from app.api.prepdoclib.textparser import TextParser
 
 # pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
 pytesseract.pytesseract.tesseract_cmd = r"C:\\Users\\rogerio.rodrigues\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe"
 
 class ImageProcessing:
-
     def __init__(self):
-        print('Image Processing')
+        print("image-processing")
 
     def find_words_remove(self, img_data):
         __words_remove = []
@@ -142,6 +142,7 @@ class PyTesseractParser(BaseBlobParser):
     def __init__(self, pdf_path: str):
         self._img_processing = ImageProcessing()
         self._pdf_path       = pdf_path
+        self._text_parser    = TextParser()
 
         self._all_letters = " abcdefghijlmonpqrstuvxyzABCDEFGHIJLMNOPQRSTUVXYZ.,;'-0123456789"
     
@@ -163,8 +164,9 @@ class PyTesseractParser(BaseBlobParser):
         return __text
 
     def __limpar_texto(self, txt: str) -> str:
+        __txt = self._text_parser.parse(content=txt)
         __cleaner = CleanSymbolsProcessor()
-        __t = __cleaner.process_line(txt).strip()
+        __t       = __cleaner.process_line(__txt).strip()
         return self.__tratar_linhas_texto(__t)
 
     def lazy_parse(self, blob: Union[Blob, None] = None) -> Iterator[Document]:
@@ -195,7 +197,7 @@ class PyTesseractLoader(BasePDFLoader):
         yield from self.parser.parse(None)
 
 if __name__ == '__main__':
-    file_path = "./files/pdfs/CCI1029.pdf"
+    file_path = "./files/pdfs/comprovante.pdf"
     loader    = PyTesseractLoader(file_path)
     documents = loader.load()
     print(documents)
