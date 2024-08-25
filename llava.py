@@ -1,37 +1,57 @@
-import fitz
-import pytesseract
+import asyncio
+from ollama import AsyncClient
+import base64
+import os
+import io
 from PIL import Image
-from pytesseract import Output
-import cv2
 import ollama
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\\Users\\rogerio.rodrigues\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe"
+def get_image(image_path):
+    with open(image_path, 'rb') as file:
+        return file.read()
 
-def get_rgb_from_img(img_path):
-    image_bgr = cv2.imread(img_path)
-    img_rgb   = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
-    return img_rgb
+def encode_image(image_path):
+    """Getting the base64 string"""
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode("utf-8")
 
-def get_text_from_image(img_path):
-    img_rgb = get_rgb_from_img(img_path)
-    config_pytesseract = '--tessdata-dir assets/tessdata'
-    text = pytesseract.image_to_string(image=img_rgb, lang='por', config=config_pytesseract)
-    return text
+def generate_text(instruction, file_path):
+    result = ollama.generate(
+        model='llava:7b-v1.6-vicuna-q2_K',
+        prompt=instruction,
+        images=[file_path],
+        stream=False
+    )['response']
+    img=Image.open(file_path, mode='r')
+    img = img.resize([int(i/1.2) for i in img.size])
+    print(img) 
+    for i in result.split('.'):
+        print(i, end='', flush=True)
 
-if __name__ == "__main__":
-    res = ollama.chat(
-        model='bakllava',
+async def main():
+    #instruction = "Descreva a imagem." 
+    #file_path = 'C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/files/to_img/comprovante_0.png'
+    #generate_text(instruction, file_path)
+    
+    #import sys; sys.exit(0)
+    
+    b64 = get_image('C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/files/to_img/cci1010_0.png')
+    #with Image.open('C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/files/to_img/cci1202_0.png','rb') as f:
+    #    b64 = f
+    async for part in await AsyncClient().chat(
+        model='moondream:latest',
         messages=[
-            #{
-            #    'role': "system",
-            #    "content": "Você é um sistema OCR que apenas responde perguntas relacionadas a imagem forncecida. Responda as perguntas do usuário sempre no idioma que ele utilizou."
-            #},
             {
                 'role': 'user',
-                'content': 'Descreve essa imagem. O que está escrito nela?',
-                'images': ['C:/mnt/CCI1202_0.png']
+                'content': 'Question: Extrai o texto da imagem.\n\nAnswer:',
+                'images': [b64]
             }
         ],
-        keep_alive='1h'
-    )
-    print(res['message']['content'])
+        keep_alive='1h',
+        stream=True,
+    ):print(part['message']['content'], end='', flush=True)
+
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+    

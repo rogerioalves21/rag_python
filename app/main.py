@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from app.utils import cors_origins
 from app.api.main import api_router
@@ -13,6 +14,8 @@ app = FastAPI(
     debug=True,
     title='lid-sisbr-backoffice'
 )
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # habilita o CORS
 app.add_middleware(

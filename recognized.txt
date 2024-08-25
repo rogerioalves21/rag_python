@@ -1,0 +1,156 @@
+YSICOOB
+
+| Carta-Circular
+de Instrução
+
+
+|Brasília/DF, 31 de julho de 2024.
+
+'ICCI — 1.010/2024 - CCS
+
+| Às entidades do Sicoob.
+
+| Evolução da funcionalidade Multicálculo Automóvel no Sistema Integrado para Gestão e
+
+'IAquisíção de Seguros do Sicoob (SicoobSigas) do Sisbr 3.0, referente às mudanças na
+
+'Iintegração das seguradoras Porto e Azul.
+
+| Senhores(as),
+
+linformamos a
+
+'|e Azul,
+
+Iseguradoras
+
+'Iíntegração das
+
+'Imudanças
+
+'| Porto
+
+'|Com
+
+.
+
+na)|
+
+as|
+
+'Ievolução da funcionalidade Multicálculo Automóvel no SicoobSigas do Sisbr 3.0,
+
+| realizada em 24/7/2024, contemplando as seguintes alterações nas companhias:
+
+'Ia partir de 24/7/2024, os cálculos realizados não serão salvos. Após essa data,
+
+[a)|
+
+|será necessário criar uma simulação para calcular ou contratar seguros;
+
+'|23/8/2024,
+
+| de|
+
+|de|
+
+|b) |
+
+iserá
+
+'Ivigência
+
+Irenovações
+
+'Ipa rtir
+
+| seguros
+
+a
+
+| -com
+
+| nas
+
+'Iapresentado um pacote fechado de condição exclusiva de cada seguradora.
+
+INão será válido o recálculo ou ajustes de coberturas;
+
+Ipara OS casos em que há uma recusa no produto tradicional, disponibilizamos
+
+1 o)|
+
+| condições
+
+| Todos,
+
+idenominada
+
+'Ialternativa,
+
+| oferta
+
+| Cotação para
+
+| com
+
+uma
+
+'Iapresentadas
+
+| oferta,
+
+'Icooperado.
+
+icada
+
+Iadequadas
+
+'|serão
+
+'|Nessa
+
+as|
+
+'Ipara
+
+| coberturas de Incêndio, Roubo e Furto, Compreensiva Fipe de até 80% (oitenta
+
+'Ipor cento) ou RCF. Não será válido recálculo ou ajustes de coberturas;
+
+| Condições
+
+'Idísponível
+
+[ d) |
+
+Iopção
+
+iestá
+
+'| Prêmio
+
+| Especiais,
+
+'|Cota
+
+'| Desconto
+
+na)|
+
+El
+
+Iconforme o saldo acumulado da corretora. O desconto não é aplicável para o
+
+'Ipacote de renovação;
+
+Iquando exigida a vistoria prévia pela seguradora, será apresentada na tela de
+
+l e)|
+
+'Ibaixar o aplicativo de
+
+|contratação a seguinte mensagem, com o /!ink para
+
+| HRESTRITAH
+

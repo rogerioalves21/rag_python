@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/showdown@1.9.0/dist/showdown.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <title>...</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Segoe UI" !important;
+        }
+
+        html {
+            background: #f2f2f2 !important;
+            /* Root font size for 320px width screens */
+            font-family: "Segoe UI" !important;
+            -webkit-font-smoothing: antialiased !important;
+            -moz-osx-font-smoothing: grayscale !important;
+        }
+
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #root {
+            height: 100%;
+        }
+
+        .llm-container-message {
+            padding-top: 50px;
+            height: 500px;
+            color: #fff;
+            background-color: #009688;
+        }
+
+        .message-container {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.05);
+            /*font-size: 14px;*/
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- header class="jumbotron text-center">
+        <h4>LLM RAG Chatbot - Desenvolvimento</h4>
+    </header -->
+    <main class="container-fluid">
+        <section class="row">
+            <div class="panel panel-default">
+                <div class="panel-heading">LLM RAG Chatbot - Desenvolvimento</div>
+                <div class="panel-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-sm-12 message-container" id="llm-container">
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <form action="/action_page.php" onsubmit="return sendMessage(event)">
+                                    <div class="input-group">
+                                        <textarea type="text" class="form-control" id="questao"></textarea>
+                                        <div class="input-group-btn">
+                                            <button class="btn" type="submit">
+                                                <i class="glyphicon glyphicon-send"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+    <footer class="row"></footer>
+    <script>
+        document.getElementById("llm-container").innerHTML = marked.parse('# Marked in browser\n\nRendered by **marked**.');
+        async function sendMessage(e) {
+            e.preventDefault();
+
+            const pergunta = document.getElementById("questao").value;
+            const contexto = ""// document.getElementById("contexto").value;
+            const payload = {
+                "type": "object",
+                "properties": {
+                    "question": {
+                        "type": "string",
+                        "description": pergunta
+                    },
+                    "service": {
+                        "type": "string",
+                        "description": "--"
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "Llama3"
+                    }
+                }
+            };
+            var response = await fetch('http://localhost:8000/api/v1/conversation-parent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            var reader = response.body.getReader();
+            var decoder = new TextDecoder('utf-8');
+
+            document.getElementById("llm-container").innerHTML = '';
+
+            var tokens = []
+
+            var converter = new showdown.Converter();
+
+            let retorno = await reader.read()
+                .then(function processResult(result) {
+                    console.log(result.done);
+                    if (result.done) return;
+
+                    let token = decoder.decode(result.value);
+
+                    if (token.endsWith('!\n') || token.endsWith('?\n') || token.endsWith(':\n')) {
+                        tokens.push(token + '<br/>');
+                    } else {
+                        tokens.push(token);
+                    }
+
+                    // let html_content = converter.makeHtml(tokens.join(""));
+                    document.getElementById("llm-container").innerHTML = marked.parse(tokens.join(""));
+
+                    /* if (token.endsWith('!') || token.endsWith('?')) {
+                        document.getElementById("llm-container").innerHTML += token + "<br>";
+                    } else {
+                        document.getElementById("llm-container").innerHTML += token;
+                    } */
+
+                    return reader.read().then(processResult);
+                });
+
+        }
+    </script>
+</body>
+
+</html>

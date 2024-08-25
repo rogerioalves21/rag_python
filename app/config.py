@@ -5,12 +5,16 @@ from typing_extensions import Annotated
 from app.models import User
 import os
 import logging
+from app.api.services.comunicados_service import ComunicadosService
 
 logger = logging.getLogger(__name__)
 
 # VARIÁVEIS PARA VALIDAÇÃO DO TOKEN RHSSO
 api_userinfo = 'https://api-sisbr-ti.homologacao.com.br/user-info/v2/userinfo'
 client_id = 'lid'
+
+def get_rag_service() -> Union[ComunicadosService, None]:
+    return None
 
 def create_user(payload: str) -> User:
     return User(
