@@ -16,8 +16,8 @@ from clean_symbols import CleanSymbolsProcessor
 from app.api.prepdoclib.textparser import TextParser
 from concurrent.futures import ThreadPoolExecutor, wait, as_completed
 
-pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
-# pytesseract.pytesseract.tesseract_cmd = r"C:\\Users\\rogerio.rodrigues\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe"
+# pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
+pytesseract.pytesseract.tesseract_cmd = r"C:/Users/rogerio.rodrigues/AppData/Local/Programs/Tesseract-OCR/tesseract.exe"
 
 os.environ['OMP_THREAD_LIMIT'] = '4'
 
@@ -55,7 +55,7 @@ class ImageProcessing:
         return text
 
     def __task(self, __page: Page, __page_number: int, __img_path: str) -> Union[Tuple[int, str], None]:
-        __pixmap: Page       = __page.get_pixmap(dpi=500)
+        __pixmap: Page       = __page.get_pixmap(dpi=550)
         # __img                = ImagePIL.frombytes("RGB", [__pixmap.width, __pixmap.height], __pixmap.samples)
         
         __img                = self.to_gray(__pixmap, __img_path, __page_number)
@@ -120,15 +120,19 @@ class ImageProcessing:
         cv2.destroyAllWindows()
 
     # Limiarização com o método de otsu. O valor do threshold será calculado automaticamente
-    def otsu_threshold(self, img_path):
-        img       = cv2.imread(img_path)
+    def otsu_threshold(self, __pixmap: Page, __img_path: str, __page: int):
+        __path_foto = __img_path.replace('pdfs', 'to_img')
+        __path_foto = __path_foto.replace('.pdf', f'_{__page}.png')
+        print(f"CAMINHO FOTO: {__path_foto}")
+        __pixmap.pil_save(__path_foto, optimize=True)
+        img       = cv2.imread(__path_foto)
         gray      = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         val, otsu = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
         print('Limiar calculado (cada img possuirá um limiar diferente: ', val)
-        new_img_path = img_path.replace('.png', '_OTSU.png')
+        new_img_path = __path_foto.replace('.png', '_OTSU.png')
         cv2.imwrite(new_img_path, otsu)
-        return new_img_path
+        return cv2.imread(new_img_path)
 
     def adaptive_threshold(selfs, img_path):
         img = cv2.imread(img_path)

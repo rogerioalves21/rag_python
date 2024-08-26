@@ -10,7 +10,10 @@ from langchain_core.documents import Document
 from langchain_community.vectorstores import DocArrayInMemorySearch
 from langchain.memory import ConversationBufferMemory
 from langchain.chains.conversational_retrieval.base import ConversationalRetrievalChain
-from langchain_chroma import Chroma
+try:
+    from langchain_chroma import Chroma
+except:
+    print("não existe o chroma instalado")
 from langchain_core.prompts import ChatPromptTemplate
 from image_utils import ImageProcessing, PyTesseractLoader
 import re
@@ -33,6 +36,8 @@ def unicode_to_ascii(s: str) -> str:
 def normalize_string(s: str) -> str:
     s = unicode_to_ascii(s.lower().strip())
     return s.strip()
+
+data_base = None
 
 class ComunicadosService():
     """ Classe responsável por converter arquivos PDF em Imagens.
@@ -70,28 +75,36 @@ class ComunicadosService():
 
         __chroma_folder = '/home/rogerio_rodrigues/python-workspace/rag_python/collection/'
         # self.__store = LocalFileStore(root_path='C:/Users/rogerio.rodrigues/Documents/workspace_python/doc_store/')
-        self.__chroma_db = Chroma(
-            collection_name="comunicados-sicoob",
-            embedding_function=self.__embedding_function,
-            persist_directory=__chroma_folder,
-            # client_settings={"is_persistent": True, "allow_reset": True, "persist_directory": __chroma_folder}
-        )
-        print(self.__chroma_db)
-        
+        if not self.__in_memory:
+            self.__chroma_db = Chroma(
+                collection_name="comunicados-sicoob",
+                embedding_function=self.__embedding_function,
+                persist_directory=__chroma_folder,
+            )
+            print(self.__chroma_db)
+
         self.__data_base = DocArrayInMemorySearch.from_params(
             embedding=self.__embedding_function,
             metric="euclidian_dist",
         )
-        
-        self.__full_doc_retriever = ParentDocumentRetriever(
-            vectorstore=self.__chroma_db,
-            docstore=self.__store,
-            child_splitter=self.__text_splitter,
-            search_kwargs={"k": 10}
-        )
+
+        if self.__in_memory:
+            self.__full_doc_retriever = ParentDocumentRetriever(
+                vectorstore=self.__data_base,
+                docstore=self.__store,
+                child_splitter=self.__text_splitter,
+                search_kwargs={"k": 10}
+            )
+        else:
+            self.__full_doc_retriever = ParentDocumentRetriever(
+                vectorstore=self.__chroma_db,
+                docstore=self.__store,
+                child_splitter=self.__text_splitter,
+                search_kwargs={"k": 10}
+            )
         self.__chain.verbose = True
         
-        # trata o prompti after formatting
+        # trata o prompt after formatting
         __condense_question_template = """
             Return text in the original language of the follow up question.
             If the follow up question does not need context, return the exact same text back.
@@ -116,6 +129,11 @@ class ComunicadosService():
 
     def load_data(self) -> None:
         """ popula a store e vectstore """
+        data_base = DocArrayInMemorySearch.from_params(
+            embedding=self.__embedding_function,
+            metric="euclidian_dist",
+        )
+        self.__data_base = data_base
         self.__obter_conteudo_arquivo()
         print(list(self.__store.yield_keys()))
     

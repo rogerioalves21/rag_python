@@ -18,6 +18,7 @@ api_userinfo = 'https://api-sisbr-ti.homologacao.com.br/user-info/v2/userinfo'
 client_id    = 'lid'
 
 CONFIG_EMBD     = 'mxbai-embed-large'
+MODEL_LLAMA     = 'llama3.1:8b-instruct-q2_K'
 MODEL_GEMMA     = 'gemma2:2b-instruct-q4_K_M'
 
 config_system_prompt = "Você é um assistente dedicado a responder perguntas utilizando o contexto fornecido. O contexto contêm comunicados (CCI) delimitados por aspas triplas. Se você não souber a resposta, responda que não sabe. Escreva sua resposta SEMPRE em Português."
@@ -61,7 +62,7 @@ def get_ollama_embeddings() -> Union[OllamaEmbeddings, None]:
 def get_chat_ollama_client() -> Union[ChatOllama, None]:
     """ Instância do cliente para os LLMs do ollama """
     print(f"Criando o get_chat_ollama_client")
-    __llm = ChatOllama(model=MODEL_GEMMA, keep_alive='1h', temperature=0.7 ,num_predict=2000)
+    __llm = ChatOllama(model=MODEL_GEMMA, keep_alive='1h', temperature=0.4, num_predict=2000)
     print("Criando o ChatOllama")
     print(__llm)
     return __llm
@@ -80,7 +81,7 @@ def get_rag_service(
         chain_qr=None,
         system_prompt=config_system_prompt,
         folder='./files/pdfs/',
-        in_memory=False,
+        in_memory=True,
         callbacks=None,
         chat_prompt=chat_prompt,
         memory_history=memory_history
