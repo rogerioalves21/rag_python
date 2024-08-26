@@ -10,7 +10,7 @@ from langchain_core.documents import Document
 from langchain_community.vectorstores import DocArrayInMemorySearch
 from langchain.memory import ConversationBufferMemory
 from langchain.chains.conversational_retrieval.base import ConversationalRetrievalChain
-# from langchain_chroma import Chroma
+from langchain_chroma import Chroma
 from langchain_core.prompts import ChatPromptTemplate
 from image_utils import ImageProcessing, PyTesseractLoader
 import re
@@ -48,7 +48,8 @@ class ComunicadosService():
         folder: Union[str, None] = None,
         in_memory : Union[bool, None] = False,
         callbacks: Union[List| None] = None,
-        chat_prompt: Union[ChatPromptTemplate, None] = None
+        chat_prompt: Union[ChatPromptTemplate, None] = None,
+        memory_history: Union[ConversationBufferMemory, None] = None
     ):
         self.__text_parser        = TextParser()
         self.__data_base          = None
@@ -65,32 +66,30 @@ class ComunicadosService():
         self.__store              = InMemoryStore() # contêm todos os documentos
         self.__callbacks          = callbacks
         self.__chat_prompt        = chat_prompt
+        self.__memory             = memory_history # TODO - criar isso para multi-usuário
 
+        __chroma_folder = '/home/rogerio_rodrigues/python-workspace/rag_python/collection/'
         # self.__store = LocalFileStore(root_path='C:/Users/rogerio.rodrigues/Documents/workspace_python/doc_store/')
+        self.__chroma_db = Chroma(
+            collection_name="comunicados-sicoob",
+            embedding_function=self.__embedding_function,
+            persist_directory=__chroma_folder,
+            # client_settings={"is_persistent": True, "allow_reset": True, "persist_directory": __chroma_folder}
+        )
+        print(self.__chroma_db)
         
-        #self.__chroma_db = Chroma(
-        #    collection_name="comunicados-sicoob",
-        #    embedding_function=self.__embedding_function,
-        #)
         self.__data_base = DocArrayInMemorySearch.from_params(
             embedding=self.__embedding_function,
-            metric="euclidian_dist"
+            metric="euclidian_dist",
         )
         
         self.__full_doc_retriever = ParentDocumentRetriever(
-            vectorstore=self.__data_base, #self.__chroma_db,
+            vectorstore=self.__chroma_db,
             docstore=self.__store,
             child_splitter=self.__text_splitter,
             search_kwargs={"k": 10}
         )
         self.__chain.verbose = True
-        
-        # memória para conversação. TODO - criar isso para multi-usuário
-        __memory = ConversationBufferMemory(
-            memory_key='chat_history',
-            output_key='answer',
-            return_messages=True
-        )
         
         # trata o prompti after formatting
         __condense_question_template = """
@@ -104,11 +103,10 @@ class ComunicadosService():
         """
         condense_question_prompt = PromptTemplate.from_template(__condense_question_template)
         
-        # Setup LLM and QA chain
         self.__qa_chain = ConversationalRetrievalChain.from_llm(
             llm=self.__chain,
             retriever=self.__full_doc_retriever,
-            memory=__memory,
+            memory=self.__memory,
             condense_question_prompt=condense_question_prompt,
             return_source_documents=True,
             verbose=True
@@ -116,18 +114,19 @@ class ComunicadosService():
 
         self.__qa_chain.rephrase_question=False
 
-        # popula a store e vectstore
+    def load_data(self) -> None:
+        """ popula a store e vectstore """
         self.__obter_conteudo_arquivo()
         print(list(self.__store.yield_keys()))
-        
+    
     def set_callbacks(self, value: List) -> None:
         self.__callbacks = value
     
     async def agenerate_memory(self, query: str) -> Any:
         """ Chamada streaming para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
-        __sub_docs = self.get_sub_documents(clean_query(query), 4)
+        __sub_docs = self.get_sub_documents(clean_query(query), 10)
         print(__sub_docs)
-        __sub_docs.reverse()
+        # __sub_docs.reverse()
         __relevantes = []
         for __doc in __sub_docs:
             __relevantes.append('\n"""')
@@ -210,9 +209,9 @@ class ComunicadosService():
         count = 0
         print('workers started.')
         with ThreadPoolExecutor(max_workers=4) as exe:
-            futures = [exe.submit(self.__task, __arquivo) for __arquivo in __arquivos]
-            wait(futures)
-            for future in as_completed(futures):
+            __futures = [exe.submit(self.__task, __arquivo) for __arquivo in __arquivos]
+            wait(__futures)
+            for future in as_completed(__futures):
                 __documents = future.result()
                 self.__full_doc_retriever.add_documents(__documents)
                 count += 1

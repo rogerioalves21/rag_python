@@ -16,8 +16,8 @@ from clean_symbols import CleanSymbolsProcessor
 from app.api.prepdoclib.textparser import TextParser
 from concurrent.futures import ThreadPoolExecutor, wait, as_completed
 
-# pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
-pytesseract.pytesseract.tesseract_cmd = r"C:\\Users\\rogerio.rodrigues\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
+# pytesseract.pytesseract.tesseract_cmd = r"C:\\Users\\rogerio.rodrigues\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe"
 
 os.environ['OMP_THREAD_LIMIT'] = '4'
 
@@ -54,19 +54,22 @@ class ImageProcessing:
             text = text.replace(w, '')
         return text
 
-    def __task(self, __page: Page, __page_number: int) -> Union[Tuple[int, str], None]:
-        __pixmap: Page       = __page.get_pixmap(dpi=300)
-        __img                = ImagePIL.frombytes("RGB", [__pixmap.width, __pixmap.height], __pixmap.samples)
+    def __task(self, __page: Page, __page_number: int, __img_path: str) -> Union[Tuple[int, str], None]:
+        __pixmap: Page       = __page.get_pixmap(dpi=500)
+        # __img                = ImagePIL.frombytes("RGB", [__pixmap.width, __pixmap.height], __pixmap.samples)
+        
+        __img                = self.to_gray(__pixmap, __img_path, __page_number)
+        # __img                = ImagePIL.frombytes(__to_gray.tobytes())
         __config_pytesseract = r'--tessdata-dir assets/tessdata -l por --oem 1 --psm 6 -c preserve_interword_spaces=1 output-preserve-enable=true'
         __texto              = pytesseract.image_to_string(image=__img, lang='por', nice=9, config=__config_pytesseract)
-        __img.close()
+        # __img.close()
         return __page_number, __texto
 
     def pdf_to_text(self, img_path: str) -> str:
         __conteudo_arquivo = []
         with fitz.open(img_path) as __pdf:
             with ThreadPoolExecutor(max_workers=4) as exe:
-                futures = [exe.submit(self.__task, __page, __page.number) for __page in __pdf]
+                futures = [exe.submit(self.__task, __page, __page.number, img_path) for __page in __pdf]
                 wait(futures)
                 for future in as_completed(futures):
                     __page_number, __texto = future.result()
@@ -85,15 +88,16 @@ class ImageProcessing:
             imagens_criadas.append((new_img_folder, page.number))
         return imagens_criadas
 
-    def to_gray(self, img_path):
-        img_bgr = cv2.imread(img_path)
-        gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-
-        cv2.imwrite(img_path.replace('.png', 'GRAY.png'), gray)
-        
-        cv2.imshow('Image', gray)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+    def to_gray(self, __pixmap: Page, __img_path: str, __page: int):
+        __path_foto = __img_path.replace('pdfs', 'to_img')
+        __path_foto = __path_foto.replace('.pdf', f'_{__page}.png')
+        print(f"CAMINHO FOTO: {__path_foto}")
+        __pixmap.pil_save(__path_foto, optimize=True)
+        __img_bgr      = cv2.imread(__path_foto)
+        __gray         = cv2.cvtColor(__img_bgr, cv2.COLOR_BGR2GRAY)
+        __new_img_path = __path_foto.replace('.png', '_GRAY.png')
+        cv2.imwrite(__new_img_path, __gray)
+        return cv2.imread(__new_img_path)
 
     # Limiarização simples
     def simple_threshold(self, img_path, mim_threshold=127):
@@ -117,8 +121,8 @@ class ImageProcessing:
 
     # Limiarização com o método de otsu. O valor do threshold será calculado automaticamente
     def otsu_threshold(self, img_path):
-        img = cv2.imread(img_path)
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        img       = cv2.imread(img_path)
+        gray      = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         val, otsu = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
         print('Limiar calculado (cada img possuirá um limiar diferente: ', val)

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.routes import get_signed_url, user_control_service, check_documents, conversation, conversation2, parent
+from app.api.routes import get_signed_url, user_control_service, check_documents, conversation, conversation2, parent, load_data
 
 api_router = APIRouter()
 
@@ -10,3 +10,4 @@ api_router.include_router(check_documents.router, tags=["check-documents"])
 api_router.include_router(conversation.router, tags=["conversation"])
 api_router.include_router(conversation2.router, tags=["conversation-tiny"])
 api_router.include_router(parent.router, tags=["conversation-parent"])
+api_router.include_router(load_data.router, tags=["load-data"])

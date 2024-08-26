@@ -43,7 +43,7 @@ class ComunicadoTextSplitter(TextSplitter):
             else:
                 chunks.append(self.__clean_text(__text))
                 break
-        return self._merge_splits(chunks, separator="\n\n")
+        return self._merge_splits(chunks, separator="\n\n\n")
 
     @staticmethod
     def __clean_text(text: str) -> str:

@@ -5,16 +5,87 @@ from typing_extensions import Annotated
 from app.models import User
 import os
 import logging
+from langchain_core.prompts import ChatPromptTemplate
 from app.api.services.comunicados_service import ComunicadosService
+from langchain_ollama import ChatOllama, OllamaEmbeddings
+from app.api.prepdoclib.comunicado_splitter import ComunicadoTextSplitter
+from langchain.memory import ConversationBufferMemory, ChatMessageHistory
 
 logger = logging.getLogger(__name__)
 
 # VARIÁVEIS PARA VALIDAÇÃO DO TOKEN RHSSO
 api_userinfo = 'https://api-sisbr-ti.homologacao.com.br/user-info/v2/userinfo'
-client_id = 'lid'
+client_id    = 'lid'
 
-def get_rag_service() -> Union[ComunicadosService, None]:
-    return None
+CONFIG_EMBD     = 'mxbai-embed-large'
+MODEL_GEMMA     = 'gemma2:2b-instruct-q4_K_M'
+
+config_system_prompt = "Você é um assistente dedicado a responder perguntas utilizando o contexto fornecido. O contexto contêm comunicados (CCI) delimitados por aspas triplas. Se você não souber a resposta, responda que não sabe. Escreva sua resposta SEMPRE em Português."
+
+def get_memory_history() -> ConversationBufferMemory:
+    """ Carrega a memória de conversação """
+    print(f"Criando o ConversationBufferMemory")
+    __memory = ConversationBufferMemory(
+        chat_memory=ChatMessageHistory(),
+        memory_key='chat_history',
+        output_key='answer',
+        return_messages=True
+    )
+    print(__memory)
+    return __memory
+
+def get_text_splitter() -> Union[ComunicadoTextSplitter, None]:
+    print(f"Criando o ComunicadoTextSplitter")
+    __splitter = ComunicadoTextSplitter(chunk_size=2000, chunk_overlap=500, length_function=len)
+    return __splitter
+
+def get_chat_prompt() -> Union[ChatPromptTemplate, None]:
+    print(f"Criando o ChatPromptTemplate")
+    __chat_prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", config_system_prompt),
+            ("user", "{question}"),
+            ("user", "#### CONTEXTO ####\n\n{context}")
+        ]
+    )
+    print(__chat_prompt)
+    return __chat_prompt
+
+def get_ollama_embeddings() -> Union[OllamaEmbeddings, None]:
+    """ LLM para embeddings """
+    print(f"Criando o OllamaEmbeddings")
+    __embed = OllamaEmbeddings(model=CONFIG_EMBD)
+    print(__embed)
+    return __embed
+
+def get_chat_ollama_client() -> Union[ChatOllama, None]:
+    """ Instância do cliente para os LLMs do ollama """
+    print(f"Criando o get_chat_ollama_client")
+    __llm = ChatOllama(model=MODEL_GEMMA, keep_alive='1h', temperature=0.7 ,num_predict=2000)
+    print("Criando o ChatOllama")
+    print(__llm)
+    return __llm
+
+def get_rag_service(
+        embeddings: Annotated[OllamaEmbeddings, Depends(get_ollama_embeddings)],
+        text_splitter: Annotated[ComunicadoTextSplitter, Depends(get_text_splitter)],
+        llm_streaming: Annotated[ChatOllama, Depends(get_chat_ollama_client)],
+        chat_prompt: Annotated[ChatPromptTemplate, Depends(get_chat_prompt)],
+        memory_history: Annotated[ChatPromptTemplate, Depends(get_memory_history)]
+    ) -> Union[ComunicadosService, None]:
+    __rag_service = ComunicadosService(
+        embedding_function=embeddings,
+        text_splitter=text_splitter,
+        chain=llm_streaming,
+        chain_qr=None,
+        system_prompt=config_system_prompt,
+        folder='./files/pdfs/',
+        in_memory=False,
+        callbacks=None,
+        chat_prompt=chat_prompt,
+        memory_history=memory_history
+    )
+    return __rag_service
 
 def create_user(payload: str) -> User:
     return User(
@@ -59,3 +130,4 @@ def do_login(X_JWT_Assertion: Annotated[Union[str, None], Header()] = None) -> U
     return get_dados_usuario(X_JWT_Assertion)
 
 InformacoesUsuario: User | None = Depends(do_login)
+RagService: ComunicadosService | None = Depends(get_rag_service)
