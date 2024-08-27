@@ -4,6 +4,7 @@ from cv2.typing import MatLike
 import fitz
 from fitz import Page
 from PIL import Image as ImagePIL
+import easyocr
 import pytesseract
 from pytesseract import Output
 from langchain_core.documents import Document
@@ -16,13 +17,14 @@ from clean_symbols import CleanSymbolsProcessor
 from app.api.prepdoclib.textparser import TextParser
 from concurrent.futures import ThreadPoolExecutor, wait, as_completed
 
-# pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
-pytesseract.pytesseract.tesseract_cmd = r"C:/Users/rogerio.rodrigues/AppData/Local/Programs/Tesseract-OCR/tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
+# pytesseract.pytesseract.tesseract_cmd = r"C:/Users/rogerio.rodrigues/AppData/Local/Programs/Tesseract-OCR/tesseract.exe"
 
 os.environ['OMP_THREAD_LIMIT'] = '4'
 
 class ImageProcessing:
     def __init__(self):
+        # self.__eocrreader = easyocr.Reader(['pt','en'])
         print("image-processing")
 
     def find_words_remove(self, img_data):
@@ -58,10 +60,11 @@ class ImageProcessing:
         __pixmap: Page       = __page.get_pixmap(dpi=550)
         # __img                = ImagePIL.frombytes("RGB", [__pixmap.width, __pixmap.height], __pixmap.samples)
         
-        __img                = self.to_gray(__pixmap, __img_path, __page_number)
+        __img, __new_img     = self.to_gray(__pixmap, __img_path, __page_number)
         # __img                = ImagePIL.frombytes(__to_gray.tobytes())
         __config_pytesseract = r'--tessdata-dir assets/tessdata -l por --oem 1 --psm 6 -c preserve_interword_spaces=1 output-preserve-enable=true'
         __texto              = pytesseract.image_to_string(image=__img, lang='por', nice=9, config=__config_pytesseract)
+        # __texto              = '\n\n'.join(self.__eocrreader.readtext(__new_img, detail=0, paragraph=True, text_threshold=0.2))
         # __img.close()
         return __page_number, __texto
 
@@ -97,7 +100,7 @@ class ImageProcessing:
         __gray         = cv2.cvtColor(__img_bgr, cv2.COLOR_BGR2GRAY)
         __new_img_path = __path_foto.replace('.png', '_GRAY.png')
         cv2.imwrite(__new_img_path, __gray)
-        return cv2.imread(__new_img_path)
+        return cv2.imread(__new_img_path), __new_img_path
 
     # Limiarização simples
     def simple_threshold(self, img_path, mim_threshold=127):

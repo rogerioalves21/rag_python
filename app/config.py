@@ -10,6 +10,9 @@ from app.api.services.comunicados_service import ComunicadosService
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 from app.api.prepdoclib.comunicado_splitter import ComunicadoTextSplitter
 from langchain.memory import ConversationBufferMemory, ChatMessageHistory
+from langchain_community.vectorstores import DocArrayInMemorySearch
+from langchain.storage import InMemoryStore
+import functools
 
 logger = logging.getLogger(__name__)
 
@@ -52,12 +55,30 @@ def get_chat_prompt() -> Union[ChatPromptTemplate, None]:
     print(__chat_prompt)
     return __chat_prompt
 
+@functools.cache
 def get_ollama_embeddings() -> Union[OllamaEmbeddings, None]:
     """ LLM para embeddings """
     print(f"Criando o OllamaEmbeddings")
     __embed = OllamaEmbeddings(model=CONFIG_EMBD)
     print(__embed)
     return __embed
+
+@functools.cache
+def get_memory_store() -> Union[InMemoryStore, None]:
+    """ Cria a store em memória """
+    __store = InMemoryStore()
+    print(__store)
+    return __store
+
+@functools.cache
+def get_memory_db() -> Union[DocArrayInMemorySearch, None]:
+    """ Cria o banco de dados em memória """
+    __data_base = DocArrayInMemorySearch.from_params(
+        embedding=get_ollama_embeddings(),
+        metric="euclidian_dist",
+    )
+    print(__data_base)
+    return __data_base
 
 def get_chat_ollama_client() -> Union[ChatOllama, None]:
     """ Instância do cliente para os LLMs do ollama """
@@ -72,19 +93,22 @@ def get_rag_service(
         text_splitter: Annotated[ComunicadoTextSplitter, Depends(get_text_splitter)],
         llm_streaming: Annotated[ChatOllama, Depends(get_chat_ollama_client)],
         chat_prompt: Annotated[ChatPromptTemplate, Depends(get_chat_prompt)],
-        memory_history: Annotated[ChatPromptTemplate, Depends(get_memory_history)]
+        memory_history: Annotated[ChatPromptTemplate, Depends(get_memory_history)],
+        memory_data_base: Annotated[DocArrayInMemorySearch, Depends(get_memory_db)],
+        memory_store: Annotated[InMemoryStore, Depends(get_memory_store)],
     ) -> Union[ComunicadosService, None]:
     __rag_service = ComunicadosService(
         embedding_function=embeddings,
         text_splitter=text_splitter,
         chain=llm_streaming,
-        chain_qr=None,
         system_prompt=config_system_prompt,
         folder='./files/pdfs/',
         in_memory=True,
         callbacks=None,
         chat_prompt=chat_prompt,
-        memory_history=memory_history
+        memory_history=memory_history,
+        memory_data_base=memory_data_base,
+        store=memory_store
     )
     return __rag_service
 

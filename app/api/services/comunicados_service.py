@@ -37,8 +37,6 @@ def normalize_string(s: str) -> str:
     s = unicode_to_ascii(s.lower().strip())
     return s.strip()
 
-data_base = None
-
 class ComunicadosService():
     """ Classe responsável por converter arquivos PDF em Imagens.
         Transforma as mesmas em textos, e inclui em base de dados (memória).
@@ -48,30 +46,26 @@ class ComunicadosService():
         embedding_function: OllamaEmbeddings,
         text_splitter: CharacterTextSplitter,
         chain: Union[ChatOllama | StrOutputParser | ChatPromptTemplate],
-        chain_qr: Union[ChatOllama | StrOutputParser | ChatPromptTemplate, None] = None,
         system_prompt: Union[str, None] = None,
         folder: Union[str, None] = None,
         in_memory : Union[bool, None] = False,
         callbacks: Union[List| None] = None,
         chat_prompt: Union[ChatPromptTemplate, None] = None,
-        memory_history: Union[ConversationBufferMemory, None] = None
+        memory_history: Union[ConversationBufferMemory, None] = None,
+        memory_data_base: Union[DocArrayInMemorySearch, None] = None,
+        store: Union[InMemoryStore, None] = None
     ):
-        self.__text_parser        = TextParser()
-        self.__data_base          = None
-        self.__chroma_db          = None
         self.__embedding_function = embedding_function
         self.__chain              = chain
-        self.__chain_qr           = chain_qr
         self.__system_prompt      = system_prompt
         self.__text_splitter      = text_splitter
         self.__folder             = folder
-        self.__img_prc            = ImageProcessing()
         self.__in_memory          = in_memory
-        self.__documents          = []
-        self.__store              = InMemoryStore() # contêm todos os documentos
+        self.__store              = store # contêm todos os documentos
         self.__callbacks          = callbacks
         self.__chat_prompt        = chat_prompt
         self.__memory             = memory_history # TODO - criar isso para multi-usuário
+        self.__data_base          = memory_data_base
 
         __chroma_folder = '/home/rogerio_rodrigues/python-workspace/rag_python/collection/'
         # self.__store = LocalFileStore(root_path='C:/Users/rogerio.rodrigues/Documents/workspace_python/doc_store/')
@@ -82,11 +76,6 @@ class ComunicadosService():
                 persist_directory=__chroma_folder,
             )
             print(self.__chroma_db)
-
-        self.__data_base = DocArrayInMemorySearch.from_params(
-            embedding=self.__embedding_function,
-            metric="euclidian_dist",
-        )
 
         if self.__in_memory:
             self.__full_doc_retriever = ParentDocumentRetriever(
@@ -129,11 +118,6 @@ class ComunicadosService():
 
     def load_data(self) -> None:
         """ popula a store e vectstore """
-        data_base = DocArrayInMemorySearch.from_params(
-            embedding=self.__embedding_function,
-            metric="euclidian_dist",
-        )
-        self.__data_base = data_base
         self.__obter_conteudo_arquivo()
         print(list(self.__store.yield_keys()))
     
