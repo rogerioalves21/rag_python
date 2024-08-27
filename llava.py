@@ -17,7 +17,7 @@ def encode_image(image_path):
 
 def generate_text(instruction, file_path):
     result = ollama.generate(
-        model='llava:7b-v1.6-vicuna-q2_K',
+        model='llava-phi3',
         prompt=instruction,
         images=[file_path],
         stream=False
@@ -33,20 +33,23 @@ async def main():
     #file_path = 'C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/files/to_img/comprovante_0.png'
     #generate_text(instruction, file_path)
     
-    #import sys; sys.exit(0)
+    #import sys; sys.exit(0) 'Você é um assistente OCR. Extraia todo o texto da imagem. O idioma é português.'
+
+    prompt = """You are an assistant tasked with text extraction from images for retrieval."""
     
-    b64 = get_image('C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/files/to_img/cci1010_0.png')
+    b64 = get_image('C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/files/to_img/CCI1.088_2024_0.png')
     #with Image.open('C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/files/to_img/cci1202_0.png','rb') as f:
     #    b64 = f
     async for part in await AsyncClient().chat(
-        model='moondream:latest',
+        model='llava-phi3',
         messages=[
             {
                 'role': 'user',
-                'content': 'Question: Extrai o texto da imagem.\n\nAnswer:',
+                'content': prompt,
                 'images': [b64]
             }
         ],
+        options={'num_predict': 2000, "temperature": 0.7},
         keep_alive='1h',
         stream=True,
     ):print(part['message']['content'], end='', flush=True)

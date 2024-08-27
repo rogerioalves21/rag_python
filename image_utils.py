@@ -17,8 +17,8 @@ from clean_symbols import CleanSymbolsProcessor
 from app.api.prepdoclib.textparser import TextParser
 from concurrent.futures import ThreadPoolExecutor, wait, as_completed
 
-pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
-# pytesseract.pytesseract.tesseract_cmd = r"C:/Users/rogerio.rodrigues/AppData/Local/Programs/Tesseract-OCR/tesseract.exe"
+# pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
+pytesseract.pytesseract.tesseract_cmd = r"C:/Users/rogerio.rodrigues/AppData/Local/Programs/Tesseract-OCR/tesseract.exe"
 
 os.environ['OMP_THREAD_LIMIT'] = '4'
 
@@ -57,7 +57,7 @@ class ImageProcessing:
         return text
 
     def __task(self, __page: Page, __page_number: int, __img_path: str) -> Union[Tuple[int, str], None]:
-        __pixmap: Page       = __page.get_pixmap(dpi=550)
+        __pixmap: Page       = __page.get_pixmap(dpi=300)
         # __img                = ImagePIL.frombytes("RGB", [__pixmap.width, __pixmap.height], __pixmap.samples)
         
         __img, __new_img     = self.to_gray(__pixmap, __img_path, __page_number)

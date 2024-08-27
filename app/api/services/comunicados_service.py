@@ -10,20 +10,16 @@ from langchain_core.documents import Document
 from langchain_community.vectorstores import DocArrayInMemorySearch
 from langchain.memory import ConversationBufferMemory
 from langchain.chains.conversational_retrieval.base import ConversationalRetrievalChain
-try:
-    from langchain_chroma import Chroma
-except:
-    print("não existe o chroma instalado")
 from langchain_core.prompts import ChatPromptTemplate
-from image_utils import ImageProcessing, PyTesseractLoader
+from image_utils import PyTesseractLoader
 import re
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_community.document_loaders import PyPDFium2Loader
 from langchain.retrievers import ParentDocumentRetriever
 from langchain.storage import InMemoryStore
 from rich import print
-from app.api.prepdoclib.textparser import TextParser
 from app.api.prepdoclib.comunicado_splitter import clean_query
+from langchain_community.vectorstores import DuckDB
 
 all_letters = " abcdefghijlmonpqrstuvxyzABCDEFGHIJLMNOPQRSTUVXYZ.,;'-0123456789"
 def unicode_to_ascii(s: str) -> str:
@@ -53,7 +49,8 @@ class ComunicadosService():
         chat_prompt: Union[ChatPromptTemplate, None] = None,
         memory_history: Union[ConversationBufferMemory, None] = None,
         memory_data_base: Union[DocArrayInMemorySearch, None] = None,
-        store: Union[InMemoryStore, None] = None
+        store: Union[InMemoryStore, None] = None,
+        duckdb_vector_storage: Union[DuckDB, None] = None
     ):
         self.__embedding_function = embedding_function
         self.__chain              = chain
@@ -66,16 +63,7 @@ class ComunicadosService():
         self.__chat_prompt        = chat_prompt
         self.__memory             = memory_history # TODO - criar isso para multi-usuário
         self.__data_base          = memory_data_base
-
-        __chroma_folder = '/home/rogerio_rodrigues/python-workspace/rag_python/collection/'
-        # self.__store = LocalFileStore(root_path='C:/Users/rogerio.rodrigues/Documents/workspace_python/doc_store/')
-        if not self.__in_memory:
-            self.__chroma_db = Chroma(
-                collection_name="comunicados-sicoob",
-                embedding_function=self.__embedding_function,
-                persist_directory=__chroma_folder,
-            )
-            print(self.__chroma_db)
+        self.__vector_storage     = duckdb_vector_storage
 
         if self.__in_memory:
             self.__full_doc_retriever = ParentDocumentRetriever(
@@ -86,7 +74,7 @@ class ComunicadosService():
             )
         else:
             self.__full_doc_retriever = ParentDocumentRetriever(
-                vectorstore=self.__chroma_db,
+                vectorstore=self.__vector_storage,
                 docstore=self.__store,
                 child_splitter=self.__text_splitter,
                 search_kwargs={"k": 10}
@@ -126,9 +114,9 @@ class ComunicadosService():
     
     async def agenerate_memory(self, query: str) -> Any:
         """ Chamada streaming para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
-        __sub_docs = self.get_sub_documents(clean_query(query), 10)
+        __sub_docs = self.get_sub_documents(clean_query(query), 4)
+        __sub_docs.sort(key=lambda x: x.metadata['source'])
         print(__sub_docs)
-        # __sub_docs.reverse()
         __relevantes = []
         for __doc in __sub_docs:
             __relevantes.append('\n"""')
@@ -184,22 +172,10 @@ class ComunicadosService():
     
     def __carregar_pdf(self, arquivos: List[str]):
          for arquivo in tqdm(arquivos):
-            doc_path_pdf     = self.__folder + arquivo
-            loader           = PyPDFium2Loader(doc_path_pdf)
-            documents        = loader.load()
-            self.__documents.extend(documents)
-            document_chunks  = self.__text_splitter.split_documents(documents=documents)
-            if self.__data_base is None:
-                if self.__in_memory:
-                    self.__data_base = DocArrayInMemorySearch.from_documents(collection_name="comunicados-sicoob", documents=document_chunks, embedding=self.__embedding_function)
-                else:
-                    self.__chroma_db = None# Chroma.from_documents(collection_name="comunicados-sicoob", documents=document_chunks, embedding=self.__embedding_function)
-            else:
-                if self.__in_memory:
-                    self.__data_base.add_documents(document_chunks)
-                else:
-                    raise Exception('sem base de dados configurada')
-                    ## self.__chroma_db.add_documents(document_chunks)
+            __doc_path_pdf     = self.__folder + arquivo
+            __loader           = PyPDFium2Loader(__doc_path_pdf)
+            __documents        = __loader.load()
+            self.__full_doc_retriever.add_documents(__documents)
 
     def __task(self, __arquivo: str) -> Union[List[Document], None]:
         __file_path     = self.__folder + __arquivo
@@ -227,9 +203,6 @@ class ComunicadosService():
             return __resultado[0]
         return None
     
-    def __converter_texto_para_chunks(self, texto_arquivo: str) -> List[str]:
-        return self.__text_splitter.split_text(texto_arquivo)
-    
     def get_parent_documents(self, query: str) -> List[Document]:
         """ Recupera os textos completos da página do pdf e não o chunk dos subdocs """
         return self.__full_doc_retriever.invoke(query, kwargs={"verbose": True, "top_k": 4, "k": 4})
@@ -238,7 +211,7 @@ class ComunicadosService():
         if self.__in_memory:
             relevant_context = self.__data_base.similarity_search(query=question, k=top_k)
         else:
-            relevant_context = self.__chroma_db.similarity_search(query=question, k=top_k)
+            relevant_context = self.__vector_storage.similarity_search(query=question, k=top_k)
         return relevant_context
 
     def get_full_document_by_source(self, source: str) -> Union[Document, None]:

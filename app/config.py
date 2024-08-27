@@ -3,16 +3,18 @@ from typing import Union
 from fastapi import Depends, Header, HTTPException, status
 from typing_extensions import Annotated
 from app.models import User
-import os
 import logging
 from langchain_core.prompts import ChatPromptTemplate
 from app.api.services.comunicados_service import ComunicadosService
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 from app.api.prepdoclib.comunicado_splitter import ComunicadoTextSplitter
-from langchain.memory import ConversationBufferMemory, ChatMessageHistory
+from langchain.memory import ConversationBufferMemory
+from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_community.vectorstores import DocArrayInMemorySearch
 from langchain.storage import InMemoryStore
 import functools
+from langchain_community.vectorstores import DuckDB
+import duckdb
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +26,7 @@ CONFIG_EMBD     = 'mxbai-embed-large'
 MODEL_LLAMA     = 'llama3.1:8b-instruct-q2_K'
 MODEL_GEMMA     = 'gemma2:2b-instruct-q4_K_M'
 
-config_system_prompt = "Você é um assistente dedicado a responder perguntas utilizando o contexto fornecido. O contexto contêm comunicados (CCI) delimitados por aspas triplas. Se você não souber a resposta, responda que não sabe. Escreva sua resposta SEMPRE em Português."
+config_system_prompt = "Você é um assistente brasileiro dedicado a responder perguntas utilizando o contexto fornecido. Se você não souber a resposta, responda que o contexto é insuficiente para responder a pergunta. Escreva sua resposta no idioma Português."
 
 def get_memory_history() -> ConversationBufferMemory:
     """ Carrega a memória de conversação """
@@ -64,6 +66,14 @@ def get_ollama_embeddings() -> Union[OllamaEmbeddings, None]:
     return __embed
 
 @functools.cache
+def get_duckdb_vector_store() -> Union[DuckDB, None]:
+    """ Cria o vectorstore com duckdb """
+    print("Criando o DuckDB")
+    __vector_store = DuckDB(embedding=get_ollama_embeddings())
+    print(__vector_store)
+    return __vector_store
+
+@functools.cache
 def get_memory_store() -> Union[InMemoryStore, None]:
     """ Cria a store em memória """
     __store = InMemoryStore()
@@ -96,6 +106,7 @@ def get_rag_service(
         memory_history: Annotated[ChatPromptTemplate, Depends(get_memory_history)],
         memory_data_base: Annotated[DocArrayInMemorySearch, Depends(get_memory_db)],
         memory_store: Annotated[InMemoryStore, Depends(get_memory_store)],
+        duckdb_vector_storage: Annotated[DuckDB, Depends(get_duckdb_vector_store)]
     ) -> Union[ComunicadosService, None]:
     __rag_service = ComunicadosService(
         embedding_function=embeddings,
@@ -103,12 +114,13 @@ def get_rag_service(
         chain=llm_streaming,
         system_prompt=config_system_prompt,
         folder='./files/pdfs/',
-        in_memory=True,
+        in_memory=False,
         callbacks=None,
         chat_prompt=chat_prompt,
         memory_history=memory_history,
         memory_data_base=memory_data_base,
-        store=memory_store
+        store=memory_store,
+        duckdb_vector_storage=duckdb_vector_storage
     )
     return __rag_service
 

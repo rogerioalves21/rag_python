@@ -1,7 +1,7 @@
 from langchain_ollama import OllamaEmbeddings
 from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, UnstructuredExcelLoader, UnstructuredWordDocumentLoader
 from langchain_text_splitters import CharacterTextSplitter
-from langchain_community.vectorstores import DocArrayInMemorySearch
+from langchain_community.vectorstores import DuckDB
 from typing import Any, Union, List
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.documents import Document
@@ -27,6 +27,7 @@ excel_file_path = (
 
 def load_pdf(file_path: str, text_splitter: CharacterTextSplitter, extract_images=True) -> List[Document]:
     loader = PyPDFLoader(file_path, extract_images=extract_images)
+    
     return loader.load_and_split(text_splitter)
 
 def load_docx(file_path: str, text_splitter: CharacterTextSplitter) -> List[Document]:
@@ -74,7 +75,7 @@ def extrair_pdfs() -> None:
             file.write(doc.page_content)
 
 if __name__ == '__main__':
-    load_xlsx2()
+    #load_xlsx2()
     # TODO - converter os documentos em markdown. as llms leem facilmente este formato.
-    # extrair_pdfs()
+    extrair_pdfs()
     # db = DocArrayInMemorySearch.from_documents(docs, embeddings)
