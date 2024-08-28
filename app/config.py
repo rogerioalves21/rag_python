@@ -23,7 +23,7 @@ api_userinfo = 'https://api-sisbr-ti.homologacao.com.br/user-info/v2/userinfo'
 client_id    = 'lid'
 
 CONFIG_EMBD     = 'mxbai-embed-large'
-MODEL_LLAMA     = 'llama3.1:8b-instruct-q2_K'
+MODEL_LLAMA     = 'mistral:7b-instruct-v0.3-q2_K'
 MODEL_GEMMA     = 'gemma2:2b-instruct-q4_K_M'
 
 config_system_prompt = "Você é um assistente brasileiro dedicado a responder perguntas utilizando o contexto fornecido. Se você não souber a resposta, responda que o contexto é insuficiente para responder a pergunta. Escreva sua resposta no idioma Português."
@@ -93,7 +93,7 @@ def get_memory_db() -> Union[DocArrayInMemorySearch, None]:
 def get_chat_ollama_client() -> Union[ChatOllama, None]:
     """ Instância do cliente para os LLMs do ollama """
     print(f"Criando o get_chat_ollama_client")
-    __llm = ChatOllama(model=MODEL_GEMMA, keep_alive='1h', temperature=0.4, num_predict=2000)
+    __llm = ChatOllama(model=MODEL_GEMMA, keep_alive='1h', temperature=0.5, num_predict=2000)
     print("Criando o ChatOllama")
     print(__llm)
     return __llm

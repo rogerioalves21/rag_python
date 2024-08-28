@@ -4,10 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.utils import cors_origins
 from app.api.main import api_router
 import os
-from langchain.globals import set_llm_cache
-from langchain_community.cache import SQLiteCache
+# from langchain.globals import set_llm_cache
+# from langchain_community.cache import SQLiteCache
 
-set_llm_cache(SQLiteCache())
+# set_llm_cache(SQLiteCache())
 
 # seta as variáveis local
 os.environ.setdefault('API_USERINFO', 'https://api-sisbr-ti.homologacao.com.br/user-info/v2/userinfo')

@@ -115,7 +115,7 @@ class ComunicadosService():
     async def agenerate_memory(self, query: str) -> Any:
         """ Chamada streaming para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
         __sub_docs = self.get_sub_documents(clean_query(query), 4)
-        __sub_docs.sort(key=lambda x: x.metadata['source'])
+        __sub_docs.sort(key=lambda x: x.metadata['page'])
         print(__sub_docs)
         __relevantes = []
         for __doc in __sub_docs:
