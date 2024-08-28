@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Union, Any
+from typing import Union, Any, List
 
 class SignedUrls(BaseModel):
     presigned_urls: Union[list[str] | None] = None
@@ -42,9 +42,14 @@ class DescriptionModel(BaseModel):
     description: Union[str | None] = None
 
 class PropertiesModel(BaseModel):
-    question:Union[DescriptionModel | None] = None
-    service:Union[DescriptionModel | None] = None
+    question: Union[DescriptionModel | None] = None
+    service: Union[DescriptionModel | None] = None
     model: Union[DescriptionModel | None] = None
+
+class SourceModel(BaseModel):
+    name: Union[str | None] = None
+    link: Union[str | None] = None
+    page: Union[int | None] = 0
 
 class ConversationPayload(BaseModel):
     type: Union[str | None] = None
@@ -53,3 +58,7 @@ class ConversationPayload(BaseModel):
 class ConversationResponse(BaseModel):
     data: Union[str | None] = None
     success: bool = True
+
+class NormativosResponse(BaseModel):
+    message: Union[str | None] = None
+    sources: Union[List | None] = None

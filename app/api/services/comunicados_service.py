@@ -1,4 +1,4 @@
-from typing import List, Union, Any
+from typing import List, Union, Any, Tuple
 from tqdm import tqdm
 import os
 import time
@@ -124,7 +124,7 @@ class ComunicadosService():
             __relevantes.append('"""\n')
         __messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes))
         self.__qa_chain.combine_docs_chain.llm_chain.prompt.messages = __messages
-        return await self.__qa_chain.ainvoke({"question": query}, {"callbacks": self.__callbacks})
+        return await self.__qa_chain.ainvoke(input={"question": query}, config={"callbacks": self.__callbacks, "include_run_info": True})
     
     async def agenerate(self, query: str) -> Any:
         """ Chamada streaming para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
@@ -137,6 +137,19 @@ class ComunicadosService():
             __relevantes.append('"""\n')
         __messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes))
         return await self.__chain.agenerate(messages=[__messages])
+
+    def invoke_with_sources(self, query: str) -> Union[Tuple[str, List[Document]], None]:
+        """ Chamada para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever e Fontes utilizadas """
+        __sub_docs   = self.get_sub_documents(clean_query(query), 20)
+        __relevantes = []
+        for __doc in __sub_docs:
+            __relevantes.append('\n"""')
+            __relevantes.append(__doc.page_content)
+            __relevantes.append('"""\n')
+        __messages   = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes))
+        self.__qa_chain.combine_docs_chain.llm_chain.prompt.messages = __messages
+        retorno      = self.__qa_chain.invoke({"question": query})
+        return retorno['answer'], __sub_docs
     
     def invoke(self, query: str) -> Union[str, None]:
         """ Chamada para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
