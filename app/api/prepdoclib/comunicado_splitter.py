@@ -11,16 +11,13 @@ def tratar_linhas_texto(document: str) -> str:
     __text = __text.replace('  ', ' ')
     return __text
 
-
 def clean_query(query: str) -> str:
     return clean_text(query)
-
 
 def clean_text(text: str) -> str:
     clean = re.split(r'\s+|#\s*', text)
     texto_0 = ' '.join(clean)
     return texto_0
-
 
 class ComunicadoTextSplitter(TextSplitter):
     """ Quebra em partes iguais textos de comunicados """
@@ -38,7 +35,9 @@ class ComunicadoTextSplitter(TextSplitter):
                 if limit == -1:
                     limit = self._chunk_size
                 chunks.append(self.__clean_text(__text[:limit]))
-                __text = self.__clean_text(__text[limit:]).strip()
+                
+                # aqui eu corto o texto. então seu eu cortar com valores a menos isso vira um overlap
+                __text = self.__clean_text(__text[limit - self._chunk_overlap:]).strip()
 
             else:
                 chunks.append(self.__clean_text(__text))

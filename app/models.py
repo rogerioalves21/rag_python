@@ -50,9 +50,12 @@ class SourceModel(BaseModel):
     name: Union[str | None] = None
     link: Union[str | None] = None
     page: Union[int | None] = 0
+    topic_suggestions: Union[str, None] = None
 
 class ConversationPayload(BaseModel):
     type: Union[str | None] = None
+    start_date: Union[str | None] = None
+    end_date: Union[str | None] = None
     properties: Union[PropertiesModel | None] = None
 
 class ConversationResponse(BaseModel):

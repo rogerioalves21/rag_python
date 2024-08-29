@@ -42,7 +42,7 @@ def get_memory_history() -> ConversationBufferMemory:
 
 def get_text_splitter() -> Union[ComunicadoTextSplitter, None]:
     print(f"Criando o ComunicadoTextSplitter")
-    __splitter = ComunicadoTextSplitter(chunk_size=300, chunk_overlap=80, length_function=len)
+    __splitter = ComunicadoTextSplitter(chunk_size=600, chunk_overlap=80, length_function=len)
     print(__splitter)
     return __splitter
 
@@ -110,7 +110,6 @@ def get_rag_service(
         duckdb_vector_storage: Annotated[DuckDB, Depends(get_duckdb_vector_store)]
     ) -> Union[ComunicadosService, None]:
     __rag_service = ComunicadosService(
-        embedding_function=embeddings,
         text_splitter=text_splitter,
         chain=llm_streaming,
         system_prompt=config_system_prompt,
@@ -123,6 +122,7 @@ def get_rag_service(
         store=memory_store,
         duckdb_vector_storage=duckdb_vector_storage
     )
+    print(__rag_service)
     return __rag_service
 
 def create_user(payload: str) -> User:

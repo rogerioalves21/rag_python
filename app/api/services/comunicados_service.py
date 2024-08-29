@@ -20,6 +20,7 @@ from langchain.storage import InMemoryStore
 from rich import print
 from app.api.prepdoclib.comunicado_splitter import clean_query
 from langchain_community.vectorstores import DuckDB
+from app.api.services.metadata_service import MetadataService
 
 all_letters = " abcdefghijlmonpqrstuvxyzABCDEFGHIJLMNOPQRSTUVXYZ.,;'-0123456789"
 def unicode_to_ascii(s: str) -> str:
@@ -39,7 +40,6 @@ class ComunicadosService():
     """
     def __init__(
         self,
-        embedding_function: OllamaEmbeddings,
         text_splitter: CharacterTextSplitter,
         chain: Union[ChatOllama | StrOutputParser | ChatPromptTemplate],
         system_prompt: Union[str, None] = None,
@@ -52,7 +52,6 @@ class ComunicadosService():
         store: Union[InMemoryStore, None] = None,
         duckdb_vector_storage: Union[DuckDB, None] = None
     ):
-        self.__embedding_function = embedding_function
         self.__chain              = chain
         self.__system_prompt      = system_prompt
         self.__text_splitter      = text_splitter
@@ -139,8 +138,10 @@ class ComunicadosService():
         return await self.__chain.agenerate(messages=[__messages])
 
     def invoke_with_sources(self, query: str) -> Union[Tuple[str, List[Document]], None]:
-        """ Chamada para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever e Fontes utilizadas """
-        __sub_docs   = self.get_sub_documents(clean_query(query), 20)
+        """ Chamada para o llm. SubDocuments e Fontes utilizadas """
+        __sub_docs   = self.get_sub_documents(clean_query(query), 6)
+        # TODO - filtrar por resumo e palavras - chave
+        # TODO - OPÇÃO, gerar os embeds do resultado e fazer outro filtro por similaridade.
         __relevantes = []
         for __doc in __sub_docs:
             __relevantes.append('\n"""')
@@ -154,7 +155,6 @@ class ComunicadosService():
     def invoke(self, query: str) -> Union[str, None]:
         """ Chamada para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
         __sub_docs = self.get_sub_documents(clean_query(query), 20)
-        __sub_docs.reverse()
         __relevantes = []
         for __doc in __sub_docs:
             __relevantes.append('\n"""')
@@ -185,9 +185,9 @@ class ComunicadosService():
     
     def __carregar_pdf(self, arquivos: List[str]):
          for arquivo in tqdm(arquivos):
-            __doc_path_pdf     = self.__folder + arquivo
-            __loader           = PyPDFium2Loader(__doc_path_pdf)
-            __documents        = __loader.load()
+            __doc_path_pdf = self.__folder + arquivo
+            __loader       = PyPDFium2Loader(__doc_path_pdf)
+            __documents    = __loader.load()
             self.__full_doc_retriever.add_documents(__documents)
 
     def __task(self, __arquivo: str) -> Union[List[Document], None]:
@@ -204,6 +204,9 @@ class ComunicadosService():
             wait(__futures)
             for future in as_completed(__futures):
                 __documents = future.result()
+                for __doc in __documents:
+                    MetadataService(__doc).extrair_metadata()
+                print(__documents)
                 self.__full_doc_retriever.add_documents(__documents)
                 count += 1
         print(f'all done, {count} documents in {int(int(time.time() - t0)/60)} minutos')

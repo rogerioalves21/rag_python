@@ -7,6 +7,13 @@ class TextParser:
 
     def __init__(self):
         print("text-parser")
+    
+    def __clean_empty_lines(self, full_text: str) -> str:
+        """ Remove mais de 3 quebras de linhas """
+        __full_text = re.sub(r'\n{3,}', '\n\n', full_text)
+        __full_text = re.sub(r'(\n\s){3,}', '\n\n', __full_text)
+        __full_text = __full_text.replace('\xa0', ' ') # Replace non-breaking spaces
+        return __full_text
 
     def cleanup_data(self, data: str) -> str:
         """Limpa o conteúdo usando regex

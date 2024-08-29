@@ -96,7 +96,7 @@ class ChatApp:
         self.chat_area.yview(tk.END)
 
     def query_api(self, user_message):
-        query_url = 'http://localhost:8000/api/query'
+        query_url = 'http://localhost:8000/api/generate'
         query_payload = {
             "query": user_message,
             "context": self.context_text

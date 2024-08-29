@@ -14,9 +14,9 @@ def conversation_with_sources(__payload: Union[ConversationPayload | None] = Non
 
     sources = list()
     for __doc in __documents:
-        __name = str(__doc.metadata['source'])
+        __name         = str(__doc.metadata['source'])
         __name_splited = __name.split('/')
-        __name = __name_splited[len(__name_splited) - 1]
+        __name         = __name_splited[len(__name_splited) - 1]
 
         # verifica se já existe na lista a fonte
         exists = False
@@ -25,5 +25,10 @@ def conversation_with_sources(__payload: Union[ConversationPayload | None] = Non
                 exists = True
                 break
         if not exists:
-            sources.append(SourceModel(name=__name, link=f"https://abcdef.com.br/pdf/{__name}", page=__doc.metadata['page']))
+            sources.append(SourceModel(
+                name=__name,
+                link=f"https://abcdef.com.br/pdf/{__name}",
+                page=__doc.metadata['page'],
+                topic_suggestions=__doc.metadata['perguntas']
+            ))
     return NormativosResponse(message=__response, success=True, sources=sources)

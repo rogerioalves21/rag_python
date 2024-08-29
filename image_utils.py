@@ -17,8 +17,8 @@ from clean_symbols import CleanSymbolsProcessor
 from app.api.prepdoclib.textparser import TextParser
 from concurrent.futures import ThreadPoolExecutor, wait, as_completed
 
-# pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
-pytesseract.pytesseract.tesseract_cmd = r"C:/Users/rogerio.rodrigues/AppData/Local/Programs/Tesseract-OCR/tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
+# pytesseract.pytesseract.tesseract_cmd = r"C:/Users/rogerio.rodrigues/AppData/Local/Programs/Tesseract-OCR/tesseract.exe"
 
 os.environ['OMP_THREAD_LIMIT'] = '4'
 
@@ -79,7 +79,7 @@ class ImageProcessing:
                     __conteudo_arquivo.append({"content": __texto, "page": __page_number})
         __conteudo_arquivo.sort(key=lambda x: x['page'])
         __text = [f"{t['content']}\n\nPágina {t['page']}" for t in __conteudo_arquivo]
-        return '-------------------------'.join(__text)
+        return ' '.join(__text)
 
     def pdf_to_image(self, img_path: str, img_folder: str) -> List:
         pdf = fitz.open(img_path)

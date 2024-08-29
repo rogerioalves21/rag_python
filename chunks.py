@@ -105,3 +105,25 @@ model = KMeans(n_clusters=24, max_iter=1000)
 model.fit(df['embeddings'].to_list())
 df["cluster"] = model.labels_
 print(*df[df.cluster==23].text.head(3), sep='\n\n')
+
+
+filtered_retriever = FilteredRetriever(vectorstore=store.as_retriever(), filter_prefix=source_filter)
+
+chain = ConversationalRetrievalChain.from_llm(
+    llm=llm,
+    retriever=filtered_retriever,
+    memory=st.session_state.memory,
+    verbose=True,
+    return_source_documents=True,
+)
+
+
+class FilteredRetriever(VectorStoreRetriever):
+    vectorstore: VectorStoreRetriever
+    search_type: str = "similarity"
+    search_kwargs: dict = Field(default_factory=dict)
+    filter_prefix: str
+    
+    def get_relevant_documents(self, query: str) -> List[Document]:
+        results = self.vectorstore.get_relevant_documents(query=query)
+        return [doc for doc in results if doc.metadata['source'].startswith(self.filter_prefix)]
