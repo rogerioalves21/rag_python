@@ -29,6 +29,7 @@ def conversation_with_sources(__payload: Union[ConversationPayload | None] = Non
                 name=__name,
                 link=f"https://abcdef.com.br/pdf/{__name}",
                 page=__doc.metadata['page'],
-                topic_suggestions=__doc.metadata['perguntas']
+                # topic_suggestions=__doc.metadata['perguntas'],
+                # summary=__doc.metadata['resumo']
             ))
-    return NormativosResponse(message=__response, success=True, sources=sources)
+    return NormativosResponse(message=__response, success=True, documents=sources)

@@ -16,7 +16,7 @@ from app.api.services.comunicados_service import ComunicadosService
 from fastapi.responses import StreamingResponse
 from langchain.callbacks import AsyncIteratorCallbackHandler
 from langchain.schema import HumanMessage
-from clean_symbols import CleanSymbolsProcessor
+from app.api.prepdoclib.clean_symbols import CleanSymbolsProcessor
 import re
 
 MODEL         = 'qwen'

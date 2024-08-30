@@ -16,7 +16,7 @@ os.environ.setdefault('CLIENT_ID', 'lid')
 # instancia a aplicação
 app = FastAPI(
     debug=True,
-    title='lid-sisbr-backoffice'
+    title='lid-sisbr-backoffice',
 )
 
 app.mount("/static", StaticFiles(directory="static"), name="static")

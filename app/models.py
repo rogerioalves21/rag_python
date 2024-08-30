@@ -50,6 +50,7 @@ class SourceModel(BaseModel):
     name: Union[str | None] = None
     link: Union[str | None] = None
     page: Union[int | None] = 0
+    summary: Union[str | None] = 0
     topic_suggestions: Union[str, None] = None
 
 class ConversationPayload(BaseModel):
@@ -64,4 +65,4 @@ class ConversationResponse(BaseModel):
 
 class NormativosResponse(BaseModel):
     message: Union[str | None] = None
-    sources: Union[List | None] = None
+    documents: Union[List | None] = None

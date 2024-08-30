@@ -27,8 +27,8 @@ class MetadataService:
         """ Faz a extração/geração dos metadados do documento """
         __resumo         = self.__extrair_resumo()
         self.__documento.metadata['resumo']         = __resumo
-        __palavras_chave = self.__extrair_palavras_chave(__resumo)
-        self.__documento.metadata['palavras-chave'] = __palavras_chave
+        # __palavras_chave = self.__extrair_palavras_chave(__resumo)
+        # self.__documento.metadata['palavras-chave'] = __palavras_chave
         __perguntas      = self.__extrair_perguntas(__resumo)
         self.__documento.metadata['perguntas']      = __perguntas
         return self.__documento
@@ -63,5 +63,5 @@ class MetadataService:
                 ("user", "O texto é:\n{texto}")
             ]
         )
-        __messages = __chat_prompt.format_messages(texto=self.__documento.page_content)
+        __messages = __chat_prompt.format_messages(texto=self.__documento.page_content[:1024])
         return self.__chain.invoke(__messages)

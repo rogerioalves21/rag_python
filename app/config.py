@@ -22,12 +22,14 @@ logger = logging.getLogger(__name__)
 api_userinfo = 'https://api-sisbr-ti.homologacao.com.br/user-info/v2/userinfo'
 client_id    = 'lid'
 
-CONFIG_EMBD     = 'mxbai-embed-large'
-MODEL_LLAMA     = 'mistral:7b-instruct-v0.3-q2_K'
-MODEL_GEMMA     = 'gemma2:2b-instruct-q4_K_M'
+CONFIG_EMBDBERT = 'paraphrase-multilingual'
+CONFIG_EMBD  = 'mxbai-embed-large'
+MODEL_LLAMA  = 'qwen2:1.5b-instruct-q4_K_M'
+MODEL_GEMMA  = 'gemma2:2b-instruct-q4_K_M'
 
 config_system_prompt = "Você é um assistente brasileiro dedicado a responder perguntas utilizando o contexto fornecido. Se você não souber a resposta, responda que o contexto é insuficiente para responder a pergunta. Escreva sua resposta no idioma Português."
 
+@functools.cache
 def get_memory_history() -> ConversationBufferMemory:
     """ Carrega a memória de conversação """
     print(f"Criando o ConversationBufferMemory")
@@ -42,7 +44,7 @@ def get_memory_history() -> ConversationBufferMemory:
 
 def get_text_splitter() -> Union[ComunicadoTextSplitter, None]:
     print(f"Criando o ComunicadoTextSplitter")
-    __splitter = ComunicadoTextSplitter(chunk_size=600, chunk_overlap=80, length_function=len)
+    __splitter = ComunicadoTextSplitter(chunk_size=1000, chunk_overlap=200, length_function=len)
     print(__splitter)
     return __splitter
 
@@ -59,12 +61,28 @@ def get_chat_prompt() -> Union[ChatPromptTemplate, None]:
     return __chat_prompt
 
 @functools.cache
-def get_ollama_embeddings() -> Union[OllamaEmbeddings, None]:
+def get_ollama_embeddings_basic() -> Union[OllamaEmbeddings, None]:
     """ LLM para embeddings """
-    print(f"Criando o OllamaEmbeddings")
+    print(f"Criando o OllamaEmbeddings Basic")
     __embed = OllamaEmbeddings(model=CONFIG_EMBD)
     print(__embed)
     return __embed
+
+@functools.cache
+def get_ollama_embeddings() -> Union[OllamaEmbeddings, None]:
+    """ LLM para embeddings """
+    print(f"Criando o OllamaEmbeddings")
+    __embed = OllamaEmbeddings(model=CONFIG_EMBDBERT)
+    print(__embed)
+    return __embed
+
+@functools.cache
+def get_duckdb_vector_store_basic() -> Union[DuckDB, None]:
+    """ Cria o vectorstore com duckdb """
+    print("Criando o DuckDB Basic")
+    __vector_store = DuckDB(embedding=get_ollama_embeddings_basic())
+    print(__vector_store)
+    return __vector_store
 
 @functools.cache
 def get_duckdb_vector_store() -> Union[DuckDB, None]:
@@ -94,20 +112,20 @@ def get_memory_db() -> Union[DocArrayInMemorySearch, None]:
 def get_chat_ollama_client() -> Union[ChatOllama, None]:
     """ Instância do cliente para os LLMs do ollama """
     print(f"Criando o get_chat_ollama_client")
-    __llm = ChatOllama(model=MODEL_GEMMA, keep_alive='1h', temperature=0.7, num_predict=2000)
+    __llm = ChatOllama(model=MODEL_GEMMA, keep_alive='1h', temperature=0.3, num_predict=2000)
     print("Criando o ChatOllama")
     print(__llm)
     return __llm
 
 def get_rag_service(
-        embeddings: Annotated[OllamaEmbeddings, Depends(get_ollama_embeddings)],
         text_splitter: Annotated[ComunicadoTextSplitter, Depends(get_text_splitter)],
         llm_streaming: Annotated[ChatOllama, Depends(get_chat_ollama_client)],
         chat_prompt: Annotated[ChatPromptTemplate, Depends(get_chat_prompt)],
         memory_history: Annotated[ChatPromptTemplate, Depends(get_memory_history)],
         memory_data_base: Annotated[DocArrayInMemorySearch, Depends(get_memory_db)],
         memory_store: Annotated[InMemoryStore, Depends(get_memory_store)],
-        duckdb_vector_storage: Annotated[DuckDB, Depends(get_duckdb_vector_store)]
+        duckdb_vector_storage: Annotated[DuckDB, Depends(get_duckdb_vector_store)],
+        duckdb_vector_storage_basic: Annotated[DuckDB, Depends(get_duckdb_vector_store_basic)]
     ) -> Union[ComunicadosService, None]:
     __rag_service = ComunicadosService(
         text_splitter=text_splitter,
@@ -120,7 +138,8 @@ def get_rag_service(
         memory_history=memory_history,
         memory_data_base=memory_data_base,
         store=memory_store,
-        duckdb_vector_storage=duckdb_vector_storage
+        duckdb_vector_storage=duckdb_vector_storage,
+        duckdb_vector_storage_basic=duckdb_vector_storage_basic
     )
     print(__rag_service)
     return __rag_service
