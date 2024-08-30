@@ -2,7 +2,7 @@ import os
 import shutil
 from collections.abc import Generator
 
-# https://cohere.com/blog/search-cohere-langchain
+# https://cohere.com/blog/search-cohere-langchain  https://www.youtube.com/watch?v=1FERFfut4Uw
 
 from fastapi import FastAPI
 
