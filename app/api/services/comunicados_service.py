@@ -16,7 +16,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from app.api.prepdoclib.image_utils import PyTesseractLoader
 import re
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
-from langchain_community.document_loaders import PyPDFium2Loader
+from app.api.extractors.pdf_extractor import PdfExtractor
 from langchain.retrievers import ParentDocumentRetriever, MergerRetriever
 from langchain.storage import InMemoryStore
 from rich import print
@@ -95,8 +95,8 @@ class ComunicadosService():
         """
         condense_question_prompt = PromptTemplate.from_template(__condense_question_template)
 
-        __vect_retriever = self.__vector_storage.as_retriever(search_type="similarity", search_kwargs={"k": 10, "include_metadata": True})
-        __data_retriever = self.__data_base.as_retriever(search_type="similarity", search_kwargs={"k": 10, "include_metadata": True})
+        __vect_retriever = self.__vector_storage.as_retriever(search_type="similarity", search_kwargs={"k": 3, "include_metadata": True})
+        __data_retriever = self.__data_base.as_retriever(search_type="similarity", search_kwargs={"k": 3, "include_metadata": True})
 
         self.__lotr = MergerRetriever(retrievers=[__data_retriever, __vect_retriever])
         
@@ -125,7 +125,8 @@ class ComunicadosService():
         print(__sub_docs)
         __relevantes = []
         for __doc in __sub_docs:
-            __relevantes.append(f'\n#### {__doc.metadata['source']} ####\n\n')
+            __source = __doc.metadata['source']
+            __relevantes.append(f'\n#### {__source} ####\n\n')
             __relevantes.append(__doc.page_content)
             __relevantes.append('\n\n')
         __messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes))
@@ -146,16 +147,16 @@ class ComunicadosService():
 
     def invoke_with_sources(self, query: str) -> Union[Tuple[str, List[Document]], None]:
         """ Chamada para o llm. SubDocuments e Fontes utilizadas """
-        __sub_docs   = self.get_sub_documents(clean_query(query), 20)
-        # __sub_docs.sort(key=lambda x: x.metadata['source'])
-        __reordering = LongContextReorder()
-        __reordered_docs = __reordering.transform_documents(__sub_docs)
-        print(__reordered_docs)
+        __sub_docs       = self.get_sub_documents(query, 3)
+        # __reordering     = LongContextReorder()
+        # __reordered_docs = __reordering.transform_documents(__sub_docs)
+        # print(__reordered_docs)
         # TODO - filtrar por resumo e palavras - chave
         # TODO - OPÇÃO, gerar os embeds do resultado e fazer outro filtro por similaridade.
         __relevantes = []
-        for __doc in __reordered_docs:
-            __relevantes.append(f'\n#### {__doc.metadata['source']} ####\n\n')
+        for __doc in __sub_docs:
+            __source = __doc.metadata['source']
+            __relevantes.append(f'\n#### {__source} ####\n\n')
             __relevantes.append(__doc.page_content)
             __relevantes.append('\n\n')
         __messages   = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes))
@@ -197,7 +198,7 @@ class ComunicadosService():
     def __carregar_pdf(self, arquivos: List[str]):
          for arquivo in tqdm(arquivos):
             __doc_path_pdf = self.__folder + arquivo
-            __loader       = PyPDFium2Loader(__doc_path_pdf, extract_images=True)
+            __loader       = PdfExtractor(__doc_path_pdf)
             __documents    = __loader.load()
             # for __doc in __documents:
             #    MetadataService(__doc).extrair_metadata()

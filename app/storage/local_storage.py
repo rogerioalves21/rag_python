@@ -4,8 +4,6 @@ from collections.abc import Generator
 
 # https://cohere.com/blog/search-cohere-langchain  https://www.youtube.com/watch?v=1FERFfut4Uw
 
-from fastapi import FastAPI
-
 from app.storage.base_storage import BaseStorage
 
 
@@ -14,7 +12,7 @@ class LocalStorage(BaseStorage):
 
     def __init__(self):
         super().__init__()
-        folder = 'C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/local_storage/'
+        folder = '/home/rogerio_rodrigues/python-workspace/rag_python/local_storage/' # 'C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/local_storage/'
         self.folder = folder
 
     def save(self, filename: str, data):
@@ -85,3 +83,5 @@ class LocalStorage(BaseStorage):
             filename = self.folder + "/" + filename
         if os.path.exists(filename):
             os.remove(filename)
+
+storage = LocalStorage()

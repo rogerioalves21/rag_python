@@ -44,7 +44,7 @@ def get_memory_history() -> ConversationBufferMemory:
 
 def get_text_splitter() -> Union[ComunicadoTextSplitter, None]:
     print(f"Criando o ComunicadoTextSplitter")
-    __splitter = ComunicadoTextSplitter(chunk_size=1000, chunk_overlap=200, length_function=len)
+    __splitter = ComunicadoTextSplitter(chunk_size=1500, chunk_overlap=500, length_function=len)
     print(__splitter)
     return __splitter
 
@@ -112,7 +112,7 @@ def get_memory_db() -> Union[DocArrayInMemorySearch, None]:
 def get_chat_ollama_client() -> Union[ChatOllama, None]:
     """ Instância do cliente para os LLMs do ollama """
     print(f"Criando o get_chat_ollama_client")
-    __llm = ChatOllama(model=MODEL_GEMMA, keep_alive='1h', temperature=0.3, num_predict=2000)
+    __llm = ChatOllama(model=MODEL_LLAMA, keep_alive='1h', temperature=0.0, num_predict=2000)
     print("Criando o ChatOllama")
     print(__llm)
     return __llm
