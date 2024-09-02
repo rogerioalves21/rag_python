@@ -8,6 +8,7 @@ from langchain_ollama import ChatOllama
 import langchain
 from langchain_text_splitters import CharacterTextSplitter, RecursiveCharacterTextSplitter
 from langchain_core.output_parsers import StrOutputParser
+from langchain_weaviate.vectorstores import WeaviateVectorStore
 from langchain_core.documents import Document
 from langchain_community.document_transformers import LongContextReorder
 from langchain_community.vectorstores import DocArrayInMemorySearch, MongoDBAtlasVectorSearch
@@ -21,6 +22,7 @@ from app.api.extractors.pdf_extractor import PdfExtractor
 from langchain.retrievers import ParentDocumentRetriever, MergerRetriever
 from langchain.storage import InMemoryStore
 from rich import print
+from weaviate import WeaviateClient
 from app.api.prepdoclib.comunicado_splitter import clean_query, clean_text
 from langchain_community.vectorstores import DuckDB
 from app.api.services.metadata_service import MetadataService
@@ -58,7 +60,8 @@ class ComunicadosService():
         store: Union[InMemoryStore, None] = None,
         duckdb_vector_storage: Union[MongoDBAtlasVectorSearch, None] = None,
         duckdb_vector_storage_basic: Union[DuckDB, None] = None,
-        embeddings: Union[OllamaEmbeddings, None] = None
+        embeddings: Union[OllamaEmbeddings, None] = None,
+        weaviate_storage: Union[Tuple[WeaviateVectorStore, WeaviateClient], None] = None,
     ):
         self.__llm          = llm
         self.__system_prompt  = system_prompt
@@ -71,7 +74,10 @@ class ComunicadosService():
         self.__memory         = memory_history # TODO - criar isso para multi-usuário
         self.__data_base      = memory_data_base
         self.__vector_storage = duckdb_vector_storage
+        self.__vector_basic   = duckdb_vector_storage_basic
         self.__embeddings     = embeddings
+        self.__weaviate       = weaviate_storage[0]
+        self.__weaviate_cli   = weaviate_storage[1]
 
         if self.__in_memory:
             self.__full_doc_retriever = ParentDocumentRetriever(
@@ -81,7 +87,7 @@ class ComunicadosService():
             )
         else:
             self.__full_doc_retriever = ParentDocumentRetriever(
-                vectorstore=self.__vector_storage,
+                vectorstore=self.__weaviate,
                 docstore=self.__store,
                 parent_splitter=self.__text_splitter,
                 child_splitter=self.__text_splitter,
@@ -147,25 +153,23 @@ class ComunicadosService():
 
     def invoke_with_sources(self, query: str) -> Union[Tuple[str, List[Document]], None]:
         """ Chamada para o llm. SubDocuments e Fontes utilizadas """
-        __sub_docs = self.get_sub_documents(query, 6)
-
-        # usar o text parser para ver a diferença das saídas com o modelo
-
-        # refina ainda mais a saída
-        # __qa = load_qa_chain(self.__llm, chain_type="stuff", verbose=True, prompt=self.__chat_prompt)
-        # __filtrado = __qa.run(input_documents=__sub_docs, question=query)
-        # print(__filtrado)
-        
-        __relevantes = []
-        for __doc in __sub_docs:
-            __relevantes.append(__doc.page_content)
-            __relevantes.append('\n')
-        __contexto_tratado = clean_text(''.join(__relevantes))
-        __messages = self.__chat_prompt.format_messages(question=query, context=__contexto_tratado)
-        print(__messages)
-        self.__qa_chain.combine_docs_chain.llm_chain.prompt.messages = __messages
-        retorno      = self.__qa_chain.invoke({"question": query})
-        return retorno['answer'], __sub_docs
+        try:
+            self.__weaviate_cli.connect()
+            __sub_docs = self.get_sub_documents(query, top_k=4)
+            print(__sub_docs)
+            __relevantes = []
+            for __doc in __sub_docs:
+                __resumo = __doc.metadata["resumo"]
+                
+                __relevantes.append(__doc.page_content)
+                __relevantes.append('\n')
+            __contexto_tratado = clean_text(''.join(__relevantes))
+            __messages = self.__chat_prompt.format_messages(question=query, context=__contexto_tratado)
+            self.__qa_chain.combine_docs_chain.llm_chain.prompt.messages = __messages
+            retorno = self.__qa_chain.invoke({"question": query})
+            return retorno['answer'], __sub_docs
+        finally:
+            self.__weaviate_cli.close()
     
     def invoke(self, query: str) -> Union[str, None]:
         """ Chamada para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
@@ -212,11 +216,6 @@ class ComunicadosService():
         __loader    = PdfExtractor('', '', MetadataService())
         __documents = await __loader.extract_all()
         print("\nINICIO EMBEDDING\n")
-
-        # __embds = await self.__embeddings.aembed_documents([__doc.page_content for __doc in __documents])
-
-        # self.__vector_storage.
-        
         await self.__full_doc_retriever.aadd_documents(__documents)
         count += 1
         print(f'\nTUDO PRONTO, {count} DOCUMENTOS EM {int(int(time.time() - t0)/60)} MINUTOS!\n')
@@ -269,7 +268,7 @@ class ComunicadosService():
         if self.__in_memory:
             relevant_context = self.__data_base.similarity_search(query=question, k=top_k)
         else:
-            relevant_context = self.__vector_storage.similarity_search(query=question, k=top_k)
+            relevant_context = self.__weaviate.similarity_search(query=question, k=top_k)
         return relevant_context
 
     def get_full_document_by_source(self, source: str) -> Union[Document, None]:

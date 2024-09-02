@@ -1,5 +1,5 @@
 import requests
-from typing import Union
+from typing import Union, Tuple
 from fastapi import Depends, Header, HTTPException, status
 from typing_extensions import Annotated
 from app.models import User
@@ -11,6 +11,9 @@ from app.api.prepdoclib.comunicado_splitter import ComunicadoTextSplitter
 from langchain.memory import ConversationBufferMemory
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch, DocArrayInMemorySearch
+import weaviate
+from weaviate import WeaviateClient
+from langchain_weaviate.vectorstores import WeaviateVectorStore
 from langchain.storage import InMemoryStore
 import functools
 from langchain_community.vectorstores import DuckDB
@@ -32,7 +35,7 @@ config_system_prompt = "Você é um assistente dedicado a responder perguntas ut
 
 @functools.cache
 def get_memory_history() -> ConversationBufferMemory:
-    """ Carrega a memória de conversação """
+    """ \nCarrega a memória de conversação\n """
     print(f"Criando o ConversationBufferMemory")
     __memory = ConversationBufferMemory(
         chat_memory=ChatMessageHistory(),
@@ -44,7 +47,7 @@ def get_memory_history() -> ConversationBufferMemory:
     return __memory
 
 def get_text_splitter() -> Union[ComunicadoTextSplitter, None]:
-    print(f"Criando o ComunicadoTextSplitter")
+    print(f"\nCriando o ComunicadoTextSplitter\n")
     __splitter = ComunicadoTextSplitter(chunk_size=400, chunk_overlap=20, length_function=len)
     print(__splitter)
     return __splitter
@@ -63,7 +66,7 @@ def get_chat_prompt() -> Union[ChatPromptTemplate, None]:
 
 @functools.cache
 def get_ollama_embeddings_basic() -> Union[OllamaEmbeddings, None]:
-    """ LLM para embeddings """
+    """ \nLLM para embeddings\n """
     print(f"Criando o OllamaEmbeddings Basic")
     __embed = OllamaEmbeddings(model=CONFIG_EMBD)
     print(__embed)
@@ -71,7 +74,7 @@ def get_ollama_embeddings_basic() -> Union[OllamaEmbeddings, None]:
 
 @functools.cache
 def get_ollama_embeddings() -> Union[OllamaEmbeddings, None]:
-    """ LLM para embeddings """
+    """ \nLLM para embeddings\n """
     print(f"Criando o OllamaEmbeddings")
     __embed = OllamaEmbeddings(model=CONFIG_EMBDBERT)
     print(__embed)
@@ -79,23 +82,34 @@ def get_ollama_embeddings() -> Union[OllamaEmbeddings, None]:
 
 @functools.cache
 def get_duckdb_vector_store_basic() -> Union[DuckDB, None]:
-    """ Cria o vectorstore com duckdb """
+    """ \nCria o vectorstore com DUCKDB\n """
     print("Criando o DuckDB Basic")
     __vector_store = DuckDB(embedding=get_ollama_embeddings_basic())
     print(__vector_store)
     return __vector_store
 
+def get_weaviate_vector_store() -> Union[Tuple[WeaviateVectorStore, WeaviateClient], None]:
+    """ \nCria o vectorstore com WEAVIATE\n """
+    __weaviate_client = weaviate.connect_to_local(host='127.0.0.1', port=8079, grpc_port=50060)
+    __vector_store = WeaviateVectorStore(client=__weaviate_client, index_name="Doc_Jur", text_key="page_content", embedding=get_ollama_embeddings())
+    print(__vector_store)
+    return __vector_store, __weaviate_client
+
 @functools.cache
 def get_mongodb_vector_store() -> Union[MongoDBAtlasVectorSearch, None]:
-    """ Cria o vectorstore com duckdb """
+    """ \nCria o vectorstore com duckdb\n """
     print("Criando o MongoDB")
-    __mongo_client = MongoClient("mongodb://localhost:27017/?appname=SicoobLid&directConnection=true&ssl=false")
-    __collection = __mongo_client["lid"]["sicoob-collection"]
-    print(__mongo_client.list_database_names())
-    print(__collection)
-    __vector_store = MongoDBAtlasVectorSearch(collection=__collection, embedding=get_ollama_embeddings())
-    print(__vector_store)
-    return __vector_store
+    """try:
+        __mongo_client = MongoClient("mongodb://localhost:27017/?appname=SicoobLid&directConnection=true&ssl=false")
+        __collection = __mongo_client["lid"]["sicoob-collection"]
+        print(__mongo_client.list_database_names())
+        print(__collection)
+        __vector_store = MongoDBAtlasVectorSearch(collection=__collection, embedding=get_ollama_embeddings())
+        print(__vector_store)
+        return __vector_store
+    except:
+        print("Sem mongo DB")"""
+    return None
 
 @functools.cache
 def get_memory_store() -> Union[InMemoryStore, None]:
@@ -132,6 +146,7 @@ def get_rag_service(
         duckdb_vector_storage: Annotated[MongoDBAtlasVectorSearch, Depends(get_mongodb_vector_store)],
         duckdb_vector_storage_basic: Annotated[DuckDB, Depends(get_duckdb_vector_store_basic)],
         embeddings: Annotated[OllamaEmbeddings, Depends(get_ollama_embeddings)],
+        weaviate_storage: Annotated[Tuple[WeaviateVectorStore, WeaviateClient], Depends(get_weaviate_vector_store)]
     ) -> Union[ComunicadosService, None]:
     __rag_service = ComunicadosService(
         text_splitter=text_splitter,
@@ -146,7 +161,8 @@ def get_rag_service(
         store=memory_store,
         duckdb_vector_storage=duckdb_vector_storage,
         duckdb_vector_storage_basic=duckdb_vector_storage_basic,
-        embeddings=embeddings
+        embeddings=embeddings,
+        weaviate_storage=weaviate_storage
     )
     print(__rag_service)
     return __rag_service

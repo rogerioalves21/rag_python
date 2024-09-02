@@ -65,6 +65,7 @@ class PdfExtractor(BaseExtractor):
                 metadata={"source": __json["fileName"], "page": __json["page"], "resumo": __json["resumo"] }
             )
             __documents.append(__document)
+        print(__documents)
         return __documents
 
     async def extract_all(self) -> List[Document]:

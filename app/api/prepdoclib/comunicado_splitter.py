@@ -1,6 +1,7 @@
 from typing import Any, List, Literal, Optional, Union
 from langchain_text_splitters.base import Language, TextSplitter
 import re
+from app.api.prepdoclib.textparser import TextParser
 
 
 def tratar_linhas_texto(document: str) -> str:
@@ -15,9 +16,11 @@ def clean_query(query: str) -> str:
     return clean_text(query)
 
 def clean_text(text: str) -> str:
-    clean = re.split(r'\s+|#\s*', text)
-    texto_0 = ' '.join(clean)
-    return texto_0
+    __text_parser = TextParser()
+    __text = __text_parser.clean_empty_lines_mail_sites(text)
+    __clean = re.split(r'\s+|#\s*', __text)
+    __text = ' '.join(__clean)
+    return __text
 
 class ComunicadoTextSplitter(TextSplitter):
     """ Quebra em partes iguais textos de comunicados """
@@ -46,4 +49,6 @@ class ComunicadoTextSplitter(TextSplitter):
 
     @staticmethod
     def __clean_text(text: str) -> str:
-        return clean_text(text)
+        __remover_sites = TextParser()
+        __text = __remover_sites.clean_empty_lines_mail_sites(text)
+        return clean_text(__text)
