@@ -7,11 +7,11 @@ from app.api.services.comunicados_service import ComunicadosService
 router = APIRouter()
 
 @router.get("/load-data", dependencies=[RagService])
-def load_data(__rag_service: ComunicadosService | None = RagService) -> Any:
+async def load_data(__rag_service: ComunicadosService | None = RagService) -> Any:
     try:
-        __rag_service.load_data()
+        await __rag_service.load_data()
         return JSONResponse(content={"success": True})
     except Exception as e:
         print("ERRO")
         print(e)
-        return JSONResponse(content='Erro', status_code=400)
+        return JSONResponse(content=str(e), status_code=400)

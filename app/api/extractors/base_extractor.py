@@ -9,5 +9,9 @@ class BaseExtractor(ABC):
     """
 
     @abstractmethod
+    def extract_all(self) -> List[Document]:
+        raise NotImplementedError
+    
+    @abstractmethod
     def extract(self) -> List[Document]:
         raise NotImplementedError

@@ -10,11 +10,11 @@ from langchain_ollama import ChatOllama, OllamaEmbeddings
 from app.api.prepdoclib.comunicado_splitter import ComunicadoTextSplitter
 from langchain.memory import ConversationBufferMemory
 from langchain_community.chat_message_histories import ChatMessageHistory
-from langchain_community.vectorstores import DocArrayInMemorySearch
+from langchain_community.vectorstores import MongoDBAtlasVectorSearch, DocArrayInMemorySearch
 from langchain.storage import InMemoryStore
 import functools
 from langchain_community.vectorstores import DuckDB
-import duckdb
+from pymongo import MongoClient
 
 logger = logging.getLogger(__name__)
 
@@ -24,10 +24,11 @@ client_id    = 'lid'
 
 CONFIG_EMBDBERT = 'paraphrase-multilingual'
 CONFIG_EMBD  = 'mxbai-embed-large'
+MODEL_MISTRAL = 'mistral:7b-instruct-v0.3-q2_K'
 MODEL_LLAMA  = 'qwen2:1.5b-instruct-q4_K_M'
 MODEL_GEMMA  = 'gemma2:2b-instruct-q4_K_M'
 
-config_system_prompt = "Você é um assistente brasileiro dedicado a responder perguntas utilizando o contexto fornecido. Se você não souber a resposta, responda que o contexto é insuficiente para responder a pergunta. Escreva sua resposta no idioma Português."
+config_system_prompt = "Você é um assistente dedicado a responder perguntas utilizando SOMENTE o contexto fornecido. Se não for possível encontrar a resposta no contexto, responda \"O contexto fornecido é insuficiente!\". Não utilize conhecimento prévio."
 
 @functools.cache
 def get_memory_history() -> ConversationBufferMemory:
@@ -44,7 +45,7 @@ def get_memory_history() -> ConversationBufferMemory:
 
 def get_text_splitter() -> Union[ComunicadoTextSplitter, None]:
     print(f"Criando o ComunicadoTextSplitter")
-    __splitter = ComunicadoTextSplitter(chunk_size=1500, chunk_overlap=500, length_function=len)
+    __splitter = ComunicadoTextSplitter(chunk_size=400, chunk_overlap=20, length_function=len)
     print(__splitter)
     return __splitter
 
@@ -85,10 +86,14 @@ def get_duckdb_vector_store_basic() -> Union[DuckDB, None]:
     return __vector_store
 
 @functools.cache
-def get_duckdb_vector_store() -> Union[DuckDB, None]:
+def get_mongodb_vector_store() -> Union[MongoDBAtlasVectorSearch, None]:
     """ Cria o vectorstore com duckdb """
-    print("Criando o DuckDB")
-    __vector_store = DuckDB(embedding=get_ollama_embeddings())
+    print("Criando o MongoDB")
+    __mongo_client = MongoClient("mongodb://localhost:27017/?appname=SicoobLid&directConnection=true&ssl=false")
+    __collection = __mongo_client["lid"]["sicoob-collection"]
+    print(__mongo_client.list_database_names())
+    print(__collection)
+    __vector_store = MongoDBAtlasVectorSearch(collection=__collection, embedding=get_ollama_embeddings())
     print(__vector_store)
     return __vector_store
 
@@ -112,7 +117,7 @@ def get_memory_db() -> Union[DocArrayInMemorySearch, None]:
 def get_chat_ollama_client() -> Union[ChatOllama, None]:
     """ Instância do cliente para os LLMs do ollama """
     print(f"Criando o get_chat_ollama_client")
-    __llm = ChatOllama(model=MODEL_LLAMA, keep_alive='1h', temperature=0.0, num_predict=2000)
+    __llm = ChatOllama(model=MODEL_GEMMA, keep_alive='1h', temperature=0.4, num_predict=2000)
     print("Criando o ChatOllama")
     print(__llm)
     return __llm
@@ -124,12 +129,13 @@ def get_rag_service(
         memory_history: Annotated[ChatPromptTemplate, Depends(get_memory_history)],
         memory_data_base: Annotated[DocArrayInMemorySearch, Depends(get_memory_db)],
         memory_store: Annotated[InMemoryStore, Depends(get_memory_store)],
-        duckdb_vector_storage: Annotated[DuckDB, Depends(get_duckdb_vector_store)],
-        duckdb_vector_storage_basic: Annotated[DuckDB, Depends(get_duckdb_vector_store_basic)]
+        duckdb_vector_storage: Annotated[MongoDBAtlasVectorSearch, Depends(get_mongodb_vector_store)],
+        duckdb_vector_storage_basic: Annotated[DuckDB, Depends(get_duckdb_vector_store_basic)],
+        embeddings: Annotated[OllamaEmbeddings, Depends(get_ollama_embeddings)],
     ) -> Union[ComunicadosService, None]:
     __rag_service = ComunicadosService(
         text_splitter=text_splitter,
-        chain=llm_streaming,
+        llm=llm_streaming,
         system_prompt=config_system_prompt,
         folder='./files/pdfs/',
         in_memory=False,
@@ -139,23 +145,32 @@ def get_rag_service(
         memory_data_base=memory_data_base,
         store=memory_store,
         duckdb_vector_storage=duckdb_vector_storage,
-        duckdb_vector_storage_basic=duckdb_vector_storage_basic
+        duckdb_vector_storage_basic=duckdb_vector_storage_basic,
+        embeddings=embeddings
     )
     print(__rag_service)
     return __rag_service
 
-def create_user(payload: str) -> User:
+def create_user(token: Union[str, None]) -> User:
     return User(
+        cpfCnpj="00875981160",
+        cooperativa="0300",
+        descricao="Rogério Alves Rodrigues",
+        email="rogerioalves21@gmail.com",
+        login="rogerio.rodrigues",
+        instituicaoOrigem="2")
+    """return User(
         cpfCnpj=payload['cpfCnpj'],
         cooperativa=str(payload['cooperativa']),
         descricao=str(payload['descricao']),
         email=str(payload['email']),
         login=str(payload['login']),
         instituicaoOrigem=str(payload['instituicaoOrigem'])
-    )
+    )"""
 
-def get_dados_usuario(token: str) -> User:
-    try:
+def get_dados_usuario(token: Union[str, None]) -> User:
+    return create_user(token)
+    """try:
         logger.info(f'JWT\n{token}')
         headers = {
             'Authorization': f'Bearer {token}',
@@ -175,16 +190,16 @@ def get_dados_usuario(token: str) -> User:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='Erro inesperado ao tentar obter os dados do usuário logado -> user-info-api',
-        )
+        )"""
 
 def do_login(X_JWT_Assertion: Annotated[Union[str, None], Header()] = None) -> User:
     logger.info('do_login')
-    if X_JWT_Assertion is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Usuário não autenticado",
-        )
-    return get_dados_usuario(X_JWT_Assertion)
+    # if X_JWT_Assertion is None:
+    #    raise HTTPException(
+    #        status_code=status.HTTP_401_UNAUTHORIZED,
+    #        detail="Usuário não autenticado",
+    #    )
+    return get_dados_usuario(None) # X_JWT_Assertion)
 
 InformacoesUsuario: User | None = Depends(do_login)
 RagService: ComunicadosService | None = Depends(get_rag_service)
