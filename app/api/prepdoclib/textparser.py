@@ -12,14 +12,14 @@ class TextParser:
         __full_text = __full_text.replace('\xa0', ' ') # Replace non-breaking spaces
         return __full_text
     
-    def clean_empty_lines_mail_sites(self, text: str) -> str:
+    def clean_empty_lines_mail_sites(self, texto: str) -> str:
         # default clean
         # remove invalid symbol
-        text = re.sub(r'<\|', '<', text)
-        text = re.sub(r'\|>', '>', text)
-        text = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F\xEF\xBF\xBE]', '', text)
+        __text = re.sub(r'<\|', '<', texto)
+        __text = re.sub(r'\|>', '>', __text)
+        __text = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F\xEF\xBF\xBE]', '', __text)
         # Unicode  U+FFFE
-        text = re.sub('\uFFFE', '', text)
+        __text = re.sub('\uFFFE', '', __text)
 
         # Remove extra spaces
         # pattern = r'\n{3,}'
@@ -28,13 +28,13 @@ class TextParser:
         # text = re.sub(pattern, ' ', text)
             
         # Remove email
-        pattern = r'([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)'
-        text = re.sub(pattern, '', text)
+        __pattern = r'([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)'
+        __text = re.sub(__pattern, '', __text)
 
         # Remove URL
-        pattern = r'https?://[^\s]+'
-        text = re.sub(pattern, '', text)
-        return text
+        __pattern = r'https?://[^\s]+'
+        __text = re.sub(__pattern, '', __text)
+        return __text
 
     def cleanup_data(self, data: str) -> str:
         """Limpa o conteúdo usando regex
@@ -44,10 +44,10 @@ class TextParser:
             str: Texto limpo.
         """
         # combine duas ou mais novas linhas e substitua-as por uma nova linha
-        output = re.sub(r"\n{2,}", "\n", data)
+        __output = re.sub(r"\n{2,}", "\n", data)
         # combine dois ou mais espaços que não sejam novas linhas e substitua-os por um espaço
-        output = re.sub(r"[^\S\n]{2,}", " ", output)
-        return output.strip()
+        __output = re.sub(r"[^\S\n]{2,}", " ", __output)
+        return __output.strip()
     
     def parse(self, content: AnyStr) -> AnyStr:
         return self.cleanup_data(content)

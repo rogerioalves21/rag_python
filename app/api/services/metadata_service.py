@@ -9,7 +9,7 @@ from langchain.chains.summarize import load_summarize_chain
 
 class MetadataService:
     def __init__(self):
-        self.__model          = 'qwen2:1.5b-instruct-q4_K_M'
+        self.__model          = 'gemma2:2b-instruct-q4_K_M'# 'qwen2:1.5b-instruct-q4_K_M'
         self.__summary_prompt = "Você é um assistente dedicado a criar resumos de documentos. Sua tarefa é fazer um resumo claro e conciso, sem acrescentar nenhum conhecimento prévio, nota ou sugestão."
         self.__summary_juridico_prompt = "Você é um assistente especialista em processos judiciais. Sua tarefa é fazer um resumo claro e conciso de processos, foque em aspectos como número do processo, valor da causa, valor da dívida, requerentes, requeridos, as partes e objetivo do processo. Não acrescente nenhum conhecimento prévio, nota ou sugestão."
         self.__keys_prompt    = "Você é um assistente dedicado a identificar e extrair palavras-chave de um documento. Extraia entre 3 e 5 palavras-chave, pois elas serão utilizadas pela área administrativa para buscar esse mesmo documento futuramente."
@@ -100,4 +100,4 @@ RESUMO DETALHADO:
         __cleaned_text = clean_text(__documento.page_content[:1500])
         __texto = self.__text_parser.parse(__cleaned_text)
         __messages = __chat_prompt.format_messages(texto=__texto)
-        return self.__chain.invoke(__messages)
+        return "" # self.__chain.invoke(__messages)

@@ -15,8 +15,8 @@ class LocalStorage(BaseStorage):
 
     def __init__(self):
         super().__init__()
-        folder = '/home/rogerio_rodrigues/python-workspace/rag_python/local_storage/' # 'C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/local_storage/'
-        self.folder = folder
+        # folder = '/home/rogerio_rodrigues/python-workspace/rag_python/local_storage/' # 'C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/local_storage/'
+        self.folder = 'C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/local_storage/'
         print(f"diretório storage: {self.folder}")
 
     def save(self, filename: str, data):

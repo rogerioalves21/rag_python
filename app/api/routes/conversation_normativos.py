@@ -13,8 +13,8 @@ def conversation_with_sources(__payload: Union[ConversationPayload | None] = Non
     __response, __documents = __rag_service.invoke_with_sources(__payload.properties.question.description.strip())
 
     sources = list()
-    for __doc in __documents:
-        __name         = str(__doc.metadata['source'])
+    """for __doc in __documents:
+        __name         = ''#str(__doc.metadata['source'])
         __name_splited = __name.split('/')
         __name         = __name_splited[len(__name_splited) - 1]
 
@@ -31,5 +31,5 @@ def conversation_with_sources(__payload: Union[ConversationPayload | None] = Non
                 page=__doc.metadata['page'],
                 # topic_suggestions=__doc.metadata['perguntas'],
                 # summary=__doc.metadata['resumo']
-            ))
+            ))"""
     return NormativosResponse(message=__response, success=True, documents=sources)

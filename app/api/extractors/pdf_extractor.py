@@ -51,7 +51,7 @@ class PdfExtractor(BaseExtractor):
         for __page in __json["content"]:
             __document = Document(
                 page_content=__page["page_content"],
-                metadata={"source": __json["fileName"], "page": __page["page"], "resumo": __page["resumo"] }
+                metadata={"source": __json["fileName"], "fonte": __json["fileName"], "page": __json["page"], "resumo": __json["resumo"] }
             )
             __documents.append(__document)
         return __documents
@@ -62,7 +62,7 @@ class PdfExtractor(BaseExtractor):
         for __json in __jsons:
             __document = Document(
                 page_content=__json["page_content"],
-                metadata={"source": __json["fileName"], "page": __json["page"], "resumo": __json["resumo"] }
+                metadata={"source": __json["fileName"], "fonte": __json["fileName"], "page": __json["page"], "resumo": __json["resumo"] }
             )
             __documents.append(__document)
         print(__documents)

@@ -8,7 +8,11 @@ from langchain_ollama import ChatOllama
 import langchain
 from langchain_text_splitters import CharacterTextSplitter, RecursiveCharacterTextSplitter
 from langchain_core.output_parsers import StrOutputParser
-from langchain_weaviate.vectorstores import WeaviateVectorStore
+try:
+    from langchain_weaviate.vectorstores import WeaviateVectorStore
+except:
+    print("sem weaviate")
+    WeaviateVectorStore = None
 from langchain_core.documents import Document
 from langchain_community.document_transformers import LongContextReorder
 from langchain_community.vectorstores import DocArrayInMemorySearch, MongoDBAtlasVectorSearch
@@ -58,7 +62,7 @@ class ComunicadosService():
         memory_history: Union[ConversationBufferMemory, None] = None,
         memory_data_base: Union[DocArrayInMemorySearch, None] = None,
         store: Union[InMemoryStore, None] = None,
-        duckdb_vector_storage: Union[MongoDBAtlasVectorSearch, None] = None,
+        mongodb_vector_storage: Union[MongoDBAtlasVectorSearch, None] = None,
         duckdb_vector_storage_basic: Union[DuckDB, None] = None,
         embeddings: Union[OllamaEmbeddings, None] = None,
         weaviate_storage: Union[Tuple[WeaviateVectorStore, WeaviateClient], None] = None,
@@ -73,11 +77,17 @@ class ComunicadosService():
         self.__chat_prompt    = chat_prompt
         self.__memory         = memory_history # TODO - criar isso para multi-usuário
         self.__data_base      = memory_data_base
-        self.__vector_storage = duckdb_vector_storage
+        self.__mongodb_stoge  = mongodb_vector_storage
         self.__vector_basic   = duckdb_vector_storage_basic
         self.__embeddings     = embeddings
-        self.__weaviate       = weaviate_storage[0]
-        self.__weaviate_cli   = weaviate_storage[1]
+        if weaviate_storage:
+            self.__weaviate = weaviate_storage[0]
+        else:
+            self.__weaviate = None
+        if weaviate_storage:
+            self.__weaviate_cli = weaviate_storage[1]
+        else:
+            self.__weaviate_cli =None
 
         if self.__in_memory:
             self.__full_doc_retriever = ParentDocumentRetriever(
@@ -87,11 +97,12 @@ class ComunicadosService():
             )
         else:
             self.__full_doc_retriever = ParentDocumentRetriever(
-                vectorstore=self.__weaviate,
+                vectorstore=self.__mongodb_stoge, # self.__weaviate,
                 docstore=self.__store,
                 parent_splitter=self.__text_splitter,
                 child_splitter=self.__text_splitter,
-                name="ComunicadosRetriever",
+                child_metadata_fields=["resumo"],
+                name="sicoob-juridico-retriever",
             )
         self.__llm.verbose = True
         
@@ -119,7 +130,11 @@ class ComunicadosService():
 
     async def load_data(self) -> None:
         """ popula a store e vectstore """
-        await self.__obter_conteudo_arquivos()
+        try:
+            await self.__obter_conteudo_arquivos()
+        except Exception as excecao:
+            print(excecao)
+            raise excecao
     
     def set_callbacks(self, value: List) -> None:
         self.__callbacks = value
@@ -154,22 +169,22 @@ class ComunicadosService():
     def invoke_with_sources(self, query: str) -> Union[Tuple[str, List[Document]], None]:
         """ Chamada para o llm. SubDocuments e Fontes utilizadas """
         try:
-            self.__weaviate_cli.connect()
-            __sub_docs = self.get_sub_documents(query, top_k=4)
-            print(__sub_docs)
+            # self.__weaviate_cli.connect()
+            __sub_docs = self.get_sub_documents(query, top_k=6)
+            print(F'QUANTIDADE DE CHUNKS ENCONTRADOS: {len(__sub_docs)}')
             __relevantes = []
             for __doc in __sub_docs:
-                __resumo = __doc.metadata["resumo"]
-                
                 __relevantes.append(__doc.page_content)
-                __relevantes.append('\n')
-            __contexto_tratado = clean_text(''.join(__relevantes))
+                __relevantes.append('\n\n')
+            print(__relevantes)
+            __contexto_tratado = clean_text('\n\n'.join(__relevantes))
             __messages = self.__chat_prompt.format_messages(question=query, context=__contexto_tratado)
             self.__qa_chain.combine_docs_chain.llm_chain.prompt.messages = __messages
             retorno = self.__qa_chain.invoke({"question": query})
             return retorno['answer'], __sub_docs
         finally:
-            self.__weaviate_cli.close()
+            print("fim")
+            # self.__weaviate_cli.close()
     
     def invoke(self, query: str) -> Union[str, None]:
         """ Chamada para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
@@ -268,7 +283,7 @@ class ComunicadosService():
         if self.__in_memory:
             relevant_context = self.__data_base.similarity_search(query=question, k=top_k)
         else:
-            relevant_context = self.__weaviate.similarity_search(query=question, k=top_k)
+            relevant_context = self.__mongodb_stoge.similarity_search(query=question, k=top_k)
         return relevant_context
 
     def get_full_document_by_source(self, source: str) -> Union[Document, None]:
