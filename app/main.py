@@ -7,6 +7,20 @@ import os
 # from langchain.globals import set_llm_cache
 # from langchain_community.cache import SQLiteCache
 
+import time
+from app.api.extractors.pdf_extractor import PdfExtractor
+from app.api.services.metadata_service import MetadataService
+import onnxruntime as rt
+
+sess_options = rt.SessionOptions()
+sess_options.enable_profiling = True
+sess_options.log_severity_level = 0 # Verbose
+sess_options.execution_mode = rt.ExecutionMode.ORT_PARALLEL
+sess_options.graph_optimization_level = rt.GraphOptimizationLevel.ORT_ENABLE_ALL
+sess_options.inter_op_num_threads = 4
+sess_options.intra_op_num_threads = 4
+sess_options.add_session_config_entry("session.intra_op.allow_spinning", "0")
+
 # set_llm_cache(SQLiteCache())
 
 # seta as variáveis local
