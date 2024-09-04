@@ -26,16 +26,16 @@ async def task(__folder: str, __arquivo: str):
     await __loader.extract()
 
 async def main():
-    l = asyncio.get_event_loop()
     t0 = time.time()
     count = 0
     __documents = []
-    __arquivos = os.listdir('./files/pdfs')
-    with ThreadPoolExecutor(max_workers=9) as exe:
-        __futures = [exe.submit(l.run_until_complete(task), './files/pdfs', __arquivo) for __arquivo in __arquivos]
-        wait(__futures)
-        for __future in as_completed(__futures):
-            __documents.extend(__future.result())
+    __folder = './files/pdfs/'
+    __arquivos = os.listdir(__folder)
+    for __arquivo in __arquivos:
+        __doc_path_pdf = __folder + __arquivo
+        __loader       = PdfExtractor(__doc_path_pdf, __arquivo, MetadataService())
+        __document = await __loader.extract()
+        __documents.extend(__document)
     print(__documents)
     print(f'all done, {count} documents in {int(int(time.time() - t0)/60)} minutos')
 
