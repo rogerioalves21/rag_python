@@ -100,4 +100,4 @@ RESUMO DETALHADO:
         __cleaned_text = clean_text(__documento.page_content[:1500])
         __texto = self.__text_parser.parse(__cleaned_text)
         __messages = __chat_prompt.format_messages(texto=__texto)
-        return self.__chain.invoke(__messages)
+        return "" # self.__chain.invoke(__messages)

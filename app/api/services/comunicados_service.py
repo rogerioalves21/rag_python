@@ -101,7 +101,7 @@ class ComunicadosService():
                 docstore=self.__store,
                 parent_splitter=self.__text_splitter,
                 child_splitter=self.__text_splitter,
-                child_metadata_fields=["resumo"],
+                child_metadata_fields=["source", "page", "resumo"],
                 name="sicoob-juridico-retriever",
             )
         self.__llm.verbose = True

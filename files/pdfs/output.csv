@@ -1,0 +1,218 @@
+ 
+CCI - 5;00/2023 - CCS ;B;rasília;/DF, 17 de abril de 2023. 
+Às entidades do Sicoob. 
+Assunto:  ;Lançamento do produto Parceiro Mais para tomadores pessoa jurídica 
+;(PJ). 
+Senhores(as), 
+1. ;Em ;atenção ;ao ;compromisso ;de ;prover ;as ;cooperativas do ;Sicoob de ;produtos ;e 
+processos estruturados e integrados ao Sisb;r, informamos o lançamento do produto 
+Parceiro Mais para tomadores pessoa jurídica (PJ), em 19/4/2023;, conforme anexo 
+ao final desta CCI. 
+2. ;O ;fluxo ;de ;concessão ;funcionará ;tal ;qual ;a ;solução ;já ;existente ;para ;tomadores 
+pessoa ;física ;(PF), ;ou ;seja, ;a; ;captura ;de ;propostas ;ocorrerá ;direto ;da ;estrutu;ra 
+física ;do ;lojista, ;nos ;mesmos ;moldes ;operacionais ;já ;estruturados. ;Dessa ;fo;rma, 
+optando por capturar propostas nessa modalidade, as cooperativas deverão revisar 
+as regras ;para o destino Linha; de Crédito Convênio Parceiro Mais;, assim como as 
+regras ;para os mecan;ismos de ;pré-autorização ;e tabela de taxa de juros, a ;fim de 
+possibilitar ;a ;defin;ição ;do ;perfil ;de ;tomad;ores ;PJ ;para ;o ;processo ;de ;simulação, 
+pré-aprovação e atribuição de taxa de juros por meio de atributos de qualidade. 
+3. ;Compatibilizada ;com ;as ;melhores ;práticas ;de ;atendimento ;digital, ;a formalização 
+das ;operações ;dessa ;modalid;ade ;se ;dará, ;exclusivamente, ;por ;meio ;de ;contrato 
+digital, ;e ;as ;notificações ;para ;a ;realização ;do ;aceite; ;serão ;encaminhadas 
+respeitando ;o ;disposto ;na ;combinação ;de ;assinaturas ;da ;Plataforma ;de 
+Atendimento do Sisbr 2.0.  
+4. ;As ;linhas ;de crédito ;da ;modalidade serão as mesmas já ;operacionalizadas para ;o 
+público ;pessoa ;física, ;listadas ;no ;Item ;de ;Conhecimento ;(IC) ;14655; ;da; ;Base; ;de 
+Conhecimento do Portal ;de ;Serviços do; CCS;, e já ;foram adeq;uad;as ;de ;maneira a 
+contemplar ;o ;público ;PJ, ;sendo ;possível ;a ;especialização ;desse ;atributo; ;pela 
+cooperativa, se desejável. 
+5. ;Para ;as ;cooperativas ;que ;operam ;a ;solução ;de ;forma ;vinculada ;à ;Fábrica ;de 
+Limites, reiteramo;s a necessidade da criação dos perfis ;para o ;enquadramento de 
+tomadores PJ, nas portfólios dispostos a seguir: 
+Bens e Serviços; 
+Portfolio ;Outros Financiamentos; 
+Modalidade Bacen ;Financ;iament;os 
+Submodalida;de ;Aquisição de Bens – Outros Bens; 
+Veículos; 
+Portfolio ;Aquisição de Bens ;– Veículos Automotores 
+Modalidade Bacen ;Financ;iament;os 
+Submodalida;de ;Aquisição de Bens ;– Veículos Automotores 
+  Origem: CCS 
+#RESTRITA# ; ;1/;5 
+ 
+
+
+ 
+6. ;A Fábrica de; Limites opera no P;arceiro Mais para PJ tal qual na modalidade PF, ou 
+seja, de forma obrigatória para veículos e opcional para ;bens e serviços. 
+7. ;Em complemento, informamos que, para as cooperativas que ainda; não operam o 
+produto Parceiro Mais, o detalhamento do processo de im;plantação e enten;dimento 
+do e;scopo; das funcionalidades do ;Sisbr ;e;stão ;disponíveis de aco;rdo com ;o a;nexo 
+desta ;CCI ;e ;na ;Base ;de ;Conhecimento ;(IC ;1;465;5), ;e ;contemp;lam ;as ;instruções 
+necessárias ;para ;os ;usuários ;das ;cooperativas ;realizarem ;a ;implantação ;e ;a 
+prospecção da solução.  
+Atenciosamente, 
+Original assinada p;or 
+ 
+E;dson Rodrigues Lisboa Júnior ;Paulo Antônio Neto Ribeiro 
+Sistemas de Informação I ;Op;erações e Produtos de Crédito 
+Superintendente ;Superintendente 
+ ; 
+  Origem: CCS 
+#RESTRITA# ; ;2/;5 
+ 
+
+
+ 
+Anexo 
+CCI - 500/2023 - CCS 
+1. ;Informamos a evolução de funcion;alidades no Sisbr, em 19 de abril de 2023:  
+Sistema(s) ;Produto(s) 
+Sisbr 2.0 e Sisbr 3.0 ;Parceir;o Mais 
+Nº da STI ;Classificação da demanda 
+60750 – Programa Acreditar ;Evolutiva ;negocia;l 
+ 
+Fun;cionalidade 1: Nova Proposta; 
+ 
+o
+vit
+ej;Na etapa ;1 do cadastro de proposta, alterar o campo de CPF para CPF/CNPJ. 
+b
+O
+ 
+o
+hni;www.sicoob.com.br/parceiroma;is → Outros bens → Nova proposta;. 
+ma;www.sicoob.com.br/parceiroma;is → ;Veículos → N;ova ;proposta. 
+C
+Funcionalidade 2: Consulta de Operações 
+ 
+ovit
+ej;Na listagem de operações cadastradas, alterar; a coluna de C;PF para CPF/CNPJ. 
+b
+O
+ 
+o
+hni;www.sicoob.com.br/parceiroma;is → Outros bens → Consulta de Operações;.; 
+ma;www.sicoob.com.br/parceiroma;is → ;Veículos → C;onsulta de Operações. 
+C
+Funcionalidade 3: Filtro de Pe;squisa 
+ 
+o
+vit
+ej;Nesta funcionalidade;, alter;ar o cam;po d;e CPF Associado para ;CPF;/C;NPJ Associado. 
+b
+O
+ 
+o
+hni;www.sicoob.com.br/parceiroma;is → Outros bens → Consulta de Operações → Filtrar.; 
+ma;www.sicoob.com.br/parceiroma;is → ;Veículos → C;onsulta de Operações → Filtrar. 
+C
+ ; 
+  Origem: CCS 
+#RESTRITA# ; ;3/;5 
+ 
+
+
+ 
+Funcionalidade 4: Classificaçõe;s Pessoa 
+ 
+o
+vit;Na listagem de não cooperados ;cadastrados, alterar os campos ;de CPF e ;Nome para CPF/CNPJ 
+ejb;e Nome/Razão Social, respectivamente.; 
+O
+ 
+o
+h
+ni;www.sicoob.com.br/parceiroma;is → ;Simulação não associado → Classificações Pessoa. 
+m
+a
+C
+Funcionalidade 5: Novo Cadastro 
+ 
+o
+vitej;Na tela de cadastro de não cooperado, alterar o campo DE CPF PARA CPF/CNPJ. 
+b
+O
+ 
+o
+h
+ni;www.sicoob.com.br/parceiroma;is → ;Simulação não associado → Novo Cadastro.; 
+m
+a
+C
+Funcion;alidade 6: Analítico de Operações de Créd;ito ;– Parceiro Mais 
+ 
+o
+vit
+ej;Incluir o filtro Tip;o de Pessoa n;o relatório. ; 
+b
+O
+ 
+o
+h
+ni;Sisbr 2.0 → Plataforma ;de Crédito → Administração d;e Crédito ;→ ;Relatórios ;→ ;Parceiro Mais ;→ 
+ma;Analíticos; → Analítico de Operações de Crédito – Parceiro Mais. 
+C
+Funcion;alidade 7: Sintético d;e Operações de Créd;ito – Parceiro Mais 
+ 
+ o;Efetuar as seguintes inclus;ões no relatório:  
+vit;a) ;filtro; Tipo de Pessoa;  
+ej;b) ;coluna Tipo de Pessoa;  
+bO;c) ;totalizadores por tipo de convênio;  
+d) ;tipo de pes;soa no corpo do relatório.  
+ 
+ 
+o
+h
+ni;Sisbr 2.0 → Plataforma ;de Crédito → Administração d;e Crédito ;→ ;Relatórios ;→ ;Parceiro Mais ;→ 
+m;Sintéticos; → Sintético de Operações de Crédito – Parceiro Mais.  
+a
+C
+ 
+ ; 
+  Origem: CCS 
+#RESTRITA# ; ;4/;5 
+ 
+
+
+ 
+Disponíveis para consulta no Portal de Serviços do CC;S (Base de Conhecimento), 
+a ;partir de 19/4/2023, ao informar os seg;uintes códigos ;de identificação no campo 
+de pesquisa: 
+Código ;Descrição 
+Instruções ;para ;IC 14807 ;Outros Bens - Parceiro Mais 
+o usuário: 
+IC 14806 ;Veículos - Parce;iro M;ais 
+IC 15477 ;Sim;ulação Não-Associado - Parceiro Mais 
+IC 23278 ;Analític;o de Operações; de Crédito - Parceiro Mais 
+IC 20505 ;Sinté;tico; de Ope;rações de Crédito - Parceiro Mais 
+     
+Para ;as cooperativas que utilizam a ;matriz de ;acesso; ;disponibiliz;ada pelo ;Centro 
+Cooperativo ;Sicoob ;(CCS), ;essas ;funcionalidades; ;estarão ;disponíveis ;para ;o 
+usuário que possui, pelo; menos, um dos s;eguintes perfis de acesso: 
+Perfil de acesso - ;Funcion;ali;dade ;Perfil de acesso 
+Matriz ;do ;Centro ;Consultas Gerenciais; 
+Cooperativo ;Funcionalidade 6 ;Crédito III e IV. 
+Sicoob (CCS): 
+Informações rel;acionad;as à Matriz de Acesso do Centro Cooperativo Sicoob (CCS;) 
+estão ;disponíveis ;para; ;c;onsulta ;no ;Portal ;de ;Serviços ;do ;CCS ;(Base ;de 
+Conhecimento) ;ao ;informar ;o ;código ;de ;identificação ;IC ;9118 ;no ;campo ;de 
+pesquisa. 
+Eventuais ;pedidos ;de ;esclarecimentos ;deverão ;ser ;direcionados ;à ;Central ;de 
+Atendimento à Cooperativa, no número (61) 377;1-6600, opção 3, it;em 1;  
+ou por ;meio de; ;abertura ;de chamado no Port;al de Serviços do CCS, utilizando as 
+seguintes categorizações: 
+Atendi;mento à Cooperativa; → Crédito Gera;l ;(PF/PJ) → Parceiro + → Proposta ;de 
+Suporte ;às ;Crédito Associado – Parceiro +. 
+funcionalidades: 
+Atendimento ;à ;Cooperativa → ;Crédito Geral (PF/PJ) ;→ Parceiro ;+ ;→; ;Simulação 
+Não Assoc;iado. 
+Orientações ;adicionais ;aos ;c;ooperados ;poderão ser ;o;btid;as ;por ;meio ;da ;Central 
+de At;endimento, pelos ;telefones: 4000 1111 – c;apitais e regiões metropolitanas; e 
+0800 642 0000 – d;emais regiões (opção 1, item 7, subitens 3 e 2). 
+ 
+  Origem: CCS 
+#RESTRITA# ; ;5/;5 
+ 
+
+
