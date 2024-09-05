@@ -11,6 +11,7 @@ import time
 from app.api.extractors.pdf_extractor import PdfExtractor
 from app.api.services.metadata_service import MetadataService
 import onnxruntime as rt
+from langchain.globals import set_debug
 
 sess_options = rt.SessionOptions()
 sess_options.enable_profiling = True
@@ -22,6 +23,8 @@ sess_options.intra_op_num_threads = 4
 sess_options.add_session_config_entry("session.intra_op.allow_spinning", "0")
 
 # set_llm_cache(SQLiteCache())
+
+set_debug(False)
 
 # seta as variáveis local
 os.environ.setdefault('API_USERINFO', 'https://api-sisbr-ti.homologacao.com.br/user-info/v2/userinfo')

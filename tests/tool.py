@@ -1,7 +1,7 @@
 import ollama
 
 response = ollama.chat(
-    model='llama3.1',
+    model='gemma2:2b-instruct-q4_K_M',
     messages=[{'role': 'user', 'content': 
         'What is the weather in Toronto?'}],
 
@@ -27,6 +27,8 @@ response = ollama.chat(
 )
 
 print(response['message']['tool_calls'])
+
+import sys; sys.exit(0)
 
 
 import json

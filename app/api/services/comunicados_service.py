@@ -6,8 +6,11 @@ from langchain_ollama import ChatOllama, OllamaEmbeddings
 from concurrent.futures import ThreadPoolExecutor, wait, as_completed
 from langchain_ollama import ChatOllama
 import langchain
+
 from langchain_text_splitters import CharacterTextSplitter, RecursiveCharacterTextSplitter
 from langchain_core.output_parsers import StrOutputParser
+from langchain.chains import RetrievalQAWithSourcesChain
+
 try:
     from langchain_weaviate.vectorstores import WeaviateVectorStore
 except:
@@ -118,6 +121,16 @@ class ComunicadosService():
         """
         condense_question_prompt = PromptTemplate.from_template(__condense_question_template)
 
+        self.__retrieval_qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
+            llm=self.__llm,
+            chain_type="map_reduce",
+            retriever=self.__mongodb_stoge.as_retriever(),
+            return_source_documents=True,
+            reduce_k_below_max_tokens=True,
+            
+            # chain_type_kwargs={"prompt": self.__chat_prompt},
+        )
+
         self.__qa_chain = ConversationalRetrievalChain.from_llm(
             llm=self.__llm,
             retriever=self.__full_doc_retriever,
@@ -156,15 +169,15 @@ class ComunicadosService():
     
     async def agenerate(self, query: str) -> Any:
         """ Chamada streaming para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
-        __docs = self.get_parent_documents(clean_query(query))
-        __docs.sort(key=lambda x: x.metadata['source'])
-        __relevantes = []
-        for __doc in __docs:
-            __relevantes.append('\n"""')
-            __relevantes.append(__doc.page_content)
-            __relevantes.append('"""\n')
-        __messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes))
-        return await self.__chain.agenerate(messages=[__messages])
+       # __docs = self.get_parent_documents(clean_query(query))
+        #__docs.sort(key=lambda x: x.metadata['source'])
+        #__relevantes = []
+        #for __doc in __docs:
+        #    __relevantes.append('\n"""')
+        #    __relevantes.append(__doc.page_content)
+        #    __relevantes.append('"""\n')
+        #__messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes))
+        return await self.__retrieval_qa_chain.agenerate(query)# self.__chain.agenerate(messages=[__messages])
 
     def invoke_with_sources(self, query: str) -> Union[Tuple[str, List[Document]], None]:
         """ Chamada para o llm. SubDocuments e Fontes utilizadas """

@@ -20,15 +20,15 @@ def conversation_with_sources(__payload: Union[ConversationPayload | None] = Non
 
         # verifica se já existe na lista a fonte
         exists = False
-        for __i in sources:
-            if __i.name == __name and __i.page == __doc.metadata['page']:
-                exists = True
-                break
+        #for __i in sources:
+        #    if __i.name == __name and __i.page == __doc.metadata['page']:
+        #        exists = True
+        #        break
         if not exists:
             sources.append(SourceModel(
                 name=__name,
                 link=f"https://abcdef.com.br/pdf/{__name}",
-                page=__doc.metadata['page'],
+                page=0, #__doc.metadata['page'],
                 topic_suggestions="",#__doc.metadata['perguntas'],
                 summary=""#__doc.metadata['resumo']
             ))
