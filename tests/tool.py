@@ -1,7 +1,7 @@
 import ollama
 
 response = ollama.chat(
-    model='gemma2:2b-instruct-q4_K_M',
+    model='kuqoi/qwen2-tools',
     messages=[{'role': 'user', 'content': 
         'What is the weather in Toronto?'}],
 
