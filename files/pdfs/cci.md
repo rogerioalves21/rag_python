@@ -1,0 +1,140 @@
+```
+1.     Informamos a evolução de funcionalidades no Sisbr, em 19 de abril de 2023:
+             Sistema(s)                    
+Produto(s)
+           Sisbr 2.0 e Sisbr 3.0                 Parceiro
+Mais
+             Nº da STI                Classificação da
+demanda
+         60750 – Programa Acreditar               Evolutiva
+negocial
+                    Funcionalidade 1: Nova Proposta
+ Objetivo
+      Na etapa 1 do cadastro de proposta, alterar o campo de CPF para CPF/CNPJ.
+ Caminho
+      www.sicoob.com.br/parceiromais → Outros bens → Nova proposta.
+      www.sicoob.com.br/parceiromais → Veículos → Nova proposta.
+                  Funcionalidade 2: Consulta de Operações
+ Objetivo
+      Na listagem de operações cadastradas, alterar a coluna de CPF para CPF/
+CNPJ.
+ Caminho
+      www.sicoob.com.br/parceiromais → Outros bens → Consulta de Operações.
+      www.sicoob.com.br/parceiromais → Veículos → Consulta de Operações.
+                   Funcionalidade 3: Filtro de Pesquisa
+ Objetivo
+      Nesta funcionalidade, alterar o campo de CPF Associado para CPF/CNPJ
+Associado.
+ Caminho
+      www.sicoob.com.br/parceiromais → Outros bens → Consulta de Operações →
+Filtrar.
+      www.sicoob.com.br/parceiromais → Veículos → Consulta de Operações →
+Filtrar.
+Origem: CCS
+#RESTRITA#                                      
+    3/5
+
+```
+
+-----
+
+```
+Objetivo
+      Na listagem de não cooperados cadastrados, alterar os campos de CPF e Nome
+para CPF/CNPJ
+      e Nome/Razão Social, respectivamente.
+Caminho
+      www.sicoob.com.br/parceiromais → Simulação não associado → Classificações
+Pessoa.
+                     Funcionalidade 5: Novo Cadastro
+Objetivo
+      Na tela de cadastro de não cooperado, alterar o campo DE CPF PARA CPF/CNPJ.
+Caminho
+      www.sicoob.com.br/parceiromais → Simulação não associado → Novo Cadastro.
+           Funcionalidade 6: Analítico de Operações de Crédito – Parceiro
+Mais
+Objetivo
+      Incluir o filtro Tipo de Pessoa no relatório.
+Caminho
+      Sisbr 2.0 → Plataforma de Crédito → Administração de Crédito → Relatórios →
+Parceiro Mais →
+      Analíticos → Analítico de Operações de Crédito – Parceiro Mais.
+           Funcionalidade 7: Sintético de Operações de Crédito – Parceiro
+Mais
+      Efetuar as seguintes inclusões no relatório:
+Objetivo
+      a) filtro Tipo de Pessoa;
+      b) coluna Tipo de Pessoa;
+      c) totalizadores por tipo de convênio;
+      d) tipo de pessoa no corpo do relatório.
+Caminho
+      Sisbr 2.0 → Plataforma de Crédito → Administração de Crédito → Relatórios →
+Parceiro Mais →
+      Sintéticos → Sintético de Operações de Crédito – Parceiro Mais.
+Origem: CCS
+#RESTRITA#                                      
+      4/5
+
+```
+
+-----
+
+```
+Conhecimento),
+           a partir de 19/4/2023, ao informar os seguintes códigos de
+identificação no campo
+           de pesquisa:
+                 Código              Descrição
+Instruções para         IC 14807         Outros Bens - Parceiro Mais
+o usuário:
+                IC 14806          Veículos - Parceiro Mais
+                IC 15477     Simulação Não-Associado - Parceiro
+Mais
+                IC 23278   Analítico de Operações de Crédito Parceiro Mais
+                IC 20505   Sintético de Operações de Crédito Parceiro Mais
+           Para as cooperativas que utilizam a matriz de acesso
+disponibilizada pelo Centro
+           Cooperativo Sicoob (CCS), essas funcionalidades estarão
+disponíveis para o
+           usuário que possui, pelo menos, um dos seguintes perfis de
+acesso:
+Perfil de acesso -             Funcionalidade      Perfil de acesso
+Matriz do Centro                         Consultas
+Gerenciais;
+Cooperativo                Funcionalidade 6
+                                   Crédito III e IV.
+Sicoob (CCS):
+           Informações relacionadas à Matriz de Acesso do Centro Cooperativo
+Sicoob (CCS)
+           estão disponíveis para consulta no Portal de Serviços do CCS
+(Base de
+           Conhecimento) ao informar o código de identificação IC 9118 no
+campo de
+           pesquisa.
+           Eventuais pedidos de esclarecimentos deverão ser direcionados à
+Central de
+           Atendimento à Cooperativa, no número (61) 3771-6600, opção 3,
+item 1;
+           ou por meio de abertura de chamado no Portal de Serviços do CCS,
+utilizando as
+           seguintes categorizações:
+           Atendimento à Cooperativa → Crédito Geral (PF/PJ) → Parceiro + →
+Proposta de
+Suporte    às   Crédito Associado – Parceiro +.
+funcionalidades:
+           Atendimento à Cooperativa → Crédito Geral (PF/PJ) → Parceiro + →
+Simulação
+           Não Associado.
+           Orientações adicionais aos cooperados poderão ser obtidas por
+meio da Central
+           de Atendimento, pelos telefones: 4000 1111 – capitais e regiões
+metropolitanas; e
+           0800 642 0000 – demais regiões (opção 1, item 7, subitens 3 e 2).
+Origem: CCS
+#RESTRITA#                                      
+      5/5
+
+```
+
+-----
+
