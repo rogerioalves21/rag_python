@@ -8,6 +8,7 @@ from app.storage.local_storage import LocalStorage
 from langchain_community.document_loaders import PyPDFium2Loader
 from app.api.services.metadata_service import MetadataService
 from concurrent.futures import ThreadPoolExecutor, wait, as_completed
+from app.api.extractors.pdf_to_text import Documento, PdfToTextExtrator
 
 
 class PdfExtractor(BaseExtractor):
@@ -113,7 +114,13 @@ class PdfExtractor(BaseExtractor):
         return self.__to_documents_list()
 
     async def __load(self) -> List[Document]:
-        return await self.__parse()
+        return await self.__load_from_pdf_to_text() # self.__parse()
+    
+    async def __load_from_pdf_to_text(self) -> List[Document]:
+        _extractor = PdfToTextExtrator()
+        _documento = _extractor.extrair_texto(self._file_path)
+        print(_documento)
+        return [Document(page_content=_documento.conteudo, metadata=_documento.metadata)]
     
     async def __parse(self) -> List[Document]:
         return await PyPDFium2Loader(self._file_path, extract_images=True).aload()

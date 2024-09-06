@@ -26,23 +26,26 @@ class AbstractExtrator(ABC):
 class PdfToTextExtrator(AbstractExtrator):
     """ Extrai texto do PDF no layout mais próximo ao original """
 
-    def extrair_texto(self, diretorio: str) -> Documento:
-        if not os.path.isdir(diretorio): raise RuntimeError(f"O diretório informado não existe! -> {diretorio}")
+    def extrair_texto(self, _arquivo: str) -> Documento:
+        if not os.path.isfile(_arquivo): raise RuntimeError(f"O arquivo informado não existe! -> {_arquivo}")
         
-        is_windows = os.name == 'nt'
-        if is_windows: raise RuntimeError("pdftotext não existe no windows!")
+        _is_windows = os.name == 'nt'
+        if _is_windows: raise RuntimeError("pdftotext não existe no windows!")
 
         if shutil.which('pdftotext'):
-            cmd = ["pdftotext", "-layout", "-nodiag", "-enc", "UTF-8", "-colspacing", "0.3"]
-            cmd += [diretorio, "-"]
-            out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()
-            return Documento(conteudo=out.decode('utf-8'))
+            _cmd = ["pdftotext", "-layout", "-nodiag", "-enc", "UTF-8", "-colspacing", "0.3"]
+            _cmd += [_arquivo, "-"]
+            _out, _err = subprocess.Popen(_cmd, stdout=subprocess.PIPE).communicate()
+            _conteudo = _out.decode('utf-8')
+            #with open('cci.txt', 'w', encoding='utf-8') as f:
+            #    f.write(_conteudo)
+            _splt = _arquivo.split('/')
+            return Documento(conteudo=_conteudo, metadata={"source": _splt[len(_splt) - 1], "page": 0, "resumo": ""})
         else:
             raise EnvironmentError("pdftotext não instalado!")
 
 
-if __name__ == "__main__":
-    # print(os.name)
-    pdftotext = PdfToTextExtrator()
-    texto = pdftotext.extrair_texto('C:/users//rogerio.rodrigues/workspace-python/rag_python/files/old_pdfs/CCI500_2023.pdf')
-    print(texto)
+#if __name__ == "__main__":
+#    pdftotext = PdfToTextExtrator()
+#    texto = pdftotext.extrair_texto('/home/rogerio_rodrigues/python-workspace/rag_python/files/pdfs/CCI500_2023.pdf')
+#    print(texto)

@@ -120,15 +120,14 @@ class ComunicadosService():
             Standalone question:
         """
         condense_question_prompt = PromptTemplate.from_template(__condense_question_template)
-
         self.__retrieval_qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
             llm=self.__llm,
-            chain_type="map_reduce",
-            retriever=self.__mongodb_stoge.as_retriever(),
+            chain_type="stuff",
+            retriever=self.__mongodb_stoge.as_retriever(search_kwargs={'k': 3, "top_p": 1}),
+            reduce_k_below_max_tokens=False,
             return_source_documents=True,
-            reduce_k_below_max_tokens=True,
-            
-            # chain_type_kwargs={"prompt": self.__chat_prompt},
+            verbose=True,
+            chain_type_kwargs={"prompt": self.__chat_prompt},
         )
 
         self.__qa_chain = ConversationalRetrievalChain.from_llm(
@@ -154,30 +153,27 @@ class ComunicadosService():
     
     async def agenerate_memory(self, query: str) -> Any:
         """ Chamada streaming para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
-        __sub_docs = self.get_sub_documents(clean_query(query), 10)
+        __sub_docs = self.get_sub_documents(query, 3)
         __sub_docs.sort(key=lambda x: x.metadata['source'])
         print(__sub_docs)
         __relevantes = []
         for __doc in __sub_docs:
-            __source = __doc.metadata['source']
-            __relevantes.append(f'\n#### {__source} ####\n\n')
             __relevantes.append(__doc.page_content)
-            __relevantes.append('\n\n')
+            __relevantes.append('\n')
         __messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes))
         self.__qa_chain.combine_docs_chain.llm_chain.prompt.messages = __messages
         return await self.__qa_chain.ainvoke(input={"question": query}, config={"callbacks": self.__callbacks, "include_run_info": True})
     
     async def agenerate(self, query: str) -> Any:
         """ Chamada streaming para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
-       # __docs = self.get_parent_documents(clean_query(query))
-        #__docs.sort(key=lambda x: x.metadata['source'])
-        #__relevantes = []
-        #for __doc in __docs:
-        #    __relevantes.append('\n"""')
-        #    __relevantes.append(__doc.page_content)
-        #    __relevantes.append('"""\n')
-        #__messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes))
-        return await self.__retrieval_qa_chain.agenerate(query)# self.__chain.agenerate(messages=[__messages])
+        __docs = self.get_sub_documents(query, top_k=3)
+        __docs.sort(key=lambda x: x.metadata['source'])
+        __relevantes = []
+        for __doc in __docs:
+            __relevantes.append(__doc.page_content)
+            __relevantes.append('\n')
+        __messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes))
+        return await self.__qa_chain.agenerate(messages=[__messages], kwargs={"k": 3, "top_k": 3, "top_p": 1})# self.__chain.agenerate(messages=[__messages])
 
     def invoke_with_sources(self, query: str) -> Union[Tuple[str, List[Document]], None]:
         """ Chamada para o llm. SubDocuments e Fontes utilizadas """
@@ -186,15 +182,17 @@ class ComunicadosService():
             __sub_docs = self.get_sub_documents(query, top_k=6)
             print(F'QUANTIDADE DE CHUNKS ENCONTRADOS: {len(__sub_docs)}')
             __relevantes = []
-            for __doc in __sub_docs:
+            __resumo = ''
+            for __idx, __doc in enumerate(__sub_docs):
+                if __idx == 0: __resumo = __doc.metadata["resumo"] 
                 __relevantes.append(__doc.page_content)
-                __relevantes.append('\n\n')
-            print(__relevantes)
-            __contexto_tratado = clean_text('\n\n'.join(__relevantes))
-            __messages = self.__chat_prompt.format_messages(question=query, context=__contexto_tratado)
-            self.__qa_chain.combine_docs_chain.llm_chain.prompt.messages = __messages
-            retorno = self.__qa_chain.invoke({"question": query})
-            return retorno['answer'], __sub_docs
+                __relevantes.append('\n')
+            # print(__relevantes)
+            print(__resumo)
+            __messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes), summaries=__resumo)
+            self.__retrieval_qa_chain.combine_documents_chain.llm_chain.prompt.messages = __messages
+            __retorno = self.__retrieval_qa_chain.invoke({"question": query, "context": ''.join(__relevantes), "summaries": __resumo })
+            return __retorno['answer'], __sub_docs
         finally:
             print("fim")
             # self.__weaviate_cli.close()
@@ -255,7 +253,7 @@ class ComunicadosService():
             __doc_path_pdf = self.__folder + __arquivo
             __loader       = PdfExtractor(__doc_path_pdf, __arquivo, MetadataService())
             __documents    = await __loader.extract()
-            print("\nINICIO EMBEDDING\n")
+            print(f"\nINICIO EMBEDDING\n total de documentos {len(__documents)}")
             await self.__full_doc_retriever.aadd_documents(__documents)
             count += 1
         print(f'\nTUDO PRONTO, {count} DOCUMENTOS EM {int(int(time.time() - t0)/60)} MINUTOS!\n')
@@ -292,12 +290,12 @@ class ComunicadosService():
         """ Recupera os textos completos da página do pdf e não o chunk dos subdocs """
         return self.__full_doc_retriever.invoke(query, kwargs={"verbose": True, "top_k": 4, "k": 4})
     
-    def get_sub_documents(self, question: str, top_k: int = 10) -> List[Document]:
+    def get_sub_documents(self, question: str, top_k: int) -> List[Document]:
         if self.__in_memory:
-            relevant_context = self.__data_base.similarity_search(query=question, k=top_k)
+            _relevant_context = self.__data_base.similarity_search(query=question, k=top_k)
         else:
-            relevant_context = self.__mongodb_stoge.similarity_search(query=question, k=top_k)
-        return relevant_context
+            _relevant_context = self.__mongodb_stoge.similarity_search(query=question, k=top_k, kwargs={ "top_p": 6 })
+        return _relevant_context
 
     def get_full_document_by_source(self, source: str) -> Union[Document, None]:
         """ Busca o documento pelo nome do arquivo """

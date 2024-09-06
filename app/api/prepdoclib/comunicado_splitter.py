@@ -30,22 +30,24 @@ class ComunicadoTextSplitter(TextSplitter):
 
     def split_text(self, text: str) -> List[str]:
         """ Implementação do método abstrato da classe TextSplitter """
-        __text = tratar_linhas_texto(text)
+        __text = f"{text}" # tratar_linhas_texto(text)
         chunks = []
         while len(__text) > 0:
             if len(__text) > self._chunk_size:
                 limit = __text.rfind(' ', 0, self._chunk_size)
                 if limit == -1:
                     limit = self._chunk_size
-                chunks.append(self.__clean_text(__text[:limit]))
+                chunks.append(__text[:limit])
+                # chunks.append(self.__clean_text(__text[:limit]))
                 
                 # aqui eu corto o texto. então seu eu cortar com valores a menos isso vira um overlap
-                __text = self.__clean_text(__text[limit - self._chunk_overlap:]).strip()
-
+                __text = __text[limit - self._chunk_overlap:].strip()
+                # __text = self.__clean_text(__text[limit - self._chunk_overlap:]).strip()
             else:
-                chunks.append(self.__clean_text(__text))
+                chunks.append(__text)
+                # chunks.append(self.__clean_text(__text))
                 break
-        return self._merge_splits(chunks, separator="\n\n\n")
+        return self._merge_splits(chunks, separator='\x0c') # separator="\n\n\n\n")
 
     @staticmethod
     def __clean_text(text: str) -> str:

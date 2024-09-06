@@ -35,61 +35,49 @@ MODEL_MISTRAL = 'mistral:7b-instruct-v0.3-q2_K'
 MODEL_LLAMA  = 'qwen2:1.5b-instruct-q4_K_M'
 MODEL_GEMMA  = 'gemma2:2b-instruct-q4_K_M'
 
-config_system_prompt = "Você é um assistente dedicado a responder perguntas utilizando SOMENTE o contexto fornecido. Se não for possível encontrar a resposta no contexto, responda \"O contexto fornecido é insuficiente!\". Não utilize conhecimento prévio."
+config_system_prompt = "Você é um assistente prestativo do Banco Sicoob, dedicado a responder perguntas utilizando SOMENTE o contexto e resumo fornecidos. Se não for possível encontrar a resposta no contexto, responda \"O contexto fornecido é insuficiente!\". Não utilize conhecimento prévio. Antes de escrever sua resposta final, lembre que a resposta deve ser no idioma português."
 
 @functools.cache
 def get_memory_history() -> ConversationBufferMemory:
     """ \nCarrega a memória de conversação\n """
-    print(f"Criando o ConversationBufferMemory")
     __memory = ConversationBufferMemory(
         chat_memory=ChatMessageHistory(),
         memory_key='chat_history',
         output_key='answer',
         return_messages=True
     )
-    print(__memory)
     return __memory
 
 def get_text_splitter() -> Union[ComunicadoTextSplitter, None]:
-    print(f"\nCriando o ComunicadoTextSplitter\n")
-    __splitter = ComunicadoTextSplitter(chunk_size=2000, chunk_overlap=50, length_function=len)
-    print(__splitter)
+    __splitter = ComunicadoTextSplitter(chunk_size=1000, chunk_overlap=100)
     return __splitter
 
 def get_chat_prompt() -> Union[ChatPromptTemplate, None]:
-    print(f"Criando o ChatPromptTemplate")
     __chat_prompt = ChatPromptTemplate.from_messages(
         [
             ("system", config_system_prompt),
+            ("user", "#### CONTEXTO ####\n\n{context}### RESUMO ###\n\n{summaries}"),
             ("user", "{question}"),
-            ("user", "#### CONTEXTO ####\n\n{context}")
         ]
     )
-    print(__chat_prompt)
     return __chat_prompt
 
 @functools.cache
 def get_ollama_embeddings_basic() -> Union[OllamaEmbeddings, None]:
     """ \nLLM para embeddings\n """
-    print(f"Criando o OllamaEmbeddings Basic")
     __embed = OllamaEmbeddings(model=CONFIG_EMBD)
-    print(__embed)
     return __embed
 
 @functools.cache
 def get_ollama_embeddings() -> Union[OllamaEmbeddings, None]:
     """ \nLLM para embeddings\n """
-    print(f"Criando o OllamaEmbeddings")
     __embed = OllamaEmbeddings(model=CONFIG_EMBDBERT)
-    print(__embed)
     return __embed
 
 @functools.cache
 def get_duckdb_vector_store_basic() -> Union[DuckDB, None]:
     """ \nCria o vectorstore com DUCKDB\n """
-    print("Criando o DuckDB Basic")
     __vector_store = DuckDB(embedding=get_ollama_embeddings_basic())
-    print(__vector_store)
     return __vector_store
 
 def get_weaviate_vector_store() -> Union[Tuple[WeaviateVectorStore, WeaviateClient], None]:
@@ -103,14 +91,10 @@ def get_weaviate_vector_store() -> Union[Tuple[WeaviateVectorStore, WeaviateClie
 # @functools.cache
 def get_mongodb_vector_store() -> Union[MongoDBAtlasVectorSearch, None]:
     """ \nCria o vectorstore com duckdb\n """
-    print("Criando o MongoDB")
     try:
         __mongo_client = MongoClient("mongodb+srv://rogerioalves21:cCtExPYYxjDONME9@lidcluster.h0lg3.mongodb.net/?retryWrites=true&w=majority&appName=LidCluster")# "mongodb://localhost:27017/?appname=SicoobLid&directConnection=true&ssl=false")
         __collection = __mongo_client["lid"]["sicoob-collection"]
-        print(__mongo_client.list_database_names())
-        print(__collection)
         __vector_store = MongoDBAtlasVectorSearch(collection=__collection, embedding=get_ollama_embeddings(), index_name="vector_index")
-        print(__vector_store)
         return __vector_store
     except:
         print("Sem mongo DB")
@@ -120,7 +104,6 @@ def get_mongodb_vector_store() -> Union[MongoDBAtlasVectorSearch, None]:
 def get_memory_store() -> Union[InMemoryStore, None]:
     """ Cria a store em memória """
     __store = InMemoryStore()
-    print(__store)
     return __store
 
 @functools.cache
@@ -130,15 +113,11 @@ def get_memory_db() -> Union[DocArrayInMemorySearch, None]:
         embedding=get_ollama_embeddings(),
         metric="euclidian_dist",
     )
-    print(__data_base)
     return __data_base
 
 def get_chat_ollama_client() -> Union[ChatOllama, None]:
     """ Instância do cliente para os LLMs do ollama """
-    print(f"Criando o get_chat_ollama_client")
-    __llm = ChatOllama(model=MODEL_GEMMA, keep_alive='1h', temperature=0.4, num_predict=2000)
-    print("Criando o ChatOllama")
-    print(__llm)
+    __llm = ChatOllama(model=MODEL_GEMMA, keep_alive='1h', temperature=0.3, num_predict=2000)
     return __llm
 
 def get_rag_service(

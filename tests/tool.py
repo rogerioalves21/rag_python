@@ -1,9 +1,18 @@
 import ollama
 
+
+prompt = PromptTemplate(
+            template="Você é um assistente jurídico prestativo, respeitoso e honesto. Sua tarefa é auxiliar os advogados na análise de ações e processos.\n{format_instructions}\n{question}\n\n\n### Contexto ###\n\n```{context}```",
+            input_variables=["question"],
+            partial_variables={"format_instructions": format_instructions, "context": texto},
+        )
+
 response = ollama.chat(
     model='kuqoi/qwen2-tools',
-    messages=[{'role': 'user', 'content': 
-        'What is the weather in Toronto?'}],
+    messages=[
+      {'role': 'system', 'content': "Você é um assistente jurídico prestativo, respeitoso e honesto. Sua tarefa é auxiliar os advogados na análise de ações e processos.\n{format_instructions}\n{question}\n\n\n### Contexto ###\n\n```{context}```"}
+      {'role': 'user', 'content': 'What is the weather in Toronto?'}
+    ],
 
 		# provide a weather checking tool to the model
     tools=[{
