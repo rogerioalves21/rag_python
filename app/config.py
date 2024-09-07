@@ -95,6 +95,7 @@ def get_mongodb_vector_store() -> Union[MongoDBAtlasVectorSearch, None]:
         __mongo_client = MongoClient("mongodb+srv://rogerioalves21:cCtExPYYxjDONME9@lidcluster.h0lg3.mongodb.net/?retryWrites=true&w=majority&appName=LidCluster")# "mongodb://localhost:27017/?appname=SicoobLid&directConnection=true&ssl=false")
         __collection = __mongo_client["lid"]["sicoob-collection"]
         __vector_store = MongoDBAtlasVectorSearch(collection=__collection, embedding=get_ollama_embeddings(), index_name="vector_index")
+        __collection.drop()
         return __vector_store
     except:
         print("Sem mongo DB")
@@ -117,7 +118,7 @@ def get_memory_db() -> Union[DocArrayInMemorySearch, None]:
 
 def get_chat_ollama_client() -> Union[ChatOllama, None]:
     """ Instância do cliente para os LLMs do ollama """
-    __llm = ChatOllama(model=MODEL_GEMMA, keep_alive='1h', temperature=0.3, num_predict=2000)
+    __llm = ChatOllama(model=MODEL_GEMMA, keep_alive='1h', temperature=0.3, num_predict=2048)
     return __llm
 
 def get_rag_service(

@@ -1,16 +1,16 @@
-from langchain_ollama import OllamaEmbeddings
-from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, UnstructuredExcelLoader, UnstructuredWordDocumentLoader
+from langchain_community.document_loaders import PyPDFLoader, UnstructuredExcelLoader, UnstructuredWordDocumentLoader
 from langchain_text_splitters import CharacterTextSplitter
-from langchain_community.vectorstores import DuckDB
-from typing import Any, Union, List
-from langchain_core.output_parsers import StrOutputParser
+from typing import List
 from langchain_core.documents import Document
+from langchain_community.llms.ollama import Ollama
+from pandasai import SmartDataframe
+import pandas as pd
 import excel2img
-import nltk
-nltk.download('punkt')
-nltk.download('averaged_perceptron_tagger')
+from rich import print
+import pandasai as pai
+import langchain
+import gc
 
-embeddings = OllamaEmbeddings(model="nomic-embed-text:latest")
 db = None
 
 pdf_file_path = (
@@ -22,7 +22,7 @@ word_file_path = (
 )
 
 excel_file_path = (
-    "./files/Pilar3.xlsx"
+    "../files/outros/analise_excel.xlsx"
 )
 
 def load_pdf(file_path: str, text_splitter: CharacterTextSplitter, extract_images=True) -> List[Document]:
@@ -42,15 +42,18 @@ def load_xlsx(file_path: str, text_splitter: CharacterTextSplitter) -> List[Docu
     return loader.load_and_split(text_splitter)
 
 def extrair_xlsx() -> None:
-    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+    text_splitter = CharacterTextSplitter(chunk_size=5000, chunk_overlap=100)
     docs = load_xlsx(excel_file_path, text_splitter)
-    print(docs[0])
-    with open('Pilar3.html', 'w', encoding='UTF-8') as file:
-        for doc in docs:
+    # print(docs)
+    # grava somente as tabelas
+    for doc in docs:
+        with open(f'{doc.metadata['page_name'].replace(' ', '_')}_{doc.metadata['page_number']}.html', 'w', encoding='UTF-8') as file:
             if 'text_as_html' in doc.metadata.keys():
                 file.write(doc.metadata['text_as_html'])
-            else:
-                file.write('\n'.join(doc.page_content))
+            # else:
+                # file.write('\n'.join(doc.page_content))
+        
+        
             
 def extrair_docs() -> None:
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
@@ -74,8 +77,27 @@ def extrair_pdfs() -> None:
         for doc in docs:
             file.write(doc.page_content)
 
+def chat_pandas_ai():
+    # Get-Process ollama* | Sort-Object -Property CPU -Descending | Select-Object -First 10
+    llm = Ollama(model="starcoder", temperature= 0, top_k=20, top_p=4, keep_alive=0, num_predict=26)
+    data_list = pd.read_html('Caso_PF_2.html', header=0, encoding="utf-8") # essa porra vem com números nas colunas
+    # dtf = data_list[0].dropna(axis=0, thresh=4) # não sei o porque dessa merda. https://stackoverflow.com/questions/38486477/get-html-table-into-pandas-dataframe-not-list-of-dataframe-objects
+    # só tem uma tabela mesmo, então pega a posição zero.
+    data_frame = SmartDataframe(df=data_list[0], config={"llm": llm, "custom_whitelisted_dependencies": ["any_module"], "encoding": "utf-8", "verbose": True, "enforce_privacy": True, "is_conversational_answer": False, "enable_cache": False}, name="Casos Pessoa Física")
+    output = data_frame.chat(query="What is the minimum, maximum and range CCF?")
+    print(f"Resposta PANDAS AI com OLLAMA:\n{output}")
+    # import sys; sys.exit(0)
+
+def chat_pandas_ai_excel():
+    llm = Ollama(model="llama3:8b-instruct-q2_K", temperature= 0, top_k=20, top_p=4, keep_alive=0, num_predict=1234477)
+    data_frame = SmartDataframe(df="../files/outros/analise_excel.xlsx", config={"llm": llm, "custom_whitelisted_dependencies": ["any_module"], "encoding": "utf-8", "verbose": True, "enforce_privacy": True, "is_conversational_answer": False, "enable_cache": False}, name="Casos Pessoa Física")
+    output = data_frame.chat(query="Witch produto has maximum and the minimum quantidade_vendas in the dataset?")
+    print(f"Resposta PANDAS AI com OLLAMA:\n{output}")
+
 if __name__ == '__main__':
-    #load_xlsx2()
-    # TODO - converter os documentos em markdown. as llms leem facilmente este formato.
-    extrair_pdfs()
-    # db = DocArrayInMemorySearch.from_documents(docs, embeddings)
+    gc.collect()
+    pai.clear_cache()
+    langchain.verbose = True
+    # extrair_xlsx()
+    chat_pandas_ai_excel()
+    

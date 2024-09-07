@@ -11,7 +11,7 @@ response = ollama.chat(
     model='kuqoi/qwen2-tools',
     messages=[
       {'role': 'system', 'content': "Você é um assistente jurídico prestativo, respeitoso e honesto. Sua tarefa é auxiliar os advogados na análise de ações e processos.\n{format_instructions}\n{question}\n\n\n### Contexto ###\n\n```{context}```"}
-      {'role': 'user', 'content': 'What is the weather in Toronto?'}
+      {'role': 'user', 'content': 'Qual é o número do processo?'}
     ],
 
 		# provide a weather checking tool to the model
@@ -19,7 +19,7 @@ response = ollama.chat(
       'type': 'function',
       'function': {
         'name': 'get_current_weather',
-        'description': 'Get the current weather for a city',
+        'description': 'Obter o número do processo em um documento.',
         'parameters': {
           'type': 'object',
           'properties': {

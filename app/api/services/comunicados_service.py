@@ -7,9 +7,8 @@ from concurrent.futures import ThreadPoolExecutor, wait, as_completed
 from langchain_ollama import ChatOllama
 import langchain
 
-from langchain_text_splitters import CharacterTextSplitter, RecursiveCharacterTextSplitter
-from langchain_core.output_parsers import StrOutputParser
-from langchain.chains import RetrievalQAWithSourcesChain
+from langchain_text_splitters import CharacterTextSplitter
+from langchain.chains.qa_with_sources.retrieval import RetrievalQAWithSourcesChain
 
 try:
     from langchain_weaviate.vectorstores import WeaviateVectorStore
@@ -123,8 +122,8 @@ class ComunicadosService():
         self.__retrieval_qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
             llm=self.__llm,
             chain_type="stuff",
-            retriever=self.__mongodb_stoge.as_retriever(search_kwargs={'k': 3, "top_p": 1}),
-            reduce_k_below_max_tokens=False,
+            retriever=self.__mongodb_stoge.as_retriever(),
+            reduce_k_below_max_tokens=True,
             return_source_documents=True,
             verbose=True,
             chain_type_kwargs={"prompt": self.__chat_prompt},
@@ -153,16 +152,18 @@ class ComunicadosService():
     
     async def agenerate_memory(self, query: str) -> Any:
         """ Chamada streaming para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
-        __sub_docs = self.get_sub_documents(query, 3)
-        __sub_docs.sort(key=lambda x: x.metadata['source'])
-        print(__sub_docs)
+        __sub_docs = self.get_sub_documents(query, 40)
+        __sub_docs.sort(key=lambda x: x.metadata['page'])
         __relevantes = []
-        for __doc in __sub_docs:
+        __resumo = ''
+        for __idx, __doc in enumerate(__sub_docs):
+            if __idx == 0 and len(__resumo) == 0:
+                __resumo = __doc.metadata["resumo"] 
             __relevantes.append(__doc.page_content)
             __relevantes.append('\n')
-        __messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes))
+        __messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes), summaries="")#__resumo)
         self.__qa_chain.combine_docs_chain.llm_chain.prompt.messages = __messages
-        return await self.__qa_chain.ainvoke(input={"question": query}, config={"callbacks": self.__callbacks, "include_run_info": True})
+        return await self.__retrieval_qa_chain.ainvoke(input={"question": query, "context": ''.join(__relevantes), "summaries": "" }, config={"callbacks": self.__callbacks, "include_run_info": True})
     
     async def agenerate(self, query: str) -> Any:
         """ Chamada streaming para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
@@ -184,7 +185,8 @@ class ComunicadosService():
             __relevantes = []
             __resumo = ''
             for __idx, __doc in enumerate(__sub_docs):
-                if __idx == 0: __resumo = __doc.metadata["resumo"] 
+                if __idx == 0 and len(__resumo) == 0:
+                    __resumo = __doc.metadata["resumo"] 
                 __relevantes.append(__doc.page_content)
                 __relevantes.append('\n')
             # print(__relevantes)
@@ -294,7 +296,7 @@ class ComunicadosService():
         if self.__in_memory:
             _relevant_context = self.__data_base.similarity_search(query=question, k=top_k)
         else:
-            _relevant_context = self.__mongodb_stoge.similarity_search(query=question, k=top_k, kwargs={ "top_p": 6 })
+            _relevant_context = self.__mongodb_stoge.max_marginal_relevance_search(query=question, k=top_k)
         return _relevant_context
 
     def get_full_document_by_source(self, source: str) -> Union[Document, None]:
