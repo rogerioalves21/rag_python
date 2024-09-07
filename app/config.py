@@ -35,7 +35,7 @@ MODEL_MISTRAL = 'mistral:7b-instruct-v0.3-q2_K'
 MODEL_LLAMA  = 'qwen2:1.5b-instruct-q4_K_M'
 MODEL_GEMMA  = 'gemma2:2b-instruct-q4_K_M'
 
-config_system_prompt = "Você é um assistente prestativo do Banco Sicoob, dedicado a responder perguntas utilizando SOMENTE o contexto e resumo fornecidos. Se não for possível encontrar a resposta no contexto, responda \"O contexto fornecido é insuficiente!\". Não utilize conhecimento prévio. Antes de escrever sua resposta final, lembre que a resposta deve ser no idioma português."
+config_system_prompt = "Você é um assistente prestativo do Banco Sicoob, dedicado a responder perguntas utilizando somente o CONTEXTO fornecido. Se não for possível encontrar a resposta no contexto, responda \"O contexto fornecido é insuficiente!\". Não utilize conhecimento prévio. Antes de escrever sua resposta final, lembre que a resposta deve ser no idioma português."
 
 @functools.cache
 def get_memory_history() -> ConversationBufferMemory:
@@ -49,15 +49,15 @@ def get_memory_history() -> ConversationBufferMemory:
     return __memory
 
 def get_text_splitter() -> Union[ComunicadoTextSplitter, None]:
-    __splitter = ComunicadoTextSplitter(chunk_size=1000, chunk_overlap=100)
+    __splitter = ComunicadoTextSplitter(chunk_size=2048, chunk_overlap=100)
     return __splitter
 
 def get_chat_prompt() -> Union[ChatPromptTemplate, None]:
     __chat_prompt = ChatPromptTemplate.from_messages(
         [
             ("system", config_system_prompt),
-            ("user", "#### CONTEXTO ####\n\n{context}### RESUMO ###\n\n{summaries}"),
             ("user", "{question}"),
+            ("user", "**summary**\n\n{summaries}\n\n\n#### Contexto ####\n\n{context}\n\n"),
         ]
     )
     return __chat_prompt
@@ -94,8 +94,7 @@ def get_mongodb_vector_store() -> Union[MongoDBAtlasVectorSearch, None]:
     try:
         __mongo_client = MongoClient("mongodb+srv://rogerioalves21:cCtExPYYxjDONME9@lidcluster.h0lg3.mongodb.net/?retryWrites=true&w=majority&appName=LidCluster")# "mongodb://localhost:27017/?appname=SicoobLid&directConnection=true&ssl=false")
         __collection = __mongo_client["lid"]["sicoob-collection"]
-        __vector_store = MongoDBAtlasVectorSearch(collection=__collection, embedding=get_ollama_embeddings(), index_name="vector_index")
-        __collection.drop()
+        __vector_store = MongoDBAtlasVectorSearch(collection=__collection, embedding=get_ollama_embeddings(), index_name="vector_index", relevance_score_fn="dotProduct")
         return __vector_store
     except:
         print("Sem mongo DB")
@@ -118,7 +117,7 @@ def get_memory_db() -> Union[DocArrayInMemorySearch, None]:
 
 def get_chat_ollama_client() -> Union[ChatOllama, None]:
     """ Instância do cliente para os LLMs do ollama """
-    __llm = ChatOllama(model=MODEL_GEMMA, keep_alive='1h', temperature=0.3, num_predict=2048)
+    __llm = ChatOllama(model=MODEL_GEMMA, keep_alive='1h', temperature=0)
     return __llm
 
 def get_rag_service(

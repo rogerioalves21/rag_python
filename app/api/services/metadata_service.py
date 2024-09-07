@@ -10,7 +10,7 @@ from langchain.chains.summarize import load_summarize_chain
 class MetadataService:
     def __init__(self):
         self.__model          = 'gemma2:2b-instruct-q4_K_M'# 'qwen2:1.5b-instruct-q4_K_M'
-        self.__summary_prompt = "Você é um assistente especialista em resumo de documentos. Sua tarefa é fazer um resumo claro e conciso de documentos, foque em aspectos como assunto, identificador do comunicado (CCI), objetivo do documento, funcionalidades descritas no documento, quem assina o documento. Não acrescente nenhum conhecimento prévio, nota ou sugestão."
+        self.__summary_prompt = "Você é um assistente especialista em resumo de documentos. Sua tarefa é fazer um resumo claro e conciso de documentos, foque em aspectos como assunto, nomes de pessoas, empresas ou instituições financeiras, CPF e CNPJ, identificador do comunicado (CCI) caso exista, objetivo do documento, funcionalidades descritas no documento, valores, condições, tipos de contas, quem assina o documento, identifique assinaturas digitais caso existam. Não acrescente nenhum conhecimento prévio, nota ou sugestão."
         self.__summary_juridico_prompt = "Você é um assistente especialista em processos judiciais. Sua tarefa é fazer um resumo claro e conciso de processos, foque em aspectos como número do processo, valor da causa, valor da dívida, requerentes, requeridos, as partes e objetivo do processo. Não acrescente nenhum conhecimento prévio, nota ou sugestão."
         self.__keys_prompt    = "Você é um assistente dedicado a identificar e extrair palavras-chave de um documento. Extraia entre 3 e 5 palavras-chave, pois elas serão utilizadas pela área administrativa para buscar esse mesmo documento futuramente."
         self.__multi_query    = "Você é um assistente dedicado a identificar e criar perguntas com base no texto de um documento. Crie apenas 2 perguntas sobre o conteúdo do documento fornecido."
@@ -98,9 +98,10 @@ RESUMO DETALHADO:
             ]
         )
         
-        #__split = __documento.page_content.split('\x0c')
-        #__resumo_final = []
-        #for __s in __split:
-        #    if not __s or len(__s) > 0:
-        __messages = __chat_prompt.format_messages(texto=__documento.page_content[:1500])
-        return self.__chain.invoke(__messages)
+        __split = __documento.page_content.split('\x0c')
+        __resumo_final = []
+        for __s in __split:
+            if not __s or len(__s) > 0:
+                __messages = __chat_prompt.format_messages(texto=__s)
+                __resumo_final.append(self.__chain.invoke(__messages))
+        return ''.join(__resumo_final)

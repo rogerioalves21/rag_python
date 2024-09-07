@@ -5,7 +5,7 @@ from langchain_core.documents import Document
 from langchain_community.llms.ollama import Ollama
 from pandasai import SmartDataframe
 import pandas as pd
-import excel2img
+# import excel2img
 from rich import print
 import pandasai as pai
 import langchain
@@ -35,7 +35,8 @@ def load_docx(file_path: str, text_splitter: CharacterTextSplitter) -> List[Docu
     return loader.load_and_split(text_splitter)
 
 def load_xlsx2():
-    excel2img.export_img("./files/AnaliseCCF.xlsx","AnaliseCCFTratamentos.png","Tratamentos")
+    print('1')
+    # excel2img.export_img("./files/AnaliseCCF.xlsx","AnaliseCCFTratamentos.png","Tratamentos")
 
 def load_xlsx(file_path: str, text_splitter: CharacterTextSplitter) -> List[Document]:
     loader = UnstructuredExcelLoader(file_path, mode="elements")
@@ -47,14 +48,13 @@ def extrair_xlsx() -> None:
     # print(docs)
     # grava somente as tabelas
     for doc in docs:
-        with open(f'{doc.metadata['page_name'].replace(' ', '_')}_{doc.metadata['page_number']}.html', 'w', encoding='UTF-8') as file:
+        with open(F"{doc.metadata['page_name'].replace(' ', '_')}_{doc.metadata['page_number']}.html", 'w', encoding='UTF-8') as file:
             if 'text_as_html' in doc.metadata.keys():
                 file.write(doc.metadata['text_as_html'])
             # else:
                 # file.write('\n'.join(doc.page_content))
         
-        
-            
+    
 def extrair_docs() -> None:
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
     docs = load_docx(word_file_path, text_splitter)
@@ -79,19 +79,17 @@ def extrair_pdfs() -> None:
 
 def chat_pandas_ai():
     # Get-Process ollama* | Sort-Object -Property CPU -Descending | Select-Object -First 10
-    llm = Ollama(model="starcoder", temperature= 0, top_k=20, top_p=4, keep_alive=0, num_predict=26)
+    llm = Ollama(model="gemma2:2b-instruct-q4_K_M", temperature= 0, top_k=20, top_p=4, keep_alive=0, num_predict=1234477)
     data_list = pd.read_html('Caso_PF_2.html', header=0, encoding="utf-8") # essa porra vem com números nas colunas
-    # dtf = data_list[0].dropna(axis=0, thresh=4) # não sei o porque dessa merda. https://stackoverflow.com/questions/38486477/get-html-table-into-pandas-dataframe-not-list-of-dataframe-objects
-    # só tem uma tabela mesmo, então pega a posição zero.
     data_frame = SmartDataframe(df=data_list[0], config={"llm": llm, "custom_whitelisted_dependencies": ["any_module"], "encoding": "utf-8", "verbose": True, "enforce_privacy": True, "is_conversational_answer": False, "enable_cache": False}, name="Casos Pessoa Física")
     output = data_frame.chat(query="What is the minimum, maximum and range CCF?")
     print(f"Resposta PANDAS AI com OLLAMA:\n{output}")
     # import sys; sys.exit(0)
 
 def chat_pandas_ai_excel():
-    llm = Ollama(model="llama3:8b-instruct-q2_K", temperature= 0, top_k=20, top_p=4, keep_alive=0, num_predict=1234477)
+    llm = Ollama(model="gemma2:2b-instruct-q4_K_M", temperature=0, top_k=20, top_p=4, keep_alive='1h', num_predict=1234477)
     data_frame = SmartDataframe(df="../files/outros/analise_excel.xlsx", config={"llm": llm, "custom_whitelisted_dependencies": ["any_module"], "encoding": "utf-8", "verbose": True, "enforce_privacy": True, "is_conversational_answer": False, "enable_cache": False}, name="Casos Pessoa Física")
-    output = data_frame.chat(query="Witch produto has maximum and the minimum quantidade_vendas in the dataset?")
+    output = data_frame.chat(query="Witch is the minimum and maximum \"quantidade_vendas\" in the dataset?")
     print(f"Resposta PANDAS AI com OLLAMA:\n{output}")
 
 if __name__ == '__main__':
