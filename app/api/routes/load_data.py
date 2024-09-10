@@ -15,7 +15,7 @@ async def _proccess_task(__rag_service: ComunicadosService | None) -> None:
 
 
 @router.get("/load-data", dependencies=[RagService])
-async def load_data(background_tasks: BackgroundTasks, __rag_service: ComunicadosService | None = RagService) -> Any:
+def load_data(background_tasks: BackgroundTasks, __rag_service: ComunicadosService | None = RagService) -> Any:
     background_tasks.add_task(_proccess_task, __rag_service)
     return JSONResponse(content={"success": True})
     

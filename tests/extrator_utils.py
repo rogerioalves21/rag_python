@@ -86,10 +86,53 @@ def chat_pandas_ai():
     print(f"Resposta PANDAS AI com OLLAMA:\n{output}")
     # import sys; sys.exit(0)
 
+
+# This is a utility method to convert message to prompt that are understood by
+# the Llama 2 model
+def build_llama2_prompt(messages):
+    start_prompt = "<s>[INST] "
+    end_prompt = " [/INST]"
+    conversation = []
+    for index, message in enumerate(messages):
+        if message["role"] == "system" and index == 0:
+            conversation.append(f"<<SYS>>\n{message['content']}\n<</SYS>>\n\n")
+        elif message["role"] == "user":
+            conversation.append(message["content"].strip())
+        else:
+            conversation.append(f" [/INST] {message['content'].strip()}</s><s>[INST] ")
+
+    return start_prompt + "".join(conversation) + end_prompt
+ 
 def chat_pandas_ai_excel():
+<<<<<<< HEAD
     llm = Ollama(model="gemma2:2b-instruct-q4_K_M", temperature=0, top_k=20, top_p=4, keep_alive='1h', num_predict=1234477)
     data_frame = SmartDataframe(df="../files/outros/analise_excel.xlsx", config={"llm": llm, "custom_whitelisted_dependencies": ["any_module"], "encoding": "utf-8", "verbose": True, "enforce_privacy": True, "is_conversational_answer": False, "enable_cache": False}, name="Casos Pessoa Física")
     output = data_frame.chat(query="Witch is the minimum and maximum \"quantidade_vendas\" in the dataset?")
+=======
+    llm = Ollama(
+        model="codellama:7b-code", 
+        temperature= 0, 
+        top_k=40,
+        # top_p=0.1,
+        keep_alive='1h', 
+        num_predict=4096, 
+        # repeat_penalty=1.03
+    )
+    data_frame = SmartDataframe(
+        df="../files/outros/analise_excel.xlsx",
+        config={
+            "llm": llm, 
+            "custom_whitelisted_dependencies": ["any_module"], 
+            "encoding": "utf-8", 
+            "verbose": True, 
+            "enforce_privacy": False, 
+            "is_conversational_answer": False, 
+            "enable_cache": False,
+            # "custom_prompts": {"generate_python_code": MyCustomPrompt(dfs=[dfs]), "correct_error": MyCustomErrorPrompt()}
+            }, 
+        name="Tabela de produtos e vendas")
+    output = data_frame.chat(query="How many rows does the data have?", output_type='string')
+>>>>>>> 727d7d3 (evolução)
     print(f"Resposta PANDAS AI com OLLAMA:\n{output}")
 
 if __name__ == '__main__':

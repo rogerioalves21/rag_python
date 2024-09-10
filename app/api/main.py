@@ -7,7 +7,8 @@ from app.api.routes import (
     conversation2,
     parent,
     load_data,
-    conversation_normativos
+    conversation_normativos,
+    data_analysis
 )
 
 api_router = APIRouter()
@@ -19,5 +20,6 @@ api_router.include_router(check_documents.router, tags=["check-documents"])
 api_router.include_router(conversation.router, tags=["conversation"])
 api_router.include_router(conversation2.router, tags=["conversation-tiny"])
 api_router.include_router(parent.router, tags=["conversation-parent"])
+api_router.include_router(data_analysis.router, tags=["data-analysis"])
 api_router.include_router(conversation_normativos.router, tags=["conversation-with-sources"])
 api_router.include_router(load_data.router, tags=["load-data"])

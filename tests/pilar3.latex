@@ -1,0 +1,42 @@
+\begin{tabular}{llllllll}
+\toprule
+ & Tabela KM1: Informações quantitativas sobre os requerimentos prudenciais & Unnamed: 1 & Unnamed: 2 & Unnamed: 3 & Unnamed: 4 & Unnamed: 5 & Unnamed: 6 \\
+\midrule
+0 & Frequência: Trimestral & NaN & NaN & NaN & NaN & NaN & NaN \\
+1 & Data de Atualização: 31/12/2021 & NaN & NaN & NaN & NaN & NaN & NaN \\
+2 & NaN & NaN & NaN & NaN & NaN & NaN & NaN \\
+3 & NaN & NaN & NaN & NaN & NaN & NaN & NaN \\
+4 & NaN & NaN & NaN & NaN & NaN & NaN & R$ mil \\
+5 & NaN & NaN & a & b & c & d & e \\
+6 & NaN & NaN & 2021-12-31 00:00:00 & 2021-09-30 00:00:00 & 2021-06-30 00:00:00 & 2021-03-31 00:00:00 & 2020-12-31 00:00:00 \\
+7 & NaN & Capital regulamentar & NaN & NaN & NaN & NaN & NaN \\
+8 & 1 &       Capital Principal & 354074 & 377466.374980 & 375561.645460 & 363044.531090 & 360011.314260 \\
+9 & 2 &       Nível I & 354074 & 377466.374980 & 375561.645460 & 363044.531090 & 360011.314260 \\
+10 & 3 &       Patrimônio de Referência (PR) & 354074 & 377466.374980 & 375561.645460 & 363044.531090 & 360011.314260 \\
+11 & 3b &       Excesso dos recursos aplicados no ativo permanente & NaN & 0 & 0 & 0 & 0 \\
+12 & 3c &       Destaque do PR & NaN & 0 & 0 & 0 & 0 \\
+13 & NaN & Ativos ponderados pelo risco (RWA) & NaN & NaN & NaN & NaN & NaN \\
+14 & 4 &       RWA total  & 1943926 & 1956707.335310 & 1853060.930440 & 1779419.039740 & 1809051.582050 \\
+15 & NaN & Capital regulamentar como proporção do RWA & NaN & NaN & NaN & NaN & NaN \\
+16 & 5 &       Índice de Capital Principal (ICP) & 0.182144 & 0.192909 & 0.202671 & 0.204024 & 0.199006 \\
+17 & 6 &       Índice de Nível 1 (%) & 0.182144 & 0.192909 & 0.202671 & 0.204024 & 0.199006 \\
+18 & 7 &       Índice de Basileia & 0.182144 & 0.192909 & 0.202671 & 0.204024 & 0.199006 \\
+19 & NaN & Adicional de Capital Principal (ACP) como proporção do RWA & NaN & NaN & NaN & NaN & NaN \\
+20 & 8 &       Adicional de Conservação de Capital Principal - ACPConservação (%) & 0.020000 & 0.016250 & 0.016250 & 0.012500 & 0.012500 \\
+21 & 9 &       Adicional Contracíclico de Capital Principal - ACPContracíclico (%) & 0 & 0 & 0 & 0 & 0 \\
+22 & 10 &       Adicional de Importância Sistêmica de Capital Principal - ACPSistêmico (%) & 0 & 0 & 0 & 0 & 0 \\
+23 & 11 &       ACP total (%) & 0.020000 & 0.016250 & 0.016250 & 0.012500 & 0.012500 \\
+24 & 12 &       Margem excedente de Capital Principal (%) & 0.117144 & 0.131659 & 0.141421 & 0.146524 & 0.141506 \\
+25 & NaN & Razão de Alavancagem (RA) & NaN & NaN & NaN & NaN & NaN \\
+26 & 13 &       Exposição total & NaN & NaN & NaN & NaN & NaN \\
+27 & 14 &       RA (%) & NaN & NaN & NaN & NaN & NaN \\
+28 & NaN & Indicador de Liquidez de Curto Prazo (LCR) & NaN & NaN & NaN & NaN & NaN \\
+29 & 15 &       Total de Ativos de Alta Liquidez (HQLA) & NaN & NaN & NaN & NaN & NaN \\
+30 & 16 &       Total de saídas líquidas de caixa & NaN & NaN & NaN & NaN & NaN \\
+31 & 17 &       LCR (%) & NaN & NaN & NaN & NaN & NaN \\
+32 & NaN & Indicador de Liquidez de Longo Prazo (NSFR) & NaN & NaN & NaN & NaN & NaN \\
+33 & 18 &       Recursos estáveis disponíveis (ASF) & NaN & NaN & NaN & NaN & NaN \\
+34 & 19 &       Recursos estáveis requeridos (RSF) & NaN & NaN & NaN & NaN & NaN \\
+35 & 20 &       NSFR (%) & NaN & NaN & NaN & NaN & NaN \\
+\bottomrule
+\end{tabular}

@@ -19,9 +19,18 @@ class MetadataService:
         self.__output      = StrOutputParser()
         self.__llm         = ChatOllama(
             model=self.__model,
-            keep_alive='1h',
-            temperature=0.2,
-            num_predict=2000
+            keep_alive=0,
+            temperature=0.3,
+            num_ctx=4096,
+            num_predict=8192,
+            repeat_penalty=1.18,
+            num_gpu= 0,
+            tfs_z=1.7,
+            mirostat= 0,
+            low_vram=True,
+            top_k=3,
+            top_p=0.1,
+            use_mmap=False,
         )
         self.__llm.verbose = True
         self.__chain       = self.__llm | self.__output
@@ -98,10 +107,28 @@ RESUMO DETALHADO:
             ]
         )
         
-        __split = __documento.page_content.split('\x0c')
-        __resumo_final = []
-        for __s in __split:
-            if not __s or len(__s) > 0:
-                __messages = __chat_prompt.format_messages(texto=__s)
-                __resumo_final.append(self.__chain.invoke(__messages))
-        return ''.join(__resumo_final)
+        #__split = __documento.page_content.split('\x0c')
+        #__resumo_final = []
+        #for __s in __split:
+        #    if not __s or len(__s) > 0:
+        #        __messages = __chat_prompt.format_messages(texto=__s)
+        #        __resumo_final.append(self.__chain.invoke(__messages))
+        #return ''.join(__resumo_final)
+        #__split = __documento.page_content.split('\x0c')
+        #__resumo_final = []
+        #for __s in __split:
+        #    if not __s or len(__s) > 0:
+
+        _K = 4
+ 
+        # compute chunk length 
+        __chnk_len = len(__documento.page_content) // _K
+        
+        __resumos = []
+        for idx in range(0, len(__documento.page_content), __chnk_len):
+            __parte = __documento.page_content[idx : idx + __chnk_len]
+            if len(__parte) > 50:
+                __messages = __chat_prompt.format_messages(texto=__parte)
+                __resumos.append(self.__chain.invoke(__messages))
+
+        return '\n'.join(__resumos)

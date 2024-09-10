@@ -29,11 +29,11 @@ logger = logging.getLogger(__name__)
 api_userinfo = 'https://api-sisbr-ti.homologacao.com.br/user-info/v2/userinfo'
 client_id    = 'lid'
 
-CONFIG_EMBDBERT = 'gemma2:2b-instruct-q4_K_M' # 'paraphrase-multilingual'
-CONFIG_EMBD  = 'gemma2:2b-instruct-q4_K_M' # 'mxbai-embed-large'
-MODEL_MISTRAL = 'mistral:7b-instruct-v0.3-q2_K'
-MODEL_LLAMA  = 'qwen2:1.5b-instruct-q4_K_M'
-MODEL_GEMMA  = 'gemma2:2b-instruct-q4_K_M'
+CONFIG_EMBDBERT = 'kuqoi/qwen2-tools' # 'paraphrase-multilingual'
+CONFIG_EMBD  = 'kuqoi/qwen2-tools' # 'mxbai-embed-large'
+MODEL_MISTRAL = 'kuqoi/qwen2-tools'
+MODEL_LLAMA  = 'kuqoi/qwen2-tools'
+MODEL_GEMMA  = 'kuqoi/qwen2-tools'
 
 config_system_prompt = "Você é um assistente prestativo do Banco Sicoob, dedicado a responder perguntas utilizando somente o CONTEXTO fornecido. Se não for possível encontrar a resposta no contexto, responda \"O contexto fornecido é insuficiente!\". Não utilize conhecimento prévio. Antes de escrever sua resposta final, lembre que a resposta deve ser no idioma português."
 
@@ -117,7 +117,21 @@ def get_memory_db() -> Union[DocArrayInMemorySearch, None]:
 
 def get_chat_ollama_client() -> Union[ChatOllama, None]:
     """ Instância do cliente para os LLMs do ollama """
-    __llm = ChatOllama(model=MODEL_GEMMA, keep_alive='1h', temperature=0)
+    __llm = ChatOllama(
+        model=MODEL_GEMMA,
+        keep_alive=0,
+        temperature=0.3,
+        num_ctx=4096,
+        num_predict=8192,
+        repeat_penalty=1.18,
+        num_gpu= 0,
+        tfs_z=1.7,
+        mirostat= 0,
+        low_vram=True,
+        top_k=3,
+        top_p=0.1,
+        use_mmap=False,
+    )
     return __llm
 
 def get_rag_service(

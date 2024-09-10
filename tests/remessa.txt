@@ -1,0 +1,305 @@
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>RELATÓRIO CONTÁBIL - TRANSITÓRIA INTERCREDIS REMESSA EXPRESSA</th>
+      <th>Unnamed: 1</th>
+      <th>Unnamed: 2</th>
+      <th>Unnamed: 3</th>
+      <th>Unnamed: 4</th>
+      <th>Unnamed: 5</th>
+      <th>Unnamed: 6</th>
+      <th>Unnamed: 7</th>
+      <th>Unnamed: 8</th>
+      <th>Unnamed: 9</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>NaN</td>
+      <td>Data de execução</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>2020-01-09 00:00:00</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>NaN</td>
+      <td>Usuário</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>thaisx0001_00</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>NaN</td>
+      <td>Número cooperativa</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>Cliente</td>
+      <td>NaN</td>
+      <td>Valor</td>
+      <td>Conta</td>
+      <td>Data Reconhecimento</td>
+      <td>Data Processamento</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>NaN</td>
+      <td>3039</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>José da Silva</td>
+      <td>NaN</td>
+      <td>1548.59</td>
+      <td>Transitória Intercredis Remessa Expressa</td>
+      <td>2019-12-01 00:00:00</td>
+      <td>2019-12-01 00:00:00</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>NaN</td>
+      <td>4169</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>João Mello</td>
+      <td>NaN</td>
+      <td>256.25</td>
+      <td>Transitória Intercredis Remessa Expressa</td>
+      <td>2019-12-03 00:00:00</td>
+      <td>2019-12-03 00:00:00</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>NaN</td>
+      <td>4197</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>Rui Araújo de Souza</td>
+      <td>NaN</td>
+      <td>1486.95</td>
+      <td>Transitória Intercredis Remessa Expressa</td>
+      <td>2019-12-03 00:00:00</td>
+      <td>2019-12-03 00:00:00</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>NaN</td>
+      <td>3039</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>Mariana Rocha Soares</td>
+      <td>NaN</td>
+      <td>1258.69</td>
+      <td>Transitória Intercredis Remessa Expressa</td>
+      <td>2019-12-03 00:00:00</td>
+      <td>2019-12-03 00:00:00</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>NaN</td>
+      <td>3039</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>Bárbara Maria Fernandes</td>
+      <td>NaN</td>
+      <td>4589.65</td>
+      <td>Transitória Intercredis Remessa Expressa</td>
+      <td>2019-12-04 00:00:00</td>
+      <td>2019-12-04 00:00:00</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>NaN</td>
+      <td>4197</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>Ricardo Bruno Guimarães</td>
+      <td>NaN</td>
+      <td>3578.2</td>
+      <td>Transitória Intercredis Remessa Expressa</td>
+      <td>2019-12-04 00:00:00</td>
+      <td>2019-12-04 00:00:00</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>NaN</td>
+      <td>3039</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>Marcela Teixeira dos Santos</td>
+      <td>NaN</td>
+      <td>3984.56</td>
+      <td>Transitória Intercredis Remessa Expressa</td>
+      <td>2019-12-04 00:00:00</td>
+      <td>2019-12-04 00:00:00</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>NaN</td>
+      <td>4197</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>Letícia Castro Coelho</td>
+      <td>NaN</td>
+      <td>3594.15</td>
+      <td>Transitória Intercredis Remessa Expressa</td>
+      <td>2019-12-05 00:00:00</td>
+      <td>2019-12-05 00:00:00</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>NaN</td>
+      <td>3039</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>Leonardo Magalhães de Souza</td>
+      <td>NaN</td>
+      <td>1524</td>
+      <td>Transitória Intercredis Remessa Expressa</td>
+      <td>2019-12-01 00:00:00</td>
+      <td>2019-12-01 00:00:00</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>NaN</td>
+      <td>4169</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>Paulo Vinicius Catão</td>
+      <td>NaN</td>
+      <td>1548.36</td>
+      <td>Transitória Intercredis Remessa Expressa</td>
+      <td>2019-12-03 00:00:00</td>
+      <td>2019-12-03 00:00:00</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>NaN</td>
+      <td>4197</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>Renata Lins Oliveira</td>
+      <td>NaN</td>
+      <td>2569.12</td>
+      <td>Transitória Intercredis Remessa Expressa</td>
+      <td>2019-12-03 00:00:00</td>
+      <td>2019-12-03 00:00:00</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>NaN</td>
+      <td>3039</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>Marcelo Alves Machado</td>
+      <td>NaN</td>
+      <td>150.96</td>
+      <td>Transitória Intercredis Remessa Expressa</td>
+      <td>2019-12-03 00:00:00</td>
+      <td>2019-12-03 00:00:00</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>NaN</td>
+      <td>3039</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>Amanda Lima e Souza</td>
+      <td>NaN</td>
+      <td>987.52</td>
+      <td>Transitória Intercredis Remessa Expressa</td>
+      <td>2019-12-04 00:00:00</td>
+      <td>2019-12-04 00:00:00</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>NaN</td>
+      <td>4197</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>Julia Maria Caetano</td>
+      <td>NaN</td>
+      <td>4864.5</td>
+      <td>Transitória Intercredis Remessa Expressa</td>
+      <td>2019-12-05 00:00:00</td>
+      <td>2019-12-05 00:00:00</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>NaN</td>
+      <td>3039</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>Gabriel Morais</td>
+      <td>NaN</td>
+      <td>1548.12</td>
+      <td>Transitória Intercredis Remessa Expressa</td>
+      <td>2019-12-05 00:00:00</td>
+      <td>2019-12-05 00:00:00</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>NaN</td>
+      <td>4197</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>Felipe Viana Santana</td>
+      <td>NaN</td>
+      <td>3594.15</td>
+      <td>Transitória Intercredis Remessa Expressa</td>
+      <td>2019-12-05 00:00:00</td>
+      <td>2019-12-05 00:00:00</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>37083.77</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
