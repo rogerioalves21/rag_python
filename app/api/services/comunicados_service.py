@@ -162,6 +162,7 @@ class ComunicadosService():
                 __resumo = __doc.metadata["resumo"]
             __relevantes.append(__doc.page_content)
             __relevantes.append(' ')
+        print(__resumo)
         __messages = self.__chat_prompt.format_messages(question=query, context=__resumo, summaries="")
         self.__retrieval_qa_chain.combine_documents_chain.llm_chain.prompt.messages = __messages
         return await self.__retrieval_qa_chain.ainvoke(input={"question": query, "context": __resumo, "summaries": "" }, config={"callbacks": self.__callbacks, "include_run_info": True})
