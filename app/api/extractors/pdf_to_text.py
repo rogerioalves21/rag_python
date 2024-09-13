@@ -33,7 +33,8 @@ class PdfToTextExtrator(AbstractExtrator):
         # if _is_windows: raise RuntimeError("pdftotext não existe no windows!")
 
         if shutil.which('pdftotext'):
-            _cmd = ["pdftotext", "-layout", "-nodiag", "-enc", "UTF-8", "-colspacing", "0.3"]
+            # _cmd = ["pdftotext", "-layout", "-nodiag", "-enc", "UTF-8", "-colspacing", "0.3"]
+            _cmd = ["pdftotext", "-table", "-nodiag", "-enc", "UTF-8"]
             _cmd += [_arquivo, "-"]
             _out, _err = subprocess.Popen(_cmd, stdout=subprocess.PIPE).communicate()
             _conteudo = _out.decode('utf-8')

@@ -29,11 +29,11 @@ logger = logging.getLogger(__name__)
 api_userinfo = 'https://api-sisbr-ti.homologacao.com.br/user-info/v2/userinfo'
 client_id    = 'lid'
 
-CONFIG_EMBDBERT = 'kuqoi/qwen2-tools' # 'paraphrase-multilingual'
-CONFIG_EMBD  = 'kuqoi/qwen2-tools' # 'mxbai-embed-large'
-MODEL_MISTRAL = 'kuqoi/qwen2-tools'
-MODEL_LLAMA  = 'kuqoi/qwen2-tools'
-MODEL_GEMMA  = 'kuqoi/qwen2-tools'
+CONFIG_EMBDBERT = 'qwen2' # 'paraphrase-multilingual'
+CONFIG_EMBD  = 'qwen2' # 'mxbai-embed-large'
+MODEL_MISTRAL = 'qwen2'
+MODEL_LLAMA  = 'qwen2'
+MODEL_GEMMA  = 'qwen2'
 
 config_system_prompt = "Você é um assistente prestativo do Banco Sicoob, dedicado a responder perguntas utilizando somente o CONTEXTO fornecido. Se não for possível encontrar a resposta no contexto, responda \"O contexto fornecido é insuficiente!\". Não utilize conhecimento prévio. Antes de escrever sua resposta final, lembre que a resposta deve ser no idioma português."
 
@@ -49,7 +49,7 @@ def get_memory_history() -> ConversationBufferMemory:
     return __memory
 
 def get_text_splitter() -> Union[ComunicadoTextSplitter, None]:
-    __splitter = ComunicadoTextSplitter(chunk_size=2048, chunk_overlap=100)
+    __splitter = ComunicadoTextSplitter(chunk_size=4096, chunk_overlap=100)
     return __splitter
 
 def get_chat_prompt() -> Union[ChatPromptTemplate, None]:
@@ -94,7 +94,7 @@ def get_mongodb_vector_store() -> Union[MongoDBAtlasVectorSearch, None]:
     try:
         __mongo_client = MongoClient("mongodb+srv://rogerioalves21:cCtExPYYxjDONME9@lidcluster.h0lg3.mongodb.net/?retryWrites=true&w=majority&appName=LidCluster")# "mongodb://localhost:27017/?appname=SicoobLid&directConnection=true&ssl=false")
         __collection = __mongo_client["lid"]["sicoob-collection"]
-        __vector_store = MongoDBAtlasVectorSearch(collection=__collection, embedding=get_ollama_embeddings(), index_name="vector_index", relevance_score_fn="dotProduct")
+        __vector_store = MongoDBAtlasVectorSearch(collection=__collection, embedding=get_ollama_embeddings(), index_name="vector_index", relevance_score_fn="cosine")
         return __vector_store
     except:
         print("Sem mongo DB")
