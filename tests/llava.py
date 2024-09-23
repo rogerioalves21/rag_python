@@ -17,7 +17,7 @@ def encode_image(image_path):
 
 def generate_text(instruction, file_path):
     result = ollama.generate(
-        model='llava-phi3',
+        model='minicpm-v:8b-2.6-q3_K_S',
         prompt=instruction,
         images=[file_path],
         stream=False
@@ -37,11 +37,11 @@ async def main():
 
     prompt = """You are an assistant tasked with text extraction from images for retrieval."""
     
-    b64 = get_image('C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/files/to_img/CCI1.088_2024_0.png')
+    b64 = get_image('C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/files/old_to_img/0702763-79.2024.8.07.0014_0001_0.png')
     #with Image.open('C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/files/to_img/cci1202_0.png','rb') as f:
     #    b64 = f
     async for part in await AsyncClient().chat(
-        model='llava-phi3',
+        model='minicpm-v:8b-2.6-q3_K_S',
         messages=[
             {
                 'role': 'user',
@@ -50,7 +50,7 @@ async def main():
             }
         ],
         options={'num_predict': 2000, "temperature": 0.7},
-        keep_alive='1h',
+        keep_alive='15m0s',
         stream=True,
     ):print(part['message']['content'], end='', flush=True)
 

@@ -3,8 +3,8 @@ import cv2
 from cv2.typing import MatLike
 import fitz
 from fitz import Page
-from PIL import Image as ImagePIL
-import easyocr
+# from PIL import Image as ImagePIL
+# import easyocr
 import pytesseract
 from pytesseract import Output
 from langchain_core.documents import Document
@@ -20,7 +20,7 @@ from concurrent.futures import ThreadPoolExecutor, wait, as_completed
 # pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
 pytesseract.pytesseract.tesseract_cmd = r"C:/Users/rogerio.rodrigues/AppData/Local/Programs/Tesseract-OCR/tesseract.exe"
 
-os.environ['OMP_THREAD_LIMIT'] = '4'
+os.environ['OMP_THREAD_LIMIT'] = '1'
 
 class ImageProcessing:
     def __init__(self):
@@ -57,7 +57,7 @@ class ImageProcessing:
         return text
 
     def __task(self, __page: Page, __page_number: int, __img_path: str) -> Union[Tuple[int, str], None]:
-        __pixmap: Page       = __page.get_pixmap(dpi=300)
+        __pixmap: Page       = __page.get_pixmap(dpi=150)
         __img, __new_img     = self.to_gray(__pixmap, __img_path, __page_number)
         __config_pytesseract = r'--tessdata-dir assets/tessdata -l por --oem 1 --psm 6 -c preserve_interword_spaces=1 output-preserve-enable=true'
         __texto              = pytesseract.image_to_string(image=__img, lang='por', nice=9, config=__config_pytesseract)
@@ -80,20 +80,20 @@ class ImageProcessing:
         pdf = fitz.open(img_path)
         imagens_criadas    = []
         for page in pdf:
-            pixmap: Page   = page.get_pixmap(dpi=300)
-            new_img_folder = img_folder.replace('.png', '_' + str(page.number) + '.png')
+            pixmap: Page   = page.get_pixmap(dpi=150)
+            new_img_folder = img_folder.replace('.jpeg', '_' + str(page.number) + '.jpeg')
             pixmap.pil_save(new_img_folder, optimize=True)
             imagens_criadas.append((new_img_folder, page.number))
         return imagens_criadas
 
     def to_gray(self, __pixmap: Page, __img_path: str, __page: int):
         __path_foto = __img_path.replace('pdfs', 'to_img')
-        __path_foto = __path_foto.replace('.pdf', f'_{__page}.png')
+        __path_foto = __path_foto.replace('.pdf', f'_{__page}.jpeg')
         print(f"CAMINHO FOTO: {__path_foto}")
         __pixmap.pil_save(__path_foto, optimize=True)
         __img_bgr      = cv2.imread(__path_foto)
         __gray         = cv2.cvtColor(__img_bgr, cv2.COLOR_BGR2GRAY)
-        __new_img_path = __path_foto.replace('.png', '_GRAY.png')
+        __new_img_path = __path_foto.replace('.jpeg', '_GRAY.jpeg')
         cv2.imwrite(__new_img_path, __gray)
         return cv2.imread(__new_img_path), __new_img_path
 
@@ -120,7 +120,7 @@ class ImageProcessing:
     # Limiarização com o método de otsu. O valor do threshold será calculado automaticamente
     def otsu_threshold(self, __pixmap: Page, __img_path: str, __page: int):
         __path_foto = __img_path.replace('pdfs', 'to_img')
-        __path_foto = __path_foto.replace('.pdf', f'_{__page}.png')
+        __path_foto = __path_foto.replace('.pdf', f'_{__page}.jpeg')
         print(f"CAMINHO FOTO: {__path_foto}")
         __pixmap.pil_save(__path_foto, optimize=True)
         img       = cv2.imread(__path_foto)
@@ -128,7 +128,7 @@ class ImageProcessing:
         val, otsu = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
         print('Limiar calculado (cada img possuirá um limiar diferente: ', val)
-        new_img_path = __path_foto.replace('.png', '_OTSU.png')
+        new_img_path = __path_foto.replace('.jpeg', '_OTSU.jpeg')
         cv2.imwrite(new_img_path, otsu)
         return cv2.imread(new_img_path)
 
@@ -141,7 +141,7 @@ class ImageProcessing:
         print('Limiar calculado (cada img possuirá um limiar diferente: ', val)
         adapt_media = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 9)
         
-        new_img_path = img_path.replace('.png', 'THRESH2.png')
+        new_img_path = img_path.replace('.jpeg', 'THRESH2.jpeg')
         cv2.imwrite(new_img_path, adapt_media)
 
     def get_image_data(self, img_rgb):
@@ -155,7 +155,7 @@ class ImageProcessing:
 
         adapt_gaussian = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 9)
         
-        new_img_path = img_path.replace('.png', 'GAUS.png')
+        new_img_path = img_path.replace('.jpeg', 'GAUS.jpeg')
         cv2.imwrite(new_img_path, adapt_gaussian)
 
     def invert_color(self, img_path: str) -> str:
@@ -164,7 +164,7 @@ class ImageProcessing:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         invert = 255 - gray
 
-        new_img_path = img_path.replace('.png', 'INVERT.png')
+        new_img_path = img_path.replace('.jpeg', 'INVERT.jpeg')
         cv2.imwrite(new_img_path, invert)
         return new_img_path
 
@@ -203,7 +203,7 @@ class PyTesseractParser(BaseBlobParser):
     def lazy_parse(self, blob: Union[Blob, None] = None) -> Iterator[Document]:
         __split       = self._pdf_path.split("/")
         __image_name  = self.__normalize_string(__split[-1]).replace(' ', '_')
-        __image_name  = __image_name.replace('.pdf', '.png')
+        __image_name  = __image_name.replace('.pdf', '.jpeg')
         __texto       = self._img_processing.pdf_to_text(self._pdf_path)
         yield from [
             Document(
@@ -224,7 +224,7 @@ class PyTesseractLoader(BasePDFLoader):
         yield from self.parser.parse(None)
 
 if __name__ == '__main__':
-    file_path = "./files/pdfs/CCI1.081_2024.pdf"
+    file_path = "./files/pdfs/0702763-79.2024.8.07.0014_0001.pdf"
     loader    = PyTesseractLoader(file_path)
     documents = loader.load()
     print(documents)
