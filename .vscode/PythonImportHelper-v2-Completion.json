@@ -1202,6 +1202,14 @@
         "documentation": {}
     },
     {
+        "label": "PdfToTextExtrator",
+        "importPath": "app.api.extractors.pdf_to_text",
+        "description": "app.api.extractors.pdf_to_text",
+        "isExtraImport": true,
+        "detail": "app.api.extractors.pdf_to_text",
+        "documentation": {}
+    },
+    {
         "label": "Reader",
         "importPath": "pdfdataextractor",
         "description": "pdfdataextractor",
@@ -1373,79 +1381,6 @@
         "description": "fitz",
         "isExtraImport": true,
         "detail": "fitz",
-        "documentation": {}
-    },
-    {
-        "label": "Image",
-        "importPath": "PIL",
-        "description": "PIL",
-        "isExtraImport": true,
-        "detail": "PIL",
-        "documentation": {}
-    },
-    {
-        "label": "Image",
-        "importPath": "PIL",
-        "description": "PIL",
-        "isExtraImport": true,
-        "detail": "PIL",
-        "documentation": {}
-    },
-    {
-        "label": "Image",
-        "importPath": "PIL",
-        "description": "PIL",
-        "isExtraImport": true,
-        "detail": "PIL",
-        "documentation": {}
-    },
-    {
-        "label": "Image",
-        "importPath": "PIL",
-        "description": "PIL",
-        "isExtraImport": true,
-        "detail": "PIL",
-        "documentation": {}
-    },
-    {
-        "label": "Image",
-        "importPath": "PIL",
-        "description": "PIL",
-        "isExtraImport": true,
-        "detail": "PIL",
-        "documentation": {}
-    },
-    {
-        "label": "ImageFont",
-        "importPath": "PIL",
-        "description": "PIL",
-        "isExtraImport": true,
-        "detail": "PIL",
-        "documentation": {}
-    },
-    {
-        "label": "Image",
-        "importPath": "PIL",
-        "description": "PIL",
-        "isExtraImport": true,
-        "detail": "PIL",
-        "documentation": {}
-    },
-    {
-        "label": "ImageDraw",
-        "importPath": "PIL",
-        "description": "PIL",
-        "isExtraImport": true,
-        "detail": "PIL",
-        "documentation": {}
-    },
-    {
-        "label": "easyocr",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "easyocr",
-        "description": "easyocr",
-        "detail": "easyocr",
         "documentation": {}
     },
     {
@@ -2944,6 +2879,14 @@
         "documentation": {}
     },
     {
+        "label": "PyTesseractLoader",
+        "importPath": "app.api.prepdoclib.image_utils",
+        "description": "app.api.prepdoclib.image_utils",
+        "isExtraImport": true,
+        "detail": "app.api.prepdoclib.image_utils",
+        "documentation": {}
+    },
+    {
         "label": "ImageProcessing",
         "importPath": "app.api.prepdoclib.image_utils",
         "description": "app.api.prepdoclib.image_utils",
@@ -3725,6 +3668,15 @@
         "documentation": {}
     },
     {
+        "label": "easyocr",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "easyocr",
+        "description": "easyocr",
+        "detail": "easyocr",
+        "documentation": {}
+    },
+    {
         "label": "Ollama",
         "importPath": "langchain_community.llms.ollama",
         "description": "langchain_community.llms.ollama",
@@ -3806,6 +3758,78 @@
         "description": "langchain_community.llms",
         "isExtraImport": true,
         "detail": "langchain_community.llms",
+        "documentation": {}
+    },
+    {
+        "label": "Image",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "Image",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "Image",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "Image",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "ImageFont",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "Image",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "ImageDraw",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "Image",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "ImageDraw",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
         "documentation": {}
     },
     {
@@ -3935,6 +3959,23 @@
         "documentation": {}
     },
     {
+        "label": "AutoModelForObjectDetection",
+        "importPath": "transformers",
+        "description": "transformers",
+        "isExtraImport": true,
+        "detail": "transformers",
+        "documentation": {}
+    },
+    {
+        "label": "openai",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "openai",
+        "description": "openai",
+        "detail": "openai",
+        "documentation": {}
+    },
+    {
         "label": "AsyncOpenAI",
         "importPath": "openai",
         "description": "openai",
@@ -4010,6 +4051,15 @@
         "documentation": {}
     },
     {
+        "label": "codecs",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "codecs",
+        "description": "codecs",
+        "detail": "codecs",
+        "documentation": {}
+    },
+    {
         "label": "weaviate.classes",
         "kind": 6,
         "isExtraImport": true,
@@ -4073,6 +4123,49 @@
         "importPath": "sys",
         "description": "sys",
         "detail": "sys",
+        "documentation": {}
+    },
+    {
+        "label": "matplotlib.patches",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "matplotlib.patches",
+        "description": "matplotlib.patches",
+        "detail": "matplotlib.patches",
+        "documentation": {}
+    },
+    {
+        "label": "Patch",
+        "importPath": "matplotlib.patches",
+        "description": "matplotlib.patches",
+        "isExtraImport": true,
+        "detail": "matplotlib.patches",
+        "documentation": {}
+    },
+    {
+        "label": "csv",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "csv",
+        "description": "csv",
+        "detail": "csv",
+        "documentation": {}
+    },
+    {
+        "label": "transforms",
+        "importPath": "torchvision",
+        "description": "torchvision",
+        "isExtraImport": true,
+        "detail": "torchvision",
+        "documentation": {}
+    },
+    {
+        "label": "torch",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "torch",
+        "description": "torch",
+        "detail": "torch",
         "documentation": {}
     },
     {
@@ -4355,7 +4448,7 @@
         "kind": 6,
         "importPath": "app.api.prepdoclib.image_utils",
         "description": "app.api.prepdoclib.image_utils",
-        "peekOfCode": "class PyTesseractLoader(BasePDFLoader):\n    def __init__(self, file_path: str) -> None:\n        self.parser = PyTesseractParser(pdf_path=file_path)\n        super().__init__(file_path)\n    def load(self) -> List[Document]:\n        return list(self.lazy_load())\n    def lazy_load(self) -> Iterator[Document]:\n        yield from self.parser.parse(None)\nif __name__ == '__main__':\n    file_path = \"./files/pdfs/CCI1.081_2024.pdf\"",
+        "peekOfCode": "class PyTesseractLoader(BasePDFLoader):\n    def __init__(self, file_path: str) -> None:\n        self.parser = PyTesseractParser(pdf_path=file_path)\n        super().__init__(file_path)\n    def load(self) -> List[Document]:\n        return list(self.lazy_load())\n    def lazy_load(self) -> Iterator[Document]:\n        yield from self.parser.parse(None)\nif __name__ == '__main__':\n    file_path = \"./files/pdfs/0702763-79.2024.8.07.0014_0001.pdf\"",
         "detail": "app.api.prepdoclib.image_utils",
         "documentation": {}
     },
@@ -4364,7 +4457,7 @@
         "kind": 5,
         "importPath": "app.api.prepdoclib.image_utils",
         "description": "app.api.prepdoclib.image_utils",
-        "peekOfCode": "pytesseract.pytesseract.tesseract_cmd = r\"C:/Users/rogerio.rodrigues/AppData/Local/Programs/Tesseract-OCR/tesseract.exe\"\nos.environ['OMP_THREAD_LIMIT'] = '4'\nclass ImageProcessing:\n    def __init__(self):\n        # self.__eocrreader = easyocr.Reader(['pt','en'])\n        print(\"image-processing\")\n    def find_words_remove(self, img_data):\n        __words_remove = []\n        __whitelist = ['ç','STI:','STI','CCI','-','—',\"N\",'IC','SICOOB']\n        __threshold2 = 10",
+        "peekOfCode": "pytesseract.pytesseract.tesseract_cmd = r\"C:/Users/rogerio.rodrigues/AppData/Local/Programs/Tesseract-OCR/tesseract.exe\"\nos.environ['OMP_THREAD_LIMIT'] = '1'\nclass ImageProcessing:\n    def __init__(self):\n        # self.__eocrreader = easyocr.Reader(['pt','en'])\n        print(\"image-processing\")\n    def find_words_remove(self, img_data):\n        __words_remove = []\n        __whitelist = ['ç','STI:','STI','CCI','-','—',\"N\",'IC','SICOOB']\n        __threshold2 = 10",
         "detail": "app.api.prepdoclib.image_utils",
         "documentation": {}
     },
@@ -4373,7 +4466,7 @@
         "kind": 5,
         "importPath": "app.api.prepdoclib.image_utils",
         "description": "app.api.prepdoclib.image_utils",
-        "peekOfCode": "os.environ['OMP_THREAD_LIMIT'] = '4'\nclass ImageProcessing:\n    def __init__(self):\n        # self.__eocrreader = easyocr.Reader(['pt','en'])\n        print(\"image-processing\")\n    def find_words_remove(self, img_data):\n        __words_remove = []\n        __whitelist = ['ç','STI:','STI','CCI','-','—',\"N\",'IC','SICOOB']\n        __threshold2 = 10\n        for i in range(0, len(img_data['text'])):",
+        "peekOfCode": "os.environ['OMP_THREAD_LIMIT'] = '1'\nclass ImageProcessing:\n    def __init__(self):\n        # self.__eocrreader = easyocr.Reader(['pt','en'])\n        print(\"image-processing\")\n    def find_words_remove(self, img_data):\n        __words_remove = []\n        __whitelist = ['ç','STI:','STI','CCI','-','—',\"N\",'IC','SICOOB']\n        __threshold2 = 10\n        for i in range(0, len(img_data['text'])):",
         "detail": "app.api.prepdoclib.image_utils",
         "documentation": {}
     },
@@ -6434,7 +6527,7 @@
         "kind": 2,
         "importPath": "tests.llava",
         "description": "tests.llava",
-        "peekOfCode": "def get_image(image_path):\n    with open(image_path, 'rb') as file:\n        return file.read()\ndef encode_image(image_path):\n    \"\"\"Getting the base64 string\"\"\"\n    with open(image_path, \"rb\") as image_file:\n        return base64.b64encode(image_file.read()).decode(\"utf-8\")\ndef generate_text(instruction, file_path):\n    result = ollama.generate(\n        model='llava-phi3',",
+        "peekOfCode": "def get_image(image_path):\n    with open(image_path, 'rb') as file:\n        return file.read()\ndef encode_image(image_path):\n    \"\"\"Getting the base64 string\"\"\"\n    with open(image_path, \"rb\") as image_file:\n        return base64.b64encode(image_file.read()).decode(\"utf-8\")\ndef generate_text(instruction, file_path):\n    result = ollama.generate(\n        model='minicpm-v:8b-2.6-q3_K_S',",
         "detail": "tests.llava",
         "documentation": {}
     },
@@ -6443,7 +6536,7 @@
         "kind": 2,
         "importPath": "tests.llava",
         "description": "tests.llava",
-        "peekOfCode": "def encode_image(image_path):\n    \"\"\"Getting the base64 string\"\"\"\n    with open(image_path, \"rb\") as image_file:\n        return base64.b64encode(image_file.read()).decode(\"utf-8\")\ndef generate_text(instruction, file_path):\n    result = ollama.generate(\n        model='llava-phi3',\n        prompt=instruction,\n        images=[file_path],\n        stream=False",
+        "peekOfCode": "def encode_image(image_path):\n    \"\"\"Getting the base64 string\"\"\"\n    with open(image_path, \"rb\") as image_file:\n        return base64.b64encode(image_file.read()).decode(\"utf-8\")\ndef generate_text(instruction, file_path):\n    result = ollama.generate(\n        model='minicpm-v:8b-2.6-q3_K_S',\n        prompt=instruction,\n        images=[file_path],\n        stream=False",
         "detail": "tests.llava",
         "documentation": {}
     },
@@ -6452,7 +6545,7 @@
         "kind": 2,
         "importPath": "tests.llava",
         "description": "tests.llava",
-        "peekOfCode": "def generate_text(instruction, file_path):\n    result = ollama.generate(\n        model='llava-phi3',\n        prompt=instruction,\n        images=[file_path],\n        stream=False\n    )['response']\n    img=Image.open(file_path, mode='r')\n    img = img.resize([int(i/1.2) for i in img.size])\n    print(img) ",
+        "peekOfCode": "def generate_text(instruction, file_path):\n    result = ollama.generate(\n        model='minicpm-v:8b-2.6-q3_K_S',\n        prompt=instruction,\n        images=[file_path],\n        stream=False\n    )['response']\n    img=Image.open(file_path, mode='r')\n    img = img.resize([int(i/1.2) for i in img.size])\n    print(img) ",
         "detail": "tests.llava",
         "documentation": {}
     },
@@ -7208,7 +7301,7 @@
         "kind": 5,
         "importPath": "eocr",
         "description": "eocr",
-        "peekOfCode": "reader = easyocr.Reader(['pt','en'])\nresult = reader.readtext('./files/to_img/CCI500_2023_2.png', detail=0, paragraph=False, text_threshold=0.2)\nprint(result)",
+        "peekOfCode": "reader = easyocr.Reader(['pt','en'])\nresult = reader.readtext('./files/old_to_img/CCI1.301_2024_0_GRAY.jpeg', detail=0, paragraph=False, text_threshold=0.2)\nprint(result)",
         "detail": "eocr",
         "documentation": {}
     },
@@ -7217,7 +7310,7 @@
         "kind": 5,
         "importPath": "eocr",
         "description": "eocr",
-        "peekOfCode": "result = reader.readtext('./files/to_img/CCI500_2023_2.png', detail=0, paragraph=False, text_threshold=0.2)\nprint(result)",
+        "peekOfCode": "result = reader.readtext('./files/old_to_img/CCI1.301_2024_0_GRAY.jpeg', detail=0, paragraph=False, text_threshold=0.2)\nprint(result)",
         "detail": "eocr",
         "documentation": {}
     },
@@ -7228,6 +7321,33 @@
         "description": "gmain",
         "peekOfCode": "class ChatApp:\n    def __init__(self):\n        self.context_text = \"\"\n    def send_message(self, question):\n        payload = {\n            \"type\": \"object\",\n            \"properties\": {\n                \"question\": {\n                    \"type\": \"string\",\n                    \"description\": question",
         "detail": "gmain",
+        "documentation": {}
+    },
+    {
+        "label": "get_html",
+        "kind": 2,
+        "importPath": "html_to_markdown",
+        "description": "html_to_markdown",
+        "peekOfCode": "def get_html(html_path: str) -> bytes:\n    with open(html_path, 'r', encoding='utf-8') as file:\n        return file.read()\ndef to_base64(image_path):\n    \"\"\"Getting the base64 string\"\"\"\n    with open(image_path, \"rb\") as image_file:\n        return base64.b64encode(image_file.read()).decode(\"utf-8\")\ndef main():\n    html_path = '/Users/rogerio.rodrigues/Documents/work_java_pessoal/tabbypdf-master/src/test/resources/pdf/edit/html/0702763-79.2024.8.07.0014_0001.pdf.0.html'\n    html = f\"\"\"<html><body>{get_html(html_path)}</body></html>\"\"\"",
+        "detail": "html_to_markdown",
+        "documentation": {}
+    },
+    {
+        "label": "to_base64",
+        "kind": 2,
+        "importPath": "html_to_markdown",
+        "description": "html_to_markdown",
+        "peekOfCode": "def to_base64(image_path):\n    \"\"\"Getting the base64 string\"\"\"\n    with open(image_path, \"rb\") as image_file:\n        return base64.b64encode(image_file.read()).decode(\"utf-8\")\ndef main():\n    html_path = '/Users/rogerio.rodrigues/Documents/work_java_pessoal/tabbypdf-master/src/test/resources/pdf/edit/html/0702763-79.2024.8.07.0014_0001.pdf.0.html'\n    html = f\"\"\"<html><body>{get_html(html_path)}</body></html>\"\"\"\n    print(html)\n    response = ollama.chat(\n        model='reader-lm:1.5b-fp16',",
+        "detail": "html_to_markdown",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "html_to_markdown",
+        "description": "html_to_markdown",
+        "peekOfCode": "def main():\n    html_path = '/Users/rogerio.rodrigues/Documents/work_java_pessoal/tabbypdf-master/src/test/resources/pdf/edit/html/0702763-79.2024.8.07.0014_0001.pdf.0.html'\n    html = f\"\"\"<html><body>{get_html(html_path)}</body></html>\"\"\"\n    print(html)\n    response = ollama.chat(\n        model='reader-lm:1.5b-fp16',\n        messages=[\n            {\n                'role': 'user',\n                'content': html",
+        "detail": "html_to_markdown",
         "documentation": {}
     },
     {
@@ -7300,6 +7420,240 @@
         "description": "start_weaviate",
         "peekOfCode": "weav_api_key = os.getenv(\"WEAVIATE_ADMIN_KEY\")\nif __name__ == \"__main__\":\n    client = weaviate.WeaviateClient(\n        embedded_options=EmbeddedOptions(\n            additional_env_vars={\n                \"ENABLE_MODULES\": \"backup-filesystem,text2vec-ollama,generative-ollama\",\n                \"BACKUP_FILESYSTEM_PATH\": \"/tmp/backups\",\n                \"PERSISTENCE_DATA_PATH\": db_path,\n                \"LIMIT_RESOURCES\": 'true'\n            }",
         "detail": "start_weaviate",
+        "documentation": {}
+    },
+    {
+        "label": "sumarizar_processos",
+        "kind": 2,
+        "importPath": "sucesso_extracao",
+        "description": "sucesso_extracao",
+        "peekOfCode": "def sumarizar_processos(pagina: str):\n    try:\n        summary_juridico_prompt = \"Você é um assistente especialista em processos judiciais. Sua tarefa é fazer um resumo claro e conciso de processos, foque em aspectos como número do processo, valor da causa, valor da dívida, requerentes, requeridos, as partes e objetivo do processo. Não acrescente nenhum conhecimento prévio, nota ou sugestão. Escreva suas respostas no formato markdown.\"\n        payload = {\n            \"messages\": [\n                {\n                    \"content\": summary_juridico_prompt,\n                    \"role\": \"system\"\n                },\n                {",
+        "detail": "sucesso_extracao",
+        "documentation": {}
+    },
+    {
+        "label": "PROMPT_NUM_PROCESSO",
+        "kind": 5,
+        "importPath": "sucesso_extracao",
+        "description": "sucesso_extracao",
+        "peekOfCode": "PROMPT_NUM_PROCESSO = \"\"\"\nUtilizando APEANAS o contexto. Encontre e escreva as informações abaixo:\nO número do processo.\nA data da distribuição ou última distribuição.\nO valor da causa do processo.\nNome da parte autora da ação ou processo.\nNome do advogado da parte autora da ação ou processo.\nÓrgão julgador do processo.\nJuiz, ou qual o nome do Juiz de Direito citado no processo.\nEscreva sua resposta no formato",
+        "detail": "sucesso_extracao",
+        "documentation": {}
+    },
+    {
+        "label": "headers",
+        "kind": 5,
+        "importPath": "sucesso_extracao",
+        "description": "sucesso_extracao",
+        "peekOfCode": "headers = {\n    \"Content-Type\": \"application/json\"\n}\njan_ai_url = \"http://localhost:1337\"\ndef sumarizar_processos(pagina: str):\n    try:\n        summary_juridico_prompt = \"Você é um assistente especialista em processos judiciais. Sua tarefa é fazer um resumo claro e conciso de processos, foque em aspectos como número do processo, valor da causa, valor da dívida, requerentes, requeridos, as partes e objetivo do processo. Não acrescente nenhum conhecimento prévio, nota ou sugestão. Escreva suas respostas no formato markdown.\"\n        payload = {\n            \"messages\": [\n                {",
+        "detail": "sucesso_extracao",
+        "documentation": {}
+    },
+    {
+        "label": "jan_ai_url",
+        "kind": 5,
+        "importPath": "sucesso_extracao",
+        "description": "sucesso_extracao",
+        "peekOfCode": "jan_ai_url = \"http://localhost:1337\"\ndef sumarizar_processos(pagina: str):\n    try:\n        summary_juridico_prompt = \"Você é um assistente especialista em processos judiciais. Sua tarefa é fazer um resumo claro e conciso de processos, foque em aspectos como número do processo, valor da causa, valor da dívida, requerentes, requeridos, as partes e objetivo do processo. Não acrescente nenhum conhecimento prévio, nota ou sugestão. Escreva suas respostas no formato markdown.\"\n        payload = {\n            \"messages\": [\n                {\n                    \"content\": summary_juridico_prompt,\n                    \"role\": \"system\"\n                },",
+        "detail": "sucesso_extracao",
+        "documentation": {}
+    },
+    {
+        "label": "get_image",
+        "kind": 2,
+        "importPath": "sucesso_vision",
+        "description": "sucesso_vision",
+        "peekOfCode": "def get_image(image_path) -> bytes:\n    with open(image_path, 'rb') as file:\n        return file.read()\ndef to_base64(image_path):\n    \"\"\"Getting the base64 string\"\"\"\n    with open(image_path, \"rb\") as image_file:\n        return base64.b64encode(image_file.read()).decode(\"utf-8\")\ndef main():\n    img_path_00 = 'C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/files/old_to_img/0702763-79.2024.8.07.0014_0010_0_GRAY.jpeg'\n    response = ollama.chat(",
+        "detail": "sucesso_vision",
+        "documentation": {}
+    },
+    {
+        "label": "to_base64",
+        "kind": 2,
+        "importPath": "sucesso_vision",
+        "description": "sucesso_vision",
+        "peekOfCode": "def to_base64(image_path):\n    \"\"\"Getting the base64 string\"\"\"\n    with open(image_path, \"rb\") as image_file:\n        return base64.b64encode(image_file.read()).decode(\"utf-8\")\ndef main():\n    img_path_00 = 'C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/files/old_to_img/0702763-79.2024.8.07.0014_0010_0_GRAY.jpeg'\n    response = ollama.chat(\n        model='minicpm-v:8b-2.6-q5_K_M',\n        messages=[\n            {",
+        "detail": "sucesso_vision",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "sucesso_vision",
+        "description": "sucesso_vision",
+        "peekOfCode": "def main():\n    img_path_00 = 'C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/files/old_to_img/0702763-79.2024.8.07.0014_0010_0_GRAY.jpeg'\n    response = ollama.chat(\n        model='minicpm-v:8b-2.6-q5_K_M',\n        messages=[\n            {\n                'role': 'user',\n                'content': f\"{PROMPT_NUM_PROCESSO}\",\n                'images': [to_base64(img_path_00)]\n            },",
+        "detail": "sucesso_vision",
+        "documentation": {}
+    },
+    {
+        "label": "PROMPT_NUM_PROCESSO",
+        "kind": 5,
+        "importPath": "sucesso_vision",
+        "description": "sucesso_vision",
+        "peekOfCode": "PROMPT_NUM_PROCESSO = \"\"\"\nAplique OCR no texto da imagem. Encontre e escreva as informações abaixo:\nO número do processo.\nA data da distribuição ou última distribuição.\nO valor da causa do processo.\nNome da parte autora da ação ou processo.\nNome do advogado da parte autora da ação ou processo.\nÓrgão julgador do processo.\nEscreva sua resposta no formato\n{",
+        "detail": "sucesso_vision",
+        "documentation": {}
+    },
+    {
+        "label": "PROMPT_PARTES",
+        "kind": 5,
+        "importPath": "sucesso_vision",
+        "description": "sucesso_vision",
+        "peekOfCode": "PROMPT_PARTES = \"\"\"\nEncontre e escreva as informações abaixo:\nNome e CPF/CNPJ de pessoas ou bancos citados no processo.\nEscreva sua resposta no formato\n{\n    \"pessoas_bancos\": [ \"nome_pessoa_banco\": {nome_pessoa_banco}, \"cpf_cnpj_pessoa_banco\": {cpf_cnpj_pessoa_banco} ]\n}\nPense passo a passo antes de escrever sua resposta.\n\"\"\"\nPROMPT_DATA_DISTRITUICAO = \"\"\"",
+        "detail": "sucesso_vision",
+        "documentation": {}
+    },
+    {
+        "label": "PROMPT_DATA_DISTRITUICAO",
+        "kind": 5,
+        "importPath": "sucesso_vision",
+        "description": "sucesso_vision",
+        "peekOfCode": "PROMPT_DATA_DISTRITUICAO = \"\"\"\nEscreva a data da distribuição ou última distribuição descrita na imagem.\n\"\"\"\nPROMPT_CLASSE_TIPO_PROCESSO = \"\"\"\nEscreva o Tipo de Processo, ou Classe, ou Classe judicial descrito(a) na imagem.\n\"\"\"\nPROMPT_AUTOR = \"\"\"\nQuais são as partes (autor(a), advogado(s), réu(s)) citadas no processo?\nEscreva sua resposta no formato abaixo:\n```",
+        "detail": "sucesso_vision",
+        "documentation": {}
+    },
+    {
+        "label": "PROMPT_CLASSE_TIPO_PROCESSO",
+        "kind": 5,
+        "importPath": "sucesso_vision",
+        "description": "sucesso_vision",
+        "peekOfCode": "PROMPT_CLASSE_TIPO_PROCESSO = \"\"\"\nEscreva o Tipo de Processo, ou Classe, ou Classe judicial descrito(a) na imagem.\n\"\"\"\nPROMPT_AUTOR = \"\"\"\nQuais são as partes (autor(a), advogado(s), réu(s)) citadas no processo?\nEscreva sua resposta no formato abaixo:\n```\nPartes: [<nome_parte>] // lista com os nomes das partes citadas\n```\n\"\"\"",
+        "detail": "sucesso_vision",
+        "documentation": {}
+    },
+    {
+        "label": "PROMPT_AUTOR",
+        "kind": 5,
+        "importPath": "sucesso_vision",
+        "description": "sucesso_vision",
+        "peekOfCode": "PROMPT_AUTOR = \"\"\"\nQuais são as partes (autor(a), advogado(s), réu(s)) citadas no processo?\nEscreva sua resposta no formato abaixo:\n```\nPartes: [<nome_parte>] // lista com os nomes das partes citadas\n```\n\"\"\"\nPROMPT_CPF_CNPJ = \"\"\"\nEscreva os nomes e CPF/CNPJ das partes do processo descritos(as) nas imagens.\n\"\"\"",
+        "detail": "sucesso_vision",
+        "documentation": {}
+    },
+    {
+        "label": "PROMPT_CPF_CNPJ",
+        "kind": 5,
+        "importPath": "sucesso_vision",
+        "description": "sucesso_vision",
+        "peekOfCode": "PROMPT_CPF_CNPJ = \"\"\"\nEscreva os nomes e CPF/CNPJ das partes do processo descritos(as) nas imagens.\n\"\"\"\ndef get_image(image_path) -> bytes:\n    with open(image_path, 'rb') as file:\n        return file.read()\ndef to_base64(image_path):\n    \"\"\"Getting the base64 string\"\"\"\n    with open(image_path, \"rb\") as image_file:\n        return base64.b64encode(image_file.read()).decode(\"utf-8\")",
+        "detail": "sucesso_vision",
+        "documentation": {}
+    },
+    {
+        "label": "MaxResize",
+        "kind": 6,
+        "importPath": "table_transformer",
+        "description": "table_transformer",
+        "peekOfCode": "class MaxResize(object):\n    def __init__(self, max_size=800):\n        self.max_size = max_size\n    def __call__(self, image):\n        width, height = image.size\n        current_max_size = max(width, height)\n        scale = self.max_size / current_max_size\n        resized_image = image.resize(\n            (int(round(scale * width)), int(round(scale * height)))\n        )",
+        "detail": "table_transformer",
+        "documentation": {}
+    },
+    {
+        "label": "box_cxcywh_to_xyxy",
+        "kind": 2,
+        "importPath": "table_transformer",
+        "description": "table_transformer",
+        "peekOfCode": "def box_cxcywh_to_xyxy(x):\n    x_c, y_c, w, h = x.unbind(-1)\n    b = [(x_c - 0.5 * w), (y_c - 0.5 * h), (x_c + 0.5 * w), (y_c + 0.5 * h)]\n    return torch.stack(b, dim=1)\ndef rescale_bboxes(out_bbox, size):\n    width, height = size\n    boxes = box_cxcywh_to_xyxy(out_bbox)\n    boxes = boxes * torch.tensor(\n        [width-80, height-80, width+40, height+40], dtype=torch.float32\n    )",
+        "detail": "table_transformer",
+        "documentation": {}
+    },
+    {
+        "label": "rescale_bboxes",
+        "kind": 2,
+        "importPath": "table_transformer",
+        "description": "table_transformer",
+        "peekOfCode": "def rescale_bboxes(out_bbox, size):\n    width, height = size\n    boxes = box_cxcywh_to_xyxy(out_bbox)\n    boxes = boxes * torch.tensor(\n        [width-80, height-80, width+40, height+40], dtype=torch.float32\n    )\n    return boxes\ndef outputs_to_objects(outputs, img_size, id2label):\n    m = outputs.logits.softmax(-1).max(-1)\n    pred_labels = list(m.indices.detach().cpu().numpy())[0]",
+        "detail": "table_transformer",
+        "documentation": {}
+    },
+    {
+        "label": "outputs_to_objects",
+        "kind": 2,
+        "importPath": "table_transformer",
+        "description": "table_transformer",
+        "peekOfCode": "def outputs_to_objects(outputs, img_size, id2label):\n    m = outputs.logits.softmax(-1).max(-1)\n    pred_labels = list(m.indices.detach().cpu().numpy())[0]\n    pred_scores = list(m.values.detach().cpu().numpy())[0]\n    pred_bboxes = outputs[\"pred_boxes\"].detach().cpu()[0]\n    pred_bboxes = [\n        elem.tolist() for elem in rescale_bboxes(pred_bboxes, img_size)\n    ]\n    objects = []\n    for label, score, bbox in zip(pred_labels, pred_scores, pred_bboxes):",
+        "detail": "table_transformer",
+        "documentation": {}
+    },
+    {
+        "label": "detect_and_crop_save_table",
+        "kind": 2,
+        "importPath": "table_transformer",
+        "description": "table_transformer",
+        "peekOfCode": "def detect_and_crop_save_table(\n    file_path, cropped_table_directory=\"./table_images/\"\n):\n    image = Image.open(file_path).convert(\"RGB\")\n    filename, _ = os.path.splitext(file_path.split(\"/\")[-1])\n    if not os.path.exists(cropped_table_directory):\n        os.makedirs(cropped_table_directory)\n    # prepare image for the model\n    pixel_values = detection_transform(image).unsqueeze(0).to(device)\n    # forward pass",
+        "detail": "table_transformer",
+        "documentation": {}
+    },
+    {
+        "label": "plot_images",
+        "kind": 2,
+        "importPath": "table_transformer",
+        "description": "table_transformer",
+        "peekOfCode": "def plot_images(image_paths):\n    images_shown = 0\n    plt.figure(figsize=(16, 9))\n    for img_path in image_paths:\n        if os.path.isfile(img_path):\n            image = Image.open(img_path)\n            plt.subplot(2, 3, images_shown + 1)\n            plt.imshow(image)\n            plt.xticks([])\n            plt.yticks([])",
+        "detail": "table_transformer",
+        "documentation": {}
+    },
+    {
+        "label": "device",
+        "kind": 5,
+        "importPath": "table_transformer",
+        "description": "table_transformer",
+        "peekOfCode": "device = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nclass MaxResize(object):\n    def __init__(self, max_size=800):\n        self.max_size = max_size\n    def __call__(self, image):\n        width, height = image.size\n        current_max_size = max(width, height)\n        scale = self.max_size / current_max_size\n        resized_image = image.resize(\n            (int(round(scale * width)), int(round(scale * height)))",
+        "detail": "table_transformer",
+        "documentation": {}
+    },
+    {
+        "label": "detection_transform",
+        "kind": 5,
+        "importPath": "table_transformer",
+        "description": "table_transformer",
+        "peekOfCode": "detection_transform = transforms.Compose(\n    [\n        MaxResize(800),\n        transforms.ToTensor(),\n        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),\n    ]\n)\nstructure_transform = transforms.Compose(\n    [\n        MaxResize(1000),",
+        "detail": "table_transformer",
+        "documentation": {}
+    },
+    {
+        "label": "structure_transform",
+        "kind": 5,
+        "importPath": "table_transformer",
+        "description": "table_transformer",
+        "peekOfCode": "structure_transform = transforms.Compose(\n    [\n        MaxResize(1000),\n        transforms.ToTensor(),\n        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),\n    ]\n)\n# load table detection model\n# processor = TableTransformerImageProcessor(max_size=800)\nmodel = AutoModelForObjectDetection.from_pretrained(",
+        "detail": "table_transformer",
+        "documentation": {}
+    },
+    {
+        "label": "model",
+        "kind": 5,
+        "importPath": "table_transformer",
+        "description": "table_transformer",
+        "peekOfCode": "model = AutoModelForObjectDetection.from_pretrained(\n    \"microsoft/table-transformer-detection\", revision=\"no_timm\"\n).to(device)\n# load table structure recognition model\n# structure_processor = TableTransformerImageProcessor(max_size=1000)\nstructure_model = AutoModelForObjectDetection.from_pretrained(\n    \"microsoft/table-transformer-structure-recognition-v1.1-all\"\n).to(device)\n# for output bounding box post-processing\ndef box_cxcywh_to_xyxy(x):",
+        "detail": "table_transformer",
+        "documentation": {}
+    },
+    {
+        "label": "structure_model",
+        "kind": 5,
+        "importPath": "table_transformer",
+        "description": "table_transformer",
+        "peekOfCode": "structure_model = AutoModelForObjectDetection.from_pretrained(\n    \"microsoft/table-transformer-structure-recognition-v1.1-all\"\n).to(device)\n# for output bounding box post-processing\ndef box_cxcywh_to_xyxy(x):\n    x_c, y_c, w, h = x.unbind(-1)\n    b = [(x_c - 0.5 * w), (y_c - 0.5 * h), (x_c + 0.5 * w), (y_c + 0.5 * h)]\n    return torch.stack(b, dim=1)\ndef rescale_bboxes(out_bbox, size):\n    width, height = size",
+        "detail": "table_transformer",
+        "documentation": {}
+    },
+    {
+        "label": "retrieved_images",
+        "kind": 5,
+        "importPath": "table_transformer",
+        "description": "table_transformer",
+        "peekOfCode": "retrieved_images = []\nimg_path_00 = 'C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/files/old_to_img/CCI1.301_2024_1_GRAY.jpeg'\nretrieved_images.append(img_path_00)\nfor file_path in retrieved_images:\n    detect_and_crop_save_table(file_path)",
+        "detail": "table_transformer",
+        "documentation": {}
+    },
+    {
+        "label": "img_path_00",
+        "kind": 5,
+        "importPath": "table_transformer",
+        "description": "table_transformer",
+        "peekOfCode": "img_path_00 = 'C:/Users/rogerio.rodrigues/Documents/workspace_python/rag_python/files/old_to_img/CCI1.301_2024_1_GRAY.jpeg'\nretrieved_images.append(img_path_00)\nfor file_path in retrieved_images:\n    detect_and_crop_save_table(file_path)",
+        "detail": "table_transformer",
         "documentation": {}
     },
     {
