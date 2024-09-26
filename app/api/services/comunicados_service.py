@@ -17,7 +17,8 @@ except:
     WeaviateVectorStore = None
 from langchain_core.documents import Document
 from langchain_community.document_transformers import LongContextReorder
-from langchain_community.vectorstores import DocArrayInMemorySearch, MongoDBAtlasVectorSearch
+from langchain_mongodb import MongoDBAtlasVectorSearch
+from langchain_community.vectorstores import DocArrayInMemorySearch
 from langchain.memory import ConversationBufferMemory
 from langchain.chains.conversational_retrieval.base import ConversationalRetrievalChain
 from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
@@ -103,7 +104,7 @@ class ComunicadosService():
                 docstore=self.__store,
                 parent_splitter=self.__text_splitter,
                 child_splitter=self.__text_splitter,
-                child_metadata_fields=["source", "page", "resumo"],
+                # child_metadata_fields=["source", "page", "resumo"],
                 name="sicoob-juridico-retriever",
             )
         self.__llm.verbose = True
@@ -123,18 +124,18 @@ class ComunicadosService():
             llm=self.__llm,
             chain_type="stuff",
             retriever=self.__mongodb_stoge.as_retriever(),
-            reduce_k_below_max_tokens=True,
-            return_source_documents=True,
+            # reduce_k_below_max_tokens=True,
+            # return_source_documents=True,
             verbose=True,
-            chain_type_kwargs={"prompt": self.__chat_prompt},
+            #chain_type_kwargs={"prompt": self.__chat_prompt},
         )
 
         self.__qa_chain = ConversationalRetrievalChain.from_llm(
             llm=self.__llm,
-            retriever=self.__full_doc_retriever,
+            retriever=self.__mongodb_stoge.as_retriever(),
             memory=self.__memory,
-            condense_question_prompt=condense_question_prompt,
-            return_source_documents=True,
+            # condense_question_prompt=condense_question_prompt,
+            # return_source_documents=True,
             verbose=True
         )
         self.__qa_chain.rephrase_question=False
@@ -152,25 +153,25 @@ class ComunicadosService():
     
     async def agenerate_memory(self, query: str) -> Any:
         """ Chamada streaming para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
-        __sub_docs = self.get_sub_documents(query, 6)
-        print(F'QUANTIDADE DE CHUNKS ENCONTRADOS: {len(__sub_docs)}')
-        __sub_docs.sort(key=lambda x: x.metadata['embedding'])
+        __sub_docs = self.get_sub_documents(query, 2)
+        print(F'agenerate_memory QUANTIDADE DE CHUNKS ENCONTRADOS: {len(__sub_docs)}')
+        # __sub_docs.sort(key=lambda x: x.metadata['embedding'])
         __relevantes = []
-        __resumo = ''
         for __idx, __doc in enumerate(__sub_docs):
-            if __idx == 0 and len(__resumo) == 0:
-                __resumo = __doc.metadata["resumo"]
             __relevantes.append(__doc.page_content)
             __relevantes.append(' ')
-        __messages = self.__chat_prompt.format_messages(question=query, context=__relevantes, summaries="")
-        self.__retrieval_qa_chain.combine_documents_chain.llm_chain.prompt.messages = __messages
-        return await self.__retrieval_qa_chain.ainvoke(input={"question": query, "context": __resumo, "summaries": "" }, config={"callbacks": self.__callbacks, "include_run_info": True})
+        print('---------------------------------------')
+        print(__relevantes)
+        print('---------------------------------------')
+        __messages = self.__chat_prompt.format_messages(question=query, context=__relevantes)
+        self.__qa_chain.combine_docs_chain.llm_chain.prompt.messages = __messages
+        return await self.__qa_chain.ainvoke(input={"question": query }, config={"callbacks": self.__callbacks, "include_run_info": True})
     
     async def agenerate(self, query: str) -> Any:
         """ Chamada streaming para o llm. Busca os documentos com mais contexto no ParentDocumentRetriever """
         __docs = self.get_sub_documents(query, top_k=3)
         __docs.sort(key=lambda x: x.metadata['source'])
-        print(F'QUANTIDADE DE CHUNKS ENCONTRADOS: {len(__docs)}')
+        print(F'agenerate QUANTIDADE DE CHUNKS ENCONTRADOS: {len(__docs)}')
         __relevantes = []
         for __doc in __docs:
             __relevantes.append(__doc.page_content)
@@ -183,7 +184,7 @@ class ComunicadosService():
         try:
             # self.__weaviate_cli.connect()
             __sub_docs = self.get_sub_documents(query, top_k=6)
-            print(F'QUANTIDADE DE CHUNKS ENCONTRADOS: {len(__sub_docs)}')
+            print(F'invoke_with_sources QUANTIDADE DE CHUNKS ENCONTRADOS: {len(__sub_docs)}')
             __relevantes = []
             __resumo = ''
             for __idx, __doc in enumerate(__sub_docs):
@@ -192,7 +193,6 @@ class ComunicadosService():
                 __relevantes.append(__doc.page_content)
                 __relevantes.append('\n')
             # print(__relevantes)
-            print(__resumo)
             __messages = self.__chat_prompt.format_messages(question=query, context=''.join(__relevantes), summaries=__resumo)
             self.__retrieval_qa_chain.combine_documents_chain.llm_chain.prompt.messages = __messages
             __retorno = self.__retrieval_qa_chain.invoke({"question": query, "context": ''.join(__relevantes), "summaries": __resumo })
@@ -298,6 +298,7 @@ class ComunicadosService():
         if self.__in_memory:
             _relevant_context = self.__data_base.similarity_search(query=question, k=top_k)
         else:
+            print('##### BUSCANDO NO MONGO DB #######')
             _relevant_context = self.__mongodb_stoge.similarity_search(query=question, k=top_k)
         return _relevant_context
 

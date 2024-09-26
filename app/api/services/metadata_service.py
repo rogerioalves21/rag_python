@@ -9,7 +9,7 @@ from langchain.chains.summarize import load_summarize_chain
 
 class MetadataService:
     def __init__(self):
-        self.__model          = 'qwen2'
+        self.__model          = 'qwen2.5:3b'
         self.__summary_prompt = "Você é um assistente especialista em resumo de documentos. Sua tarefa é fazer um resumo claro e conciso de documentos, foque em aspectos como assunto, nomes de pessoas, empresas ou instituições financeiras, CPF e CNPJ, identificador do comunicado (CCI) caso exista, objetivo do documento, funcionalidades descritas no documento, valores, condições, tipos de contas, quem assina o documento, identifique assinaturas digitais caso existam. Não acrescente nenhum conhecimento prévio, nota ou sugestão."
         self.__summary_juridico_prompt = "Você é um assistente especialista em processos judiciais. Sua tarefa é fazer um resumo claro e conciso de processos, foque em aspectos como número do processo, valor da causa, valor da dívida, requerentes, requeridos, as partes e objetivo do processo. Não acrescente nenhum conhecimento prévio, nota ou sugestão."
         self.__keys_prompt    = "Você é um assistente dedicado a identificar e extrair palavras-chave de um documento. Extraia entre 3 e 5 palavras-chave, pois elas serão utilizadas pela área administrativa para buscar esse mesmo documento futuramente."
@@ -106,6 +106,8 @@ RESUMO DETALHADO:
                 ("user", "O texto é:\n{texto}")
             ]
         )
+
+        return ""
         
         #__split = __documento.page_content.split('\x0c')
         #__resumo_final = []
@@ -119,16 +121,16 @@ RESUMO DETALHADO:
         #for __s in __split:
         #    if not __s or len(__s) > 0:
 
-        _K = 4
+        #_K = 4
  
         # compute chunk length 
-        __chnk_len = len(__documento.page_content) // _K
+        #__chnk_len = len(__documento.page_content) // _K
         
-        __resumos = []
-        for idx in range(0, len(__documento.page_content), __chnk_len):
-            __parte = __documento.page_content[idx : idx + __chnk_len]
-            if len(__parte) > 50:
-                __messages = __chat_prompt.format_messages(texto=__parte)
-                __resumos.append(self.__chain.invoke(__messages))
+        #__resumos = []
+        #for idx in range(0, len(__documento.page_content), __chnk_len):
+        #    __parte = __documento.page_content[idx : idx + __chnk_len]
+        #    if len(__parte) > 50:
+        #        __messages = __chat_prompt.format_messages(texto=__parte)
+        #        __resumos.append(self.__chain.invoke(__messages))
 
-        return '\n'.join(__resumos)
+        # return '\n'.join(__resumos)

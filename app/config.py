@@ -10,7 +10,8 @@ from langchain_ollama import ChatOllama, OllamaEmbeddings
 from app.api.prepdoclib.comunicado_splitter import ComunicadoTextSplitter
 from langchain.memory import ConversationBufferMemory
 from langchain_community.chat_message_histories import ChatMessageHistory
-from langchain_community.vectorstores import MongoDBAtlasVectorSearch, DocArrayInMemorySearch
+from langchain_mongodb import MongoDBAtlasVectorSearch
+from langchain_community.vectorstores import DocArrayInMemorySearch
 import weaviate
 from weaviate import WeaviateClient
 try:
@@ -29,15 +30,15 @@ logger = logging.getLogger(__name__)
 api_userinfo = 'https://api-sisbr-ti.homologacao.com.br/user-info/v2/userinfo'
 client_id    = 'lid'
 
-CONFIG_EMBDBERT = 'qwen2' # 'paraphrase-multilingual'
-CONFIG_EMBD  = 'qwen2' # 'mxbai-embed-large'
-MODEL_MISTRAL = 'qwen2'
-MODEL_LLAMA  = 'qwen2'
-MODEL_GEMMA  = 'qwen2'
+CONFIG_EMBDBERT = 'llama3.2:3b' # 'paraphrase-multilingual'
+CONFIG_EMBD  = 'llama3.2:3bb' # 'mxbai-embed-large'
+MODEL_MISTRAL = 'llama3.2:3b'
+MODEL_LLAMA  = 'llama3.2:3b'
+MODEL_GEMMA  = 'llama3.2:3b'
 
 config_system_prompt = "Você é um assistente prestativo do Banco Sicoob, dedicado a responder perguntas utilizando somente o CONTEXTO fornecido. Se não for possível encontrar a resposta no contexto, responda \"O contexto fornecido é insuficiente!\". Não utilize conhecimento prévio. Antes de escrever sua resposta final, lembre que a resposta deve ser no idioma português."
 
-@functools.cache
+# @functools.cache
 def get_memory_history() -> ConversationBufferMemory:
     """ \nCarrega a memória de conversação\n """
     __memory = ConversationBufferMemory(
@@ -49,7 +50,7 @@ def get_memory_history() -> ConversationBufferMemory:
     return __memory
 
 def get_text_splitter() -> Union[ComunicadoTextSplitter, None]:
-    __splitter = ComunicadoTextSplitter(chunk_size=4096, chunk_overlap=100)
+    __splitter = ComunicadoTextSplitter(chunk_size=2048, chunk_overlap=200)
     return __splitter
 
 def get_chat_prompt() -> Union[ChatPromptTemplate, None]:
@@ -57,7 +58,8 @@ def get_chat_prompt() -> Union[ChatPromptTemplate, None]:
         [
             ("system", config_system_prompt),
             ("user", "{question}"),
-            ("user", "**summary**\n\n{summaries}\n\n\n#### Contexto ####\n\n{context}\n\n"),
+            ("user", "**contexto**\n\n{context}\n\n"),
+            # ("user", "**summary**\n\n{summaries}\n\n\n\n**contexto**\n\n{context}\n\n"),
         ]
     )
     return __chat_prompt
@@ -121,14 +123,14 @@ def get_chat_ollama_client() -> Union[ChatOllama, None]:
         model=MODEL_GEMMA,
         keep_alive=0,
         temperature=0.3,
-        num_ctx=4096,
-        num_predict=8192,
+        num_ctx=3584,
+        num_predict=512,
         repeat_penalty=1.18,
         num_gpu= 0,
         tfs_z=1.7,
         mirostat= 0,
         low_vram=True,
-        top_k=3,
+        top_k=1,
         top_p=0.1,
         use_mmap=False,
     )
