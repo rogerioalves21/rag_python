@@ -12,10 +12,16 @@ nltk.download("punkt_tab", quiet=True)
 
 article = dict()
 
+def get_processo_judicial() -> str:
+    with open('50059699220248210038.txt', 'r', encoding='utf-8') as f:
+        return f.read()
+
 def getContexto() -> str:
     # ler o arquivo texto
     return """
-Presente em todo o Brasil, o Sicoob é o maior sistema financeiro cooperativo do país. Cuidamos das fi nanças e do futuro de mais de 4,6 milhões brasileiros — pessoas físicas e jurídicas. Temos agências em 1.842 municípios brasileiros, nas 27 unidades da Federação. 
+Presente em todo o Brasil, o Sicoob é o maior sistema financeiro cooperativo do país.
+Cuidamos das fi nanças e do futuro de mais de 4,6 milhões brasileiros — pessoas físicas e jurídicas.
+Temos agências em 1.842 municípios brasileiros, nas 27 unidades da Federação. 
 
 Em 294 deles, somos a única instituição financeira presente para atender a população.
 
@@ -23,8 +29,7 @@ Conectamos pessoas para promover justiça fi nanceira e prosperidade a todos. So
 
 Por isso, realizamos investimentos consistentes em projetos socioambientalmente sustentáveis, estimulando a economia local e a cultura da cooperação por onde passamos. 
 
-Também somos reconhecidos no mercado fi -
-nanceiro pela efi ciência e confi abilidade dos 
+Também somos reconhecidos no mercado financeiro pela efi ciência e confi abilidade dos 
 nossos canais digitais. Basta dizer que 78% 
 das nossas transações fi nanceiras são realizadas online. Investimos tanto em inovação 
 que colecionamos prêmios na área de tecnologia da informação, especialmente nos 
@@ -90,11 +95,11 @@ if __name__ == "__main__":
     allEmbeddings = []
     article = {}
     article["embeddings"] = []
-    text = getContexto()
-    chunks = chunker(text)
+    text = get_processo_judicial()
+    chunks = chunker(text, language='portuguese')
 
     # Embed (batch) chunks using ollama
-    embeddings = ollama.embed(model="all-minilm", input=chunks)["embeddings"]
+    embeddings = ollama.embed(model="nomic-embed-text", input=chunks)["embeddings"]
 
     for chunk, embedding in zip(chunks, embeddings):
         item = {}
@@ -116,7 +121,7 @@ if __name__ == "__main__":
             break
 
         # Embed the user's question using ollama.embed
-        question_embedding = ollama.embed(model="all-minilm", input=question)[
+        question_embedding = ollama.embed(model="nomic-embed-text", input=question)[
             "embeddings"
         ]
 
@@ -131,7 +136,7 @@ if __name__ == "__main__":
         system_prompt = f"Only use the following information to answer the question. Do not use anything else: {sourcetext}"
 
         ollama_response = ollama.generate(
-            model="llama3.2",
+            model="qwen2.5:3b",
             prompt=question,
             system=system_prompt,
             options={"stream": False},
@@ -141,9 +146,10 @@ if __name__ == "__main__":
         print(f"LLM Answer:\n{answer}\n")
 
         # Check each sentence in the response for grounded factuality
-        #if answer:
-        #    for claim in nltk.sent_tokenize(answer):
-        #        print(f"LLM Claim: {claim}")
-        #        print(
-        #            f"Is this claim supported by the context according to bespoke-minicheck? {check(sourcetext, claim)}\n"
-        #        )
+        if answer:
+            for claim in nltk.sent_tokenize(answer):
+                print(f"LLM Claim: {claim}")
+                print(
+                    f"Is this claim supported by the context according to bespoke-minicheck? {check(sourcetext, claim)}\n"
+                )
+        print("proxima pergunta!\n")
