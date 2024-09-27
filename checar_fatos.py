@@ -5,6 +5,9 @@ import numpy as np
 from sklearn.neighbors import NearestNeighbors
 import nltk
 
+
+# https://www.youtube.com/watch?v=IjKOw02wOhg
+
 warnings.filterwarnings(
     "ignore", category=FutureWarning, module="transformers.tokenization_utils_base"
 )
